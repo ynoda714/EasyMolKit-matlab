@@ -1,0 +1,61 @@
+# Runtime artifacts
+result/**
+!result/**/.gitkeep
+
+# Data artifacts
+*.csv
+*.xlsx
+# Curated sample datasets are tracked (CC0 / BSD-3 / CC-BY-SA 3.0 — see THIRD_PARTY_NOTICES.md)
+!data/list/*.csv
+
+# MATLAB model/binary outputs
+*.mat
+
+# Python
+python_env/
+python_env_t2/
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+
+# MATLAB temporary files
+*.asv
+*.m~
+
+# Local secrets
+apiKey.txt
+*.key
+*.secret
+
+# Temp work
+tmp/
+
+# Local config (settings.json is user-specific; example is tracked)
+config/settings.json
+
+# Logs
+logs/
+
+# Tools: private scripts (underscore prefix)
+tools/_*
+
+# Developer-internal documents (not for public distribution)
+CLAUDE.md
+PLAN.md
+docs/adr.md
+docs/dev_history.md
+docs/dev_history_archive.md
+docs/gotchas.md
+docs/release_process.md
+docs/en/
+
+# AI context
+.github/copilot-instructions.md

@@ -1,0 +1,40 @@
+{
+    "_comment": "Copy this file to config/settings.json and edit as needed.",
+    "_priority": "Environment variables > config/settings.json > defaults",
+    "_env_naming": "ECHEM_<SECTION>_<KEY> (e.g., ECHEM_PYTHON_VERSION=3.10)",
+
+    "python": {
+        "version": "3.10",
+        "embedded_dir": "python_env",
+        "execution_mode": "OutOfProcess",
+        "proxy": "",
+        "external_path": ""
+    },
+
+    "rdkit": {
+        "version": "2024.3.6",
+        "auto_init": true
+    },
+
+    "runtime": {
+        "eval_mode": "prod",
+        "text_only_mode": true
+    },
+
+    "output": {
+        "root_dir": "result/intermediate"
+    },
+
+    "run": {
+        "root_dir": "result/runs",
+        "publish_latest": true
+    },
+
+    "extraLibraries": {
+        "_comment": "Pinned versions for Track 1 optional libraries installed via installExtra().",
+        "pubchempy": "1.0.4",
+        "mordred": "2.0.7",
+        "biopython": "1.84",
+        "torch": "2.5.0"
+    }
+}
