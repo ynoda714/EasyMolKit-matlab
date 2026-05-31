@@ -123,7 +123,7 @@
 
         function test_emptyConfigStruct_desktopGuardStillFires(tc)
         % Passing Config=struct() must not bypass the Desktop guard.
-        % An empty struct triggers the internal loadConfig() fallback, but
+        % An empty struct triggers the internal emkLoadConfig() fallback, but
         % the notOnline error must still be thrown before any pip access.
             tc.assumeFalse(emk.util.isOnline(), ...
                 "Skipped: Desktop-only guard test");

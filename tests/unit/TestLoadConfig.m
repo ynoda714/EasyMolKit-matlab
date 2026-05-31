@@ -1,5 +1,5 @@
 ﻿classdef TestLoadConfig < matlab.unittest.TestCase
-% TestLoadConfig  Unit tests for src/config/loadConfig.m
+% TestLoadConfig  Unit tests for src/config/emkLoadConfig.m
 %
 % Run with:
 %   addpath(genpath("src"));
@@ -14,8 +14,8 @@
     methods (Test)
         % ------------------------------------------------------------------
         function test_defaults_returnStruct(tc)
-        % loadConfig returns a struct with expected top-level fields
-            cfg = loadConfig();
+        % emkLoadConfig returns a struct with expected top-level fields
+            cfg = emkLoadConfig();
             tc.verifyTrue(isstruct(cfg), "cfg must be a struct");
             tc.verifyTrue(isfield(cfg, "python"),  "missing field: python");
             tc.verifyTrue(isfield(cfg, "rdkit"),   "missing field: rdkit");
@@ -28,7 +28,7 @@
         function test_defaults_pythonVersion(tc)
         % Default Python version is 3.10
             setenv("EMK_PYTHON_VERSION", "");
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyEqual(cfg.python.version, "3.10");
         end
 
@@ -37,7 +37,7 @@
         % Default RDKit version is set and non-empty string.
         % verifyClass confirms the conversion codepath returns a MATLAB string
         % (not a char or numeric), mirroring the string-priority policy.
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyClass(cfg.rdkit.version, "string", ...
                 "rdkit.version must be a MATLAB string");
             tc.verifyNotEmpty(cfg.rdkit.version, ...
@@ -49,7 +49,7 @@
         % EMK_PYTHON_VERSION env var overrides python.version
             setenv("EMK_PYTHON_VERSION", "3.11");
             tc.addTeardown(@() setenv("EMK_PYTHON_VERSION", ""));
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyEqual(cfg.python.version, "3.11");
         end
 
@@ -58,7 +58,7 @@
         % EMK_RUNTIME_EVAL_MODE env var overrides runtime.eval_mode
             setenv("EMK_RUNTIME_EVAL_MODE", "ref");
             tc.addTeardown(@() setenv("EMK_RUNTIME_EVAL_MODE", ""));
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyEqual(cfg.runtime.eval_mode, "ref");
         end
 
@@ -68,7 +68,7 @@
         % verifyClass guards against numeric 1 being returned instead of logical.
             setenv("EMK_RDKIT_AUTO_INIT", "true");
             tc.addTeardown(@() setenv("EMK_RDKIT_AUTO_INIT", ""));
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyClass(cfg.rdkit.auto_init, "logical", ...
                 "auto_init must be logical (not double 1)");
             tc.verifyTrue(cfg.rdkit.auto_init, ...
@@ -81,7 +81,7 @@
         % verifyClass guards against "1" being stored as string or double.
             setenv("EMK_RDKIT_AUTO_INIT", "1");
             tc.addTeardown(@() setenv("EMK_RDKIT_AUTO_INIT", ""));
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyClass(cfg.rdkit.auto_init, "logical", ...
                 "auto_init must be logical (not double 1)");
             tc.verifyTrue(cfg.rdkit.auto_init, ...
@@ -94,7 +94,7 @@
         % verifyClass guards against 0 being returned as double instead of logical.
             setenv("EMK_RDKIT_AUTO_INIT", "false");
             tc.addTeardown(@() setenv("EMK_RDKIT_AUTO_INIT", ""));
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyClass(cfg.rdkit.auto_init, "logical", ...
                 "auto_init must be logical (not double 0)");
             tc.verifyFalse(cfg.rdkit.auto_init, ...
@@ -122,7 +122,7 @@
             cd(tmpDir);
             addpath(genpath(fullfile(prevDir, "src")));
 
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyEqual(cfg.python.version, "3.9");
             tc.verifyEqual(cfg.rdkit.version, "2023.03.1");
         end
@@ -147,7 +147,7 @@
             cd(tmpDir);
             addpath(genpath(fullfile(prevDir, "src")));
 
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyFalse(isfield(cfg, "_comment"), "_comment key must not appear in cfg");
             tc.verifyEqual(cfg.python.version, "3.10");
         end
@@ -155,7 +155,7 @@
         % ------------------------------------------------------------------
         function test_defaults_extraLibraries_fieldExists(tc)
         % cfg must have a top-level extraLibraries struct (Track 1 versions).
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyTrue(isfield(cfg, "extraLibraries"), ...
                 "cfg must have field 'extraLibraries'");
             tc.verifyTrue(isstruct(cfg.extraLibraries), ...
@@ -164,7 +164,7 @@
 
         function test_defaults_extraLibraries_pubchempy_isString(tc)
         % cfg.extraLibraries.pubchempy must be a non-empty string (pinned version).
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyTrue(isfield(cfg.extraLibraries, "pubchempy"), ...
                 "extraLibraries must have field 'pubchempy'");
             tc.verifyClass(cfg.extraLibraries.pubchempy, "string", ...
@@ -175,7 +175,7 @@
 
         function test_defaults_extraLibraries_mordred_isString(tc)
         % cfg.extraLibraries.mordred must be a non-empty string (pinned version).
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyTrue(isfield(cfg.extraLibraries, "mordred"), ...
                 "extraLibraries must have field 'mordred'");
             tc.verifyClass(cfg.extraLibraries.mordred, "string", ...
@@ -189,7 +189,7 @@
         % Major version must be a single or double digit, not a 4-digit year.
         % This guards against the 2024.1.1 mistake (version that does not exist
         % on PyPI).
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             ver = cfg.extraLibraries.mordred;
             parts = strsplit(ver, ".");
             major = str2double(parts{1});
@@ -200,7 +200,7 @@
 
         function test_defaults_extraLibraries_biopython_isString(tc)
         % cfg.extraLibraries.biopython must be a non-empty string (pinned version).
-            cfg = loadConfig();
+            cfg = emkLoadConfig();
             tc.verifyTrue(isfield(cfg.extraLibraries, "biopython"), ...
                 "extraLibraries must have field 'biopython'");
             tc.verifyClass(cfg.extraLibraries.biopython, "string", ...

@@ -25,8 +25,8 @@
 %   File artifacts: none (all files installed to ~/.local/ on the remote host)
 %
 %   Arguments:
-%     Config  struct - pre-loaded config struct from loadConfig().
-%                      When omitted, loadConfig() is called internally.
+%     Config  struct - pre-loaded config struct from emkLoadConfig().
+%                      When omitted, emkLoadConfig() is called internally.
 %
 %   Error IDs:
 %     emk:setup:installOnline:notOnline          - called on Desktop
@@ -50,7 +50,7 @@
 
     % Use supplied Config or load from file/defaults
     if isempty(fieldnames(options.Config))
-        cfg = loadConfig();
+        cfg = emkLoadConfig();
     else
         cfg = options.Config;
     end
@@ -285,7 +285,6 @@ function pipName = resolveOnlinePipName_(name)
         case "mordred",         pipName = "mordredcommunity";
         case "biopython",       pipName = "biopython";
         case "meeko",           pipName = "meeko gemmi";
-        case "prody",           pipName = "prody --only-binary :all:";  % no gcc in MATLAB Online; skip gracefully if no wheel
         case "vina",            pipName = "vina";
         case "pdbfixer",        pipName = "pdbfixer";
         case "scipy",           pipName = "scipy";

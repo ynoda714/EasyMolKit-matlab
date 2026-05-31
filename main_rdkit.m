@@ -1,4 +1,4 @@
-%% EasyMolKit -- Main Entry Point
+﻿%% EasyMolKit -- Main Entry Point
 % Run each section with Ctrl+Enter (MATLAB Run Section).
 % Always run Section 0a first to initialize paths and configuration.
 %
@@ -14,8 +14,8 @@
 % Edit the "User Settings" block below to choose optional libraries
 % and adjust settings.  No settings.json file is required.
 
-addpath(genpath("src"));
-cfg = loadConfig();   % loads defaults (+ settings.json if present)
+addpath(genpath(fullfile(fileparts(mfilename('fullpath')), "src")));
+cfg = emkLoadConfig();   % loads defaults (+ settings.json if present)
 
 % ---- User Settings: edit this block --------------------------------
 %
@@ -26,14 +26,14 @@ cfg = loadConfig();   % loads defaults (+ settings.json if present)
 %   bio     : biopython                          (~50 MB)
 %   ml      : torch (CPU-only) + torch_geometric (~800 MB)  -- R08/R09
 %   nlp     : transformers + datasets            (~2 GB)    -- R09
-%   docking : scipy + meeko + prody + vina + pdbfixer       -- Online only
+%   docking : scipy + meeko + vina + pdbfixer               -- Online only
 %             (Desktop: vina/pdbfixer skipped; see emk.setup.recipe("docking"))
 %
 cfg.useCase.qsar    = true;   % pubchempy + mordred
 cfg.useCase.bio     = true;   % biopython
 cfg.useCase.ml      = true;   % torch (CPU-only) + torch_geometric  -- R08/R09
 cfg.useCase.nlp     = true;  % transformers + datasets              -- R09
-cfg.useCase.docking = true;   % scipy + meeko + prody + vina + pdbfixer (Online only)
+cfg.useCase.docking = true;   % scipy + meeko + vina + pdbfixer (Online only)
 %
 %   Individual overrides (optional -- prefer useCase above for group installs):
 % cfg.optionalLibraries.scipy = true;   % standalone scipy without full docking stack

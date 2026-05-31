@@ -1,4 +1,4 @@
-function T = validate(varargin)
+﻿function T = validate(varargin)
 % validate  Diagnose installed library versions in the active Python environment.
 %
 %   T = emk.setup.validate()
@@ -11,7 +11,7 @@ function T = validate(varargin)
 %   Arguments (name-value):
 %     Libraries  (string array) - library names to check.
 %                Default: all known libraries (rdkit, pubchempy, mordred,
-%                biopython, scipy, meeko, prody, vina, pdbfixer,
+%                biopython, scipy, meeko, vina, pdbfixer,
 %                openbabel, mdanalysis, pymol).
 %
 %   Returns:
@@ -144,7 +144,7 @@ function pyExe = resolvePythonExe_()
     % Last resort: try embedded Python directly
     try
         projectRoot = fileparts(fileparts(fileparts(fileparts(mfilename("fullpath")))));
-        cfg = loadConfig();
+        cfg = emkLoadConfig();
         candidate = fullfile(projectRoot, cfg.python.embedded_dir, "python.exe");
         if isfile(candidate)
             pyExe = candidate;
@@ -179,7 +179,7 @@ end
 % -------------------------------------------------------------------------
 function libs = defaultLibraryList_()
     libs = ["rdkit"; "pubchempy"; "mordred"; "biopython"; ...
-            "scipy"; "meeko"; "prody"; "vina"; "pdbfixer"; ...
+            "scipy"; "meeko"; "vina"; "pdbfixer"; ...
             "openbabel"; "mdanalysis"; "pymol"];
 end
 
@@ -199,8 +199,6 @@ function meta = resolveLibMeta_(name)
             meta = struct(pipShowName="scipy",             track="1");
         case "meeko"
             meta = struct(pipShowName="meeko",             track="1");
-        case "prody"
-            meta = struct(pipShowName="prody",             track="1");
         case "vina"
             meta = struct(pipShowName="vina",              track="1");
         case "pdbfixer"

@@ -18,7 +18,15 @@
 %[text] ## セクション 0: セットアップ
 %[text] パスと Python 環境を初期化します。
 %[text] **常にこのセクションを最初に実行してください。**
-addpath(genpath("src"));
+% Resolve project root (works for Desktop, MCP, and MATLAB Online)
+sDir = fileparts(mfilename('fullpath'));
+if strlength(sDir) > 0
+    addpath(genpath(fullfile(sDir, '..', '..', '..', 'src')));
+elseif ~isempty(which("logInfo"))
+    addpath(genpath(fileparts(fileparts(which("logInfo")))));
+end
+projectRoot = resolveProjectRoot();
+addpath(genpath(fullfile(projectRoot, 'src')));
 emk.setup.initPython(); %[output:33734d2e]
 %[text] Python/RDKit プロセスをウォームアップします（最初の呼び出しは少し時間がかかります）。
 mol_warmup = emk.mol.fromSmiles("C");   % メタン

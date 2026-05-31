@@ -27,7 +27,7 @@
         return;
     end
 
-    cfg    = loadConfig();
+    cfg    = emkLoadConfig();
     online = emk.util.isOnline();
 
     % --- Determine target Python executable ---

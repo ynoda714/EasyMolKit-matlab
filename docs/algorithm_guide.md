@@ -11,7 +11,7 @@
 ## 1. 処理パイプライン概観
 
 ```
-config/settings.json ──→ loadConfig() ──→ params (struct)
+config/settings.json ──→ emkLoadConfig() ──→ params (struct)
                                               │
                               emk.setup.initPython()
                                   │ pyenv 設定・RDKit 検証
@@ -46,7 +46,7 @@ SMILES / SDF ─→ emk.mol.fromSmiles() ──→ mol (py.rdkit obj)
 | emk.similarity | [algorithms/similarity.md](algorithms/similarity.md) | tanimoto, dice, rankBy, matrix |
 | emk.io | [algorithms/io.md](algorithms/io.md) | readSdf, writeSdf, readSmilesList |
 | emk.viz | [algorithms/viz.md](algorithms/viz.md) | draw2d |
-| emk.util / src/util / src/config | [algorithms/util.md](algorithms/util.md) | pyToMatlab, isOnline, loadConfig, logHelpers, makeRunDir |
+| emk.util / src/util / src/config | [algorithms/util.md](algorithms/util.md) | pyToMatlab, isOnline, emkLoadConfig, logHelpers, makeRunDir |
 | emk.filter | [algorithms/filter.md](algorithms/filter.md) | lipinski |
 | emk.db | [algorithms/db.md](algorithms/db.md) | searchPubchem, searchChembl |
 

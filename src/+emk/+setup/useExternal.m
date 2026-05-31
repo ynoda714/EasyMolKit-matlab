@@ -1,4 +1,4 @@
-function useExternal(pythonPath)
+﻿function useExternal(pythonPath)
 % useExternal  Connect EasyMolKit to an external Python environment (Track 2).
 %
 %   emk.setup.useExternal(pythonPath)
@@ -57,7 +57,7 @@ function useExternal(pythonPath)
     end
 
     % --- Configure pyenv ---
-    cfg      = loadConfig();
+    cfg      = emkLoadConfig();
     execMode = cfg.python.execution_mode;
 
     logInfo("useExternal: Connecting to external Python: %s", pythonPath);

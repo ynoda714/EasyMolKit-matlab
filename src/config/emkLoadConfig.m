@@ -1,7 +1,7 @@
-﻿function cfg = loadConfig()
-% loadConfig  Load EasyMolKit configuration with environment variable overrides.
+﻿function cfg = emkLoadConfig()
+% emkLoadConfig  Load EasyMolKit configuration with environment variable overrides.
 %
-%   cfg = loadConfig()
+%   cfg = emkLoadConfig()
 %
 %   Priority (highest to lowest):
 %     1. Environment variables: EMK_<SECTION>_<KEY>  (e.g., EMK_PYTHON_VERSION)
@@ -57,7 +57,7 @@ function cfg = buildDefaults()
     %   bio     -> biopython
     %   ml      -> torch (CPU-only) + torch_geometric
     %   nlp     -> transformers + datasets
-    %   docking -> scipy + meeko + prody + vina + pdbfixer  (Online only)
+    %   docking -> scipy + meeko + vina + pdbfixer  (Online only)
     cfg.useCase.qsar    = false;
     cfg.useCase.bio     = false;
     cfg.useCase.ml      = false;
@@ -76,7 +76,6 @@ function cfg = buildDefaults()
     cfg.optionalLibraries.datasets        = false;
     cfg.optionalLibraries.scipy           = false;
     cfg.optionalLibraries.meeko           = false;
-    cfg.optionalLibraries.prody           = false;
     cfg.optionalLibraries.vina            = false;
     cfg.optionalLibraries.pdbfixer        = false;
 end
@@ -85,15 +84,15 @@ end
 function cfg = applyJsonFile(cfg)
     jsonPath = fullfile("config", "settings.json");
     if ~isfile(jsonPath)
-        logDebug("loadConfig: settings.json not found, using defaults");
+        logDebug("emkLoadConfig: settings.json not found, using defaults");
         return;
     end
     try
         raw = jsondecode(fileread(jsonPath));
         cfg = mergeStruct(cfg, raw);
-        logDebug("loadConfig: loaded %s", jsonPath);
+        logDebug("emkLoadConfig: loaded %s", jsonPath);
     catch ME
-        logWarn("loadConfig: failed to parse settings.json (%s), using defaults", ME.message);
+        logWarn("emkLoadConfig: failed to parse settings.json (%s), using defaults", ME.message);
     end
 end
 
@@ -128,7 +127,7 @@ function cfg = applyEnvVars(cfg)
             else
                 cfg.(sec).(key) = string(val);
             end
-            logDebug("loadConfig: %s overridden by env var %s", sec + "." + key, envName);
+            logDebug("emkLoadConfig: %s overridden by env var %s", sec + "." + key, envName);
         end
     end
 end

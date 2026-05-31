@@ -12,6 +12,7 @@ function result = searchChemblTarget(query, options)
 %   ChEMBL REST endpoint used:
 %     https://www.ebi.ac.uk/chembl/api/data/target.json
 %       ?pref_name__icontains={query}&target_type={TargetType}&limit={MaxRows}
+%     Note: spaces in TargetType are encoded as %20 (not +) to avoid HTTP 500.
 %
 %   Arguments:
 %     query      - string | char, partial preferred name (e.g.
@@ -67,13 +68,18 @@ function result = searchChemblTarget(query, options)
     maxRows = floor(options.MaxRows);
 
     % --- Build ChEMBL REST URL ---
+    % target_type must be encoded with %20 (not +) for spaces.
+    % urlencode() produces '+', which triggers HTTP 500 on ChEMBL API.
+    % We replace '+' with '%20' for this parameter only.
+    % Client-side filtering is kept as a safety net.
     BASE_URL     = "https://www.ebi.ac.uk/chembl/api/data";
     encodedQuery = string(urlencode(char(query)));
+    filterTargetType = strlength(options.TargetType) > 0;
     url = sprintf("%s/target.json?pref_name__icontains=%s&limit=%d", ...
         BASE_URL, encodedQuery, maxRows);
 
-    if strlength(options.TargetType) > 0
-        encodedType = string(urlencode(char(options.TargetType)));
+    if filterTargetType
+        encodedType = strrep(string(urlencode(char(options.TargetType))), "+", "%20");
         url = sprintf("%s&target_type=%s", url, encodedType);
     end
 
@@ -82,7 +88,7 @@ function result = searchChemblTarget(query, options)
     logDebug("searchChemblTarget: URL=%s", url);
 
     % --- Call ChEMBL REST API via webread ---
-    opts = weboptions("Timeout", 15, "ContentType", "json");
+    opts = weboptions("Timeout", 30, "ContentType", "json");
     try
         data = webread(url, opts);
     catch ME
@@ -132,10 +138,31 @@ function result = searchChemblTarget(query, options)
         targetTypes(i) = safeStr(t, "target_type",      "");
     end
 
+    % --- Client-side TargetType filtering ---
+    if filterTargetType
+        mask = strcmpi(targetTypes, options.TargetType);
+        targetIds   = targetIds(mask);
+        prefNames   = prefNames(mask);
+        organisms   = organisms(mask);
+        targetTypes = targetTypes(mask);
+        if isempty(targetIds)
+            error("emk:db:searchChemblTarget:notFound", ...
+                "No targets of type '%s' found in ChEMBL for query: %s", ...
+                options.TargetType, query);
+        end
+        % Trim to requested MaxRows
+        if numel(targetIds) > maxRows
+            targetIds   = targetIds(1:maxRows);
+            prefNames   = prefNames(1:maxRows);
+            organisms   = organisms(1:maxRows);
+            targetTypes = targetTypes(1:maxRows);
+        end
+    end
+
     result = table(targetIds, prefNames, organisms, targetTypes, ...
         VariableNames=["TargetChEMBLID","PreferredName","Organism","TargetType"]);
 
-    logInfo("searchChemblTarget: found %d target(s)", nRows);
+    logInfo("searchChemblTarget: found %d target(s)", height(result));
 end
 
 % -----------------------------------------------------------------------

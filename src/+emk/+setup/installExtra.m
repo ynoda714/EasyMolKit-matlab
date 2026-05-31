@@ -1,4 +1,4 @@
-function installExtra(name, options)
+﻿function installExtra(name, options)
 % installExtra  Install a Track 1 optional library into Embedded Python.
 %
 %   emk.setup.installExtra(name)
@@ -26,8 +26,8 @@ function installExtra(name, options)
 %
 %   Arguments:
 %     name    (1,1) string - library name (see above)
-%     Config  struct       - pre-loaded config struct from loadConfig().
-%                            When omitted, loadConfig() is called internally.
+%     Config  struct       - pre-loaded config struct from emkLoadConfig().
+%                            When omitted, emkLoadConfig() is called internally.
 %
 %   Error IDs:
 %     emk:setup:installExtra:notDesktop         - called on MATLAB Online
@@ -56,7 +56,7 @@ function installExtra(name, options)
 
     % STEP 3: Locate Embedded Python executable
     if isempty(fieldnames(options.Config))
-        cfg = loadConfig();   % no Config supplied -- load from file/defaults
+        cfg = emkLoadConfig();   % no Config supplied -- load from file/defaults
     else
         cfg = options.Config; % use caller-supplied config (avoids re-load)
     end
@@ -251,14 +251,11 @@ function info = resolveLibInfo_(name)
             info = struct(pipName="pdbfixer",           importName="pdbfixer",        pipSuffix="");
         case "scipy"
             info = struct(pipName="scipy",               importName="scipy",           pipSuffix="");
-        case "prody"
-            % prody is required by meeko mk_prepare_receptor (--read_with_prody).
-            info = struct(pipName="prody",               importName="prody",           pipSuffix="");
         otherwise
             error("emk:setup:installExtra:unknownLibrary", ...
                 "Unknown library: '%s'.\n" + ...
                 "Supported names: pubchempy, mordred, biopython, " + ...
-                "scipy, meeko, gemmi, prody, vina, pdbfixer, " + ...
+                "scipy, meeko, gemmi, vina, pdbfixer, " + ...
                 "torch, torch_geometric, transformers, datasets.\n" + ...
                 "For Track 2 / manual libraries (vina on Windows, openbabel, mdanalysis, pymol),\n" + ...
                 "see emk.setup.recipe(name) for installation instructions.", name);

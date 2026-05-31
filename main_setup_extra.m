@@ -37,7 +37,7 @@
 
 %% Section 0: Path Init  [RUN THIS FIRST]
 % ---------------------------------------------------------
-addpath(genpath("src"));
+addpath(genpath(fullfile(fileparts(mfilename('fullpath')), "src")));
 emk.setup.initPython();
 logInfo("main_setup_extra: paths initialized, Python ready");
 

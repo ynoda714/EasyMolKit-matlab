@@ -16,7 +16,15 @@
 %[text] ## Section 0: Setup
 %[text] Initialize the path and Python environment.
 %[text] **Always run this section first.**
-addpath(genpath("src"));
+% Resolve project root (works for Desktop, MCP, and MATLAB Online)
+sDir = fileparts(mfilename('fullpath'));
+if strlength(sDir) > 0
+    addpath(genpath(fullfile(sDir, '..', '..', '..', 'src')));
+elseif ~isempty(which("logInfo"))
+    addpath(genpath(fileparts(fileparts(which("logInfo")))));
+end
+projectRoot = resolveProjectRoot();
+addpath(genpath(fullfile(projectRoot, 'src')));
 emk.setup.initPython(); %[output:444a3b00]
 %[text] Warm up Python/RDKit process
 mol_warmup = emk.mol.fromSmiles("C");   % Methane -- lightweight

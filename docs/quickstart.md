@@ -1,7 +1,5 @@
 # Quick Start Guide — EasyMolKit
 
-🇯🇵 [日本語](ja/quickstart_ja.md)
-
 > Version: v0.2.0 / Updated: 2026-04-19
 
 ---
@@ -112,8 +110,6 @@ result/runs/<YYYYMMDD_HHMMSS>/
 ---
 
 ## Running Tests
-
-> Full test class list → [test_catalog.md](test_catalog.md)
 
 ```matlab
 % Unit tests

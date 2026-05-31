@@ -11,7 +11,7 @@
 %   See ADR-001 rev.3 for rationale and design decisions.
 %
 %   When Config is supplied (recommended), install() uses that struct instead
-%   of calling loadConfig() internally.  This lets callers set options inline
+%   of calling emkLoadConfig() internally.  This lets callers set options inline
 %   in main*.m without requiring a settings.json file.
 %   cfg.optionalLibraries.<name>=true entries are installed after RDKit.
 %
@@ -30,8 +30,8 @@
 %    12. Optional libraries  - installExtra() for cfg.optionalLibraries.<name>=true
 %
 %   Arguments:
-%     Config        struct  - pre-loaded config struct from loadConfig().
-%                             When omitted, loadConfig() is called internally.
+%     Config        struct  - pre-loaded config struct from emkLoadConfig().
+%                             When omitted, emkLoadConfig() is called internally.
 %     PythonVersion string  - Python version to download (default: "3.10").
 %
 %   File artifacts (all under python_env/):
@@ -65,7 +65,7 @@
 
     % Resolve config: use supplied Config or load from file/defaults
     if isempty(fieldnames(options.Config))
-        cfg = loadConfig();
+        cfg = emkLoadConfig();
     else
         cfg = options.Config;
     end

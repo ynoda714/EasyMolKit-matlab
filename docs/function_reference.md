@@ -1,7 +1,5 @@
 # Function Reference — EasyMolKit
 
-🇯🇵 [日本語](ja/function_reference_ja.md)
-
 > Complete list of function signatures and options. Primary reference during development.
 > Algorithm rationale → [algorithm_guide.md](algorithm_guide.md)
 
@@ -298,7 +296,7 @@ Errors: `invalidInput`, `emptyInput`.
 
 ## src/config
 
-### `loadConfig()`
+### `emkLoadConfig()`
 Returns: `struct` — `.python` `.rdkit` `.runtime` `.output` `.run`.
 Priority: `EMK_<SECTION>_<KEY>` environment variables > `config/settings.json` > defaults.
 

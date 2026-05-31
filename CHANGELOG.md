@@ -84,4 +84,4 @@ and the complete `emk.*` API for RDKit-based Chemoinformatics from MATLAB.
 - Requires MATLAB R2025b or later
 - Windows Desktop and MATLAB Online supported; macOS / Linux Desktop untested
 - Layer 2 (Stories), Layer 3 (Analytics), and Layer 4 (Research) tutorials are planned for
-  pub-v0.2.0, pub-v0.3.0, and pub-v0.4.0 respectively
+  v2.0.0, v3.0.0, and v4.0.0 respectively

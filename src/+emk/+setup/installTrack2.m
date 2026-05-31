@@ -1,4 +1,4 @@
-function installTrack2(name, options)
+﻿function installTrack2(name, options)
 % installTrack2  Install a Track 2 library into a dedicated venv (Desktop only).
 %
 %   emk.setup.installTrack2(name)
@@ -25,7 +25,7 @@ function installTrack2(name, options)
 %     BasePython    (1,1) string - absolute path to a CPython 3.10+ executable
 %                                  used to create the venv.  When omitted,
 %                                  auto-detected from PATH ("python" or "py").
-%     Config        struct       - pre-loaded config from loadConfig().
+%     Config        struct       - pre-loaded config from emkLoadConfig().
 %
 %   Error IDs:
 %     emk:setup:installTrack2:notDesktop         - called on MATLAB Online
@@ -57,7 +57,7 @@ function installTrack2(name, options)
 
     % STEP 3: Load config.
     if isempty(fieldnames(options.Config))
-        cfg = loadConfig();
+        cfg = emkLoadConfig();
     else
         cfg = options.Config;
     end

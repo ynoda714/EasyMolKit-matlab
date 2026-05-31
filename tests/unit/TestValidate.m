@@ -175,19 +175,19 @@ classdef TestValidate < matlab.unittest.TestCase
         end
 
         function test_defaultList_returns7Rows(tc)
-        % The default list covers exactly 12 known libraries:
-        %   rdkit, pubchempy, mordred, biopython, scipy, meeko, prody,
+        % The default list covers exactly 11 known libraries:
+        %   rdkit, pubchempy, mordred, biopython, scipy, meeko,
         %   vina, pdbfixer, openbabel, mdanalysis, pymol
             T = tc.DefaultResult;
-            tc.verifyNumElements(T.Library, 12, ...
-                "Default validate() must return exactly 12 rows");
+            tc.verifyNumElements(T.Library, 11, ...
+                "Default validate() must return exactly 11 rows");
         end
 
         function test_defaultList_containsAllKnownLibraries(tc)
         % Verify each of the 12 expected library names appears exactly once.
             T = tc.DefaultResult;
             expected = ["rdkit"; "pubchempy"; "mordred"; "biopython"; ...
-                        "scipy"; "meeko"; "prody"; "vina"; "pdbfixer"; ...
+                        "scipy"; "meeko"; "vina"; "pdbfixer"; ...
                         "openbabel"; "mdanalysis"; "pymol"];
             for i = 1:numel(expected)
                 tc.verifyTrue(any(T.Library == expected(i)), ...

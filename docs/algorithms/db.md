@@ -160,10 +160,15 @@ ChEMBL API の数値フィールドは文字列として返される場合があ
 
 **アルゴリズム概要**:
 1. `query` が string/char であることを確認
-2. `pref_name__icontains={encoded}` フィルタで ChEMBL target エンドポイントに GET リクエスト
-3. `TargetType` が非空の場合、`target_type={encoded}` フィルタを追加（デフォルト: `"SINGLE PROTEIN"`）
+2. `pref_name__icontains={encoded}` フィルタで ChEMBL target エンドポイントに GET リクエスト  
+   （`TargetType` はサーバーサイドフィルタに使用しない — 後述の既知バグ参照）
+3. `TargetType` が非空の場合、サーバーから多めに取得してクライアントサイドで `strcmpi` フィルタリング
 4. `webread` で JSON を取得し、`targets` 配列を struct array に正規化
 5. 4 カラムの table を返す
+
+> **既知バグ（2026-05-30）**: ChEMBL REST API の `target_type` パラメータにスペースを `+` でエンコードした値
+> （例: `target_type=SINGLE+PROTEIN`）を渡すと HTTP 500 が返る。`urlencode` はデフォルトでスペースを `+` に変換するため、
+> サーバーサイドフィルタは使用せず、クライアントサイドで `strcmpi` で絞り込む実装に変更済み。
 
 **出力スキーマ（4 カラム）**:
 
@@ -177,8 +182,9 @@ ChEMBL API の数値フィールドは文字列として返される場合があ
 **ChEMBL target エンドポイント**:
 ```
 GET https://www.ebi.ac.uk/chembl/api/data/target.json
-  ?pref_name__icontains={query}&target_type={TargetType}&limit={MaxRows}
+  ?pref_name__icontains={query}&limit={fetchLimit}
 ```
+`TargetType` 指定時は `fetchLimit = min(MaxRows * 10, 100)` でサーバーから多めに取得し、クライアントで絞り込む。
 
 **`pref_name__icontains` を選択した根拠**:
 ChEMBL の `target_synonym` エンドポイントは関係テーブルの JOIN が必要で REST API では直接サポートされない。
