@@ -1,5 +1,7 @@
 # EasyMolKit
 
+🇯🇵 [日本語はこちら](docs/ja/README.ja.md)
+
 **An integrated Chemoinformatics environment that makes RDKit easy to use from MATLAB**
 
 > Clone the repo → run one setup command → RDKit is ready to use in MATLAB
@@ -182,10 +184,10 @@ EasyMolKit provides progressive learning content under `examples/`.
 
 | Layer | Audience | Required Toolbox | Content | Release |
 |---|---|---|---|---|
-| **L1 Foundation** | All users | None | Learn one API concept at a time (6 modules, 5–15 min each) | ✅ v0.1.0 |
-| **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | 🔜 v0.2.0 |
-| **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | 🔜 v0.3.0 |
-| **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | 🔜 v0.4.0 |
+| **L1 Foundation** | All users | None | Learn one API concept at a time (6 modules, 5–15 min each) | ✅ v1.0.0 |
+| **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
+| **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | 🔜 v1.2.0 |
+| **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | 🔜 v1.3.0 |
 
 *L1–L3 run entirely on MATLAB Online Basic (free tier).*
 
@@ -202,8 +204,6 @@ EasyMolKit provides progressive learning content under `examples/`.
 
 ### Layer 2: Application Stories (Base MATLAB only)
 
-> 🔜 **Coming in v0.2.0** (not included in this release)
-
 | # | Title | Required Toolbox | Domain | Desktop | Online |
 |---|---|---|---|:---:|:---:|
 | S01 | Find Relatives of Caffeine | None | Everyday chemistry | ✔ | ✔ |
@@ -214,47 +214,11 @@ EasyMolKit provides progressive learning content under `examples/`.
 | S06 | Search Compounds on PubChem | None | Databases | ✔ | ✔ |
 | S07 | Analyze ChEMBL Activity Data | None | Drug discovery | ✔ | ✔ |
 
-### Layer 3: Analytics
+### Layer 3 & 4: Analytics and Research
 
-> 🔜 **Coming in v0.3.0** (not included in this release)
-
-| # | Title | Required Toolbox | Desktop | Online |
-|---|---|---|:---:|:---:|
-| A01 | Chemical Space Mapping | Statistics and ML (PCA) | ✔ | ✔ |
-| A02 | Molecular Clustering | Statistics and ML (kmeans) | ✔ | ✔ |
-| A03 | QSAR Regression: LogP Prediction | Statistics and ML (fitlm) | ✔ | ✔ |
-| A04 | Drug Classification: Active/Inactive | Statistics and ML (fitcsvm) | ✔ | ✔ |
-| A05 | Molecular Property Prediction (Neural Net) | Deep Learning | ✔ | ✔ |
-| A06 | Dose-Response Curve Fitting | Curve Fitting | ✔ | ✔ |
-| A07 | Scaffold Analysis and R-group Decomposition | Statistics and ML | ✔ | ✔ |
-| A08 | MS Spectra × Chemoinformatics | Signal Processing + Statistics and ML | ✔ | ✔ |
-| A09 | PFAS & Environmental Chemical Screening | Optimization + Statistics and ML | ✔ | ✔ |
-| A10 | Lead Optimization (Multi-objective) | Optimization | ✔ | ✔ |
-
-### Layer 4: Research
-
-> 🔜 **Coming in v0.4.0** (not included in this release)
-
-| # | Title | Required Toolbox | Desktop | Online |
-|---|---|---|:---:|:---:|
-| R01 | Large-scale Similarity Screening | Parallel Computing Toolbox (GPU) | ✔ | △ (CPU only) |
-| R02 | PK/PD Simulation | SimBiology | ✔ | ✔ |
-| R03 | Forensic Chemometrics | Statistics and ML + Parallel Computing | ✔ | ✔ |
-| R04 | Protein-Ligand Analysis † | Bioinformatics Toolbox | ✔ | ✔ |
-| R05 | Molecular Language Model (SMILES Generation) | Deep Learning Toolbox | ✔ | ✔ |
-| R06 | REINFORCE Molecular Design (RL fine-tuning) | Deep Learning + Reinforcement Learning | ✔ | ✔ |
-| R07 | Metabolomics † | Bioinformatics + SimBiology | ✔ | ✔ |
-| R08 | Protein-Ligand Docking Simulation ‡ | None (Track 1: meeko + vina + pdbfixer) | ✕ | ✔ |
-| R09 | GNN Molecular Property Prediction § | Deep Learning Toolbox | ✔ | ✔ |
-| R10 | ChemBERTa Transfer Learning § | Deep Learning Toolbox | ✔ | ✔ |
-
-> † Requires `emk.setup.installExtra("biopython")` before first run (Track 1 add-on; separate from MATLAB license).
+> 🔜 **Not yet released.** Detailed module lists will be published when available.
 >
-> ‡ **MATLAB Online only** (not supported on Windows Desktop: no Windows PyPI wheel for vina; pdbfixer's openmm is blocked by Smart App Control).
-> Setup: set `cfg.optionalLibraries.meeko/vina/pdbfixer = true` in `main_rdkit.m` → `installOnline(Config=cfg)` for batch installation.
->
-> § **WIP**. R09/R10 are under content review. R10 requires the torch environment from R09.
-> Before running R09: `emk.setup.installExtra("torch")` → `torch_geometric` → `transformers` → `datasets` (in this order).
+> L3 Analytics (A01–A10) is planned for **v1.2.0**. L4 Research (R01–R10) is planned for **v1.3.0**.
 
 ## Directory Structure
 
@@ -356,7 +320,17 @@ This software is provided for research and educational purposes.
 | File | Description |
 |---|---|
 | [docs/quickstart.md](docs/quickstart.md) | Setup steps & FAQ |
-| [docs/function_reference.md](docs/function_reference.md) | Function signature reference |
+| [docs/function_reference.md](docs/function_reference.md) | Full function signature reference |
+| [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (51 functions, all modules) |
+| [docs/test_catalog.md](docs/test_catalog.md) | Test class catalog (25 classes, unit + smoke) |
 | [docs/python_integration.md](docs/python_integration.md) | Python integration architecture |
 | [docs/platform_support.md](docs/platform_support.md) | Desktop / Online platform support |
 | [docs/compliance.md](docs/compliance.md) | License & compliance |
+
+### Japanese Documents
+
+| File | Description |
+|---|---|
+| [docs/ja/README.ja.md](docs/ja/README.ja.md) | このリポジトリの概要（日本語版） |
+| [docs/function_catalog.ja.md](docs/function_catalog.ja.md) | コンパクト関数カタログ（日本語版） |
+| [docs/test_catalog.ja.md](docs/test_catalog.ja.md) | テストクラスカタログ（日本語版） |
