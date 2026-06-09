@@ -184,7 +184,7 @@ classdef TestValidate < matlab.unittest.TestCase
         end
 
         function test_defaultList_containsAllKnownLibraries(tc)
-        % Verify each of the 12 expected library names appears exactly once.
+        % Verify each of the 11 expected library names appears exactly once.
             T = tc.DefaultResult;
             expected = ["rdkit"; "pubchempy"; "mordred"; "biopython"; ...
                         "scipy"; "meeko"; "vina"; "pdbfixer"; ...
@@ -262,14 +262,14 @@ classdef TestValidate < matlab.unittest.TestCase
 
         function test_emptyStringArray_usesDefaultList(tc)
         % string.empty passed as Libraries is treated as "not specified"
-        % and triggers the default 12-library list.
+        % and triggers the default 11-library list.
         % isempty(string.empty) == true, so the isempty guard fires.
         % This is consistent with the function reference: "Default: all known
         % libraries when Libraries is omitted or empty."
             T = emk.setup.validate(Libraries=string.empty);
             tc.verifyClass(T, "table", "Must still return a table");
-            tc.verifyNumElements(T.Library, 12, ...
-                "string.empty Libraries must trigger the default 12-library list");
+            tc.verifyNumElements(T.Library, 11, ...
+                "string.empty Libraries must trigger the default 11-library list");
         end
 
     end

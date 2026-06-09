@@ -11,6 +11,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-06-09
+
+### Added
+
+**Tutorial content**
+- **Layer 3: Analytics (A01–A10)** — 10 analytical tutorials (Japanese & English, 30–60 min each).
+  Requires Statistics and ML Toolbox (A01–A04, A07–A09), Deep Learning Toolbox (A05),
+  Curve Fitting Toolbox (A06), and Optimization Toolbox (A09–A10, optional).
+  All 10 modules run on MATLAB Online Basic (free tier).
+  - **A01** Chemical Space Mapping by PCA — dimensionality reduction, chemical space visualization
+  - **A02** Molecular Clustering — hierarchical clustering, structural similarity grouping
+  - **A03** QSAR Regression — LogP prediction, regression model evaluation
+  - **A04** Drug Classification — SVM / Random Forest, ROC curve analysis
+  - **A05** Neural Network Property Prediction — feedforward NN, property regression
+  - **A06** Dose-Response Curve Fitting — Hill equation, EC50 estimation
+  - **A07** Scaffold Analysis & R-Group Decomposition — medicinal chemistry analytics
+  - **A08** Mass Spectrometry × Cheminformatics — isotope pattern matching, MS annotation
+  - **A09** PFAS & Environmental Screening — SMARTS-based screening, Pareto optimization
+  - **A10** Lead Optimization — multi-objective optimization, Derringer-Suich desirability
+  - Answer scripts for all Analytics modules (`examples/*/analytics/answers/`)
+
+---
+
+## [1.1.0] - 2026-05-31
+
+### Added
+
+**Tutorial content**
+- **Layer 2: Application Stories (S01–S07)** — 7 story-based tutorials (Japanese & English, 20–40 min each).
+  All modules require Base MATLAB only (no additional Toolboxes).
+  - **S01** Finding Caffeine's Molecular Cousins — similarity search, top-N ranking
+  - **S02** Drug-likeness Filter — Lipinski's Rule of Five
+  - **S03** Structural Alert Detection for Safety Screening — SMARTS batch matching
+  - **S04** Virtual Screening Workflow — fingerprint similarity, Top-N filtering
+  - **S05** Unknown Compound Identification Challenge — forensic chemistry scenario
+  - **S06** Search Compounds on PubChem — PUG REST API integration
+  - **S07** Analyze ChEMBL Activity Data — bioactivity retrieval and analysis
+  - Answer scripts for all Stories modules (`examples/*/stories/answers/`)
+
+**Core API**
+- `resolveProjectRoot()` (`src/util/resolveProjectRoot.m`) — Three-stage fallback for stable
+  project root detection across Windows Desktop, MATLAB MCP, and MATLAB Online environments.
+
+### Changed
+
+- **Foundation (F01–F06) Section 0** — Replaced per-file inline root-detection block (~25 lines)
+  with a concise 9-line template using `resolveProjectRoot()`. MATLAB Online path resolution is now stable.
+
+---
+
 ## [1.0.0] - 2026-05-25
 
 Initial public release. Includes the **Layer 1 Foundation** tutorial series (F01–F06)
@@ -83,5 +133,5 @@ and the complete `emk.*` API for RDKit-based Chemoinformatics from MATLAB.
 
 - Requires MATLAB R2025b or later
 - Windows Desktop and MATLAB Online supported; macOS / Linux Desktop untested
-- Layer 2 (Stories), Layer 3 (Analytics), and Layer 4 (Research) tutorials are planned for
-  v2.0.0, v3.0.0, and v4.0.0 respectively
+- Layer 2 (Stories) was released in v1.1.0; Layer 3 (Analytics) in v1.2.0
+- Layer 4 (Research) tutorials are planned for v1.3.0

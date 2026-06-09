@@ -186,7 +186,7 @@ EasyMolKit provides progressive learning content under `examples/`.
 |---|---|---|---|---|
 | **L1 Foundation** | All users | None | Learn one API concept at a time (6 modules, 5–15 min each) | ✅ v1.0.0 |
 | **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
-| **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | 🔜 v1.2.0 |
+| **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | ✅ v1.2.0 |
 | **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | 🔜 v1.3.0 |
 
 *L1–L3 run entirely on MATLAB Online Basic (free tier).*
@@ -214,11 +214,26 @@ EasyMolKit provides progressive learning content under `examples/`.
 | S06 | Search Compounds on PubChem | None | Databases | ✔ | ✔ |
 | S07 | Analyze ChEMBL Activity Data | None | Drug discovery | ✔ | ✔ |
 
-### Layer 3 & 4: Analytics and Research
+### Layer 3: Analytics
+
+| # | Title | Required Toolbox | Topic | Desktop | Online |
+|---|---|---|---|:---:|:---:|
+| A01 | Chemical Space Mapping by PCA | Statistics and ML | Dimensionality reduction | ✔ | ✔ |
+| A02 | Molecular Clustering | Statistics and ML | Structural similarity | ✔ | ✔ |
+| A03 | QSAR Regression | Statistics and ML | Property prediction | ✔ | ✔ |
+| A04 | Drug Classification | Statistics and ML | ML classification | ✔ | ✔ |
+| A05 | Neural Network Property Prediction | Deep Learning | Neural networks | ✔ | ✔ |
+| A06 | Dose-Response Curve Fitting | Curve Fitting | Pharmacology | ✔ | ✔ |
+| A07 | Scaffold Analysis & R-Group Decomposition | Statistics and ML | Medicinal chemistry | ✔ | ✔ |
+| A08 | Mass Spectrometry × Cheminformatics | Signal Processing + Stats | MS analysis | ✔ | ✔ |
+| A09 | PFAS & Environmental Screening | Optimization + Stats (optional) | Environmental | ✔ | ✔ |
+| A10 | Lead Optimization | Optimization (optional) | Drug discovery | ✔ | ✔ |
+
+### Layer 4: Research
 
 > 🔜 **Not yet released.** Detailed module lists will be published when available.
 >
-> L3 Analytics (A01–A10) is planned for **v1.2.0**. L4 Research (R01–R10) is planned for **v1.3.0**.
+> L4 Research (R01–R10) is planned for **v1.3.0**.
 
 ## Directory Structure
 
