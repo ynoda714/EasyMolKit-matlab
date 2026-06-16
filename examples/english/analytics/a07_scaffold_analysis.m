@@ -1,125 +1,89 @@
 %[text] # A07: Scaffold Analysis and R Group Decomposition
-%[text] EasyMolKit Analytics — Layer 3
-%[text]
-%[text] When lining up 200 FDA-approved drugs, you notice that many share the same ring system core.
-%[text] This "scaffold" is called the **Bemis-Murcko scaffold**, and medicinal chemists use it to understand which scaffolds support multiple drugs during the design phase.
-%[text] Even with the same scaffold, changing only the side chains (R groups) can alter absorption, toxicity, and activity, allowing systematic optimization of R groups. This is the essence of **Structure-Activity Relationship (SAR)** analysis.
+%[text] EasyMolKit Analytics  -- Layer 3
+%[text] Looking across 200 FDA-approved drugs, it becomes apparent that many share the same ring system core.
+%[text] This "skeleton" is called the **Bemis-Murcko scaffold** (the ring system core with terminal substituents removed).
+%[text] Medicinal chemists use this concept during the design phase to understand which scaffolds support multiple drugs.
+%[text] If changing side chains (R groups) on the same scaffold alters absorption, toxicity, or activity, R groups can be systematically optimized.
+%[text] This is the essence of **Structure-Activity Relationship (SAR)** analysis.
 %[text] In this script, we automatically extract scaffolds from an FDA-approved drug dataset and explore scaffold diversity using frequency ranking, R group property tables, and PCA visualization.
-%[text]
-%[text] **Story**
-%[text]
-%[text] A medicinal chemist is reviewing the structural diversity of 200 FDA-approved drugs before designing a new compound library. She posed three questions:
-%[text]
-%[text] - (a) What is the most common core framework (scaffold) in approved drugs, and
-%[text] how many unique scaffolds are there?
-%[text] - (b) Which physicochemical properties (LogP: logarithm of the partition coefficient between water and octanol, TPSA: topological polar surface area, MW: molecular weight) differ among scaffold families? This is the essence of SAR analysis, linking structural changes to property changes.
-%[text] - (c) How do the same side chains (R groups) affect drug-likeness within a specific scaffold family?
-%[text]
-%[text] In this exercise, you will:
-%[text]
+%[text] 
+%[text] A medicinal chemist is reviewing the structural diversity of 200 FDA-approved drugs before designing a new compound library.
+%[text] She posed the following three questions.
+%[text] (a) What is the most common core framework (scaffold) among approved drugs, and how many unique scaffolds are there?
+%[text] (b) Which physicochemical properties (LogP, TPSA, MW) differ among scaffold families?
+%[text] (c) How do the same side chains (R groups) affect drug-likeness within specific scaffold families?
+%[text] We proceed in six steps:
 %[text] 1. Load 200 FDA drugs and extract the Bemis-Murcko scaffold for each drug.
 %[text] 2. Map unique scaffold SMILES to identify scaffold families.
 %[text] 3. Rank scaffolds by frequency and plot the distribution.
-%[text] 4. Construct an R group property table: mean and standard deviation of key descriptors per family.
-%[text] 5. Visualize SAR: PCA colored by scaffold class and ALogP box plots.
-%[text] 6. Summarize scaffold diversity with the Scaffold Diversity Index (SDI).
-%[text]
-%[text] **Learning Objectives**
-%[text]
-%[text] - Understand the definition of Bemis-Murcko scaffolds and their use in SAR
-%[text] - Use `emk.mol.scaffold()` to extract canonical scaffolds from SMILES
-%[text] - Group molecules by scaffold SMILES using MATLAB `containers.Map`
-%[text] - Construct an R group property table summarizing intra-scaffold variance
-%[text] - Visualize how scaffolds partition chemical space (PCA, box plots)
-%[text] - Calculate and interpret the Scaffold Diversity Index (SDI)
-%[text]
-%[text] **Prerequisites**
-%[text]
-%[text] - Completion of F05 (Substructure Search) — the concept of scaffolds has been introduced
-%[text] - Recommended: Familiarity with A01 (PCA) and A02 (Clustering) for visualization context
-%[text] - Statistics and Machine Learning Toolbox required (`pca`, `boxplot`)
-%[text] - No internet connection required
-%[text]
-%[text] Estimated time: 30–45 minutes
-%[text]
-%[text] **Data:**
-%[text]
-%[text] `data/list/fda_drugs.csv` — 200 FDA-approved drugs (ChEMBL CC-BY-SA 3.0)
-%[text] Columns: ChEMBLID, Name, SMILES, MolecularWeight, ALogP,
-%[text] HBondDonors, HBondAcceptors, TPSA, RotatableBonds
-%[text]
-%[text] **References**
-%[text]
-%[text] Bemis & Murcko (1996) *J. Med. Chem.* 39:2887–2893. doi:10.1021/jm9602928
-%[text] — Original paper on the concept of scaffolds
-%[text]
-%[text] Bemis & Murcko (1999) *J. Med. Chem.* 42:5095–5099. doi:10.1021/jm9903996
-%[text] — Extension to R group/side chain analysis
-%[text]
-%[text] Langdon et al. (2011) *J. Chem. Inf. Model.* 51:2174–2185. doi:10.1021/ci200319g
-%[text] — Quantitative scaffold diversity analysis of FDA drug set
-%[text]
-%[text] RDKit `MurckoScaffold` module:
-%[text] https://www.rdkit.org/docs/source/rdkit.Chem.Scaffolds.MurckoScaffold.html
-%[text]
-%[text] How to run: Execute each section with Ctrl+Enter
-
+%[text] 4. Construct an R group property table (mean and standard deviation of key descriptors per family).
+%[text] 5. Visualize SAR (PCA and ALogP box plots colored by scaffold class).
+%[text] 6. Summarize scaffold diversity using the Scaffold Diversity Index (SDI). \
+%[text] ### Learning Objectives
+%[text] - Understand the definition of Bemis-Murcko scaffolds and their use in SAR.
+%[text] - Extract canonical scaffolds from SMILES using `emk.mol.scaffold()`.
+%[text] - Group molecules by scaffold SMILES using MATLAB `containers.Map`.
+%[text] - Construct an R group property table summarizing within-scaffold variance.
+%[text] - Visualize how scaffolds partition chemical space using PCA and box plots.
+%[text] - Calculate and interpret the Scaffold Diversity Index (SDI). \
+%[text] ### Prerequisites
+%[text] - Completion of F05 (Substructure Search)  -- the concept of scaffolds has been introduced.
+%[text] - Recommended: Prior learning of A01 (PCA) and A02 (Clustering).
+%[text] - Statistics and Machine Learning Toolbox required (`pca`, `boxplot`). \
+%[text] Estimated time: 30-45 minutes
+%[text] ### Data:
+%[text] - `data/list/fda_drugs.csv`  -- 200 FDA-approved drugs (ChEMBL CC-BY-SA 3.0)
+%[text] - Columns: ChEMBLID, Name, SMILES, MolecularWeight, ALogP, HBondDonors, HBondAcceptors, TPSA, RotatableBonds \
+%[text] ### References
+%[text] - Bemis & Murcko (1996) *J. Med. Chem.* 39:2887-2893. doi:10.1021/jm9602928  -- Original paper on the scaffold concept
+%[text] - Bemis & Murcko (1999) *J. Med. Chem.* 42:5095-5099. doi:10.1021/jm9903996  -- Extension to R group/side chain analysis
+%[text] - Langdon et al. (2011) *J. Chem. Inf. Model.* 51:2174-2185. doi:10.1021/ci200319g  -- Quantitative scaffold diversity analysis of FDA drug set
+%[text] - RDKit `MurckoScaffold` module: https://www.rdkit.org/docs/source/rdkit.Chem.Scaffolds.MurckoScaffold.html \
+%[text] Execution method: Run each section with Ctrl+Enter
 %%
 %[text] ## Section 0: Setup
-
 % Resolve project root (works for Desktop, MCP, and MATLAB Online)
 sDir = fileparts(mfilename('fullpath'));
 if strlength(sDir) > 0
     addpath(genpath(fullfile(sDir, '..', '..', '..', 'src')));
+elseif isfolder(fullfile(pwd, 'src'))
+    addpath(genpath(fullfile(pwd, 'src')));
 elseif ~isempty(which("logInfo"))
     addpath(genpath(fileparts(fileparts(which("logInfo")))));
 end
 projectRoot = resolveProjectRoot();
 addpath(genpath(fullfile(projectRoot, 'src')));
-emk.setup.initPython();
-
+emk.setup.initPython(); %[output:00dd0ff1]
 %[text] Warm up the Python/RDKit process before the main execution.
 mol_warmup = emk.mol.fromSmiles("C");   % Methane -- lightweight
 clear mol_warmup;
-logSection("A07", "Section 0: Setup", "Analytics L3");
+logSection("A07", "Section 0: Setup", "Analytics L3"); %[output:39f6ca9d]
 %%
 %[text] ## Section 1: Loading FDA-approved Drugs and Extracting Murcko Scaffolds
-%[text]
-%[text] Setup is complete. First, load the FDA-approved drug data and extract the Bemis-Murcko scaffolds from each molecule.
-%[text] If extracted correctly, drugs with the same ring system core will be automatically grouped.
-%[text]
+%[text] We load the FDA-approved drug data and extract the Bemis-Murcko scaffold for each molecule. Drugs sharing the same ring system core are then automatically grouped.
 %[text] ### Concept: Bemis-Murcko Scaffold
-%[text] A scaffold (molecular framework) is the core ring system of a molecule after removing all terminal substituents (side chains).
-%[text]
+%[text] A scaffold (molecular framework) is the core ring system of a molecule remaining after removing all terminal substituents (side chains).
 %[text] **Bemis-Murcko Definition (1996)** retains the following elements:
 %[text] - All ring atoms (including heteroatoms like N, O, S)
 %[text] - Linker bonds and atoms connecting rings
-%[text] - Single-atom linkers between rings
-%[text]
-%[text] Side chains attached to the ring system are removed. For example:
-%[text] - Aspirin `CC(=O)Oc1ccccc1C(=O)O` → Scaffold `c1ccccc1` (Benzene)
-%[text] - Ibuprofen `CC(C)Cc1ccc(C(C)C(=O)O)cc1` → Scaffold `c1ccc(cc1)` (Benzene)
-%[text]
-%[text] Both have a benzene scaffold, but the R groups differ significantly.
-%[text] Scaffold analysis reveals which frameworks support multiple drugs.
-%[text]
-%[text] Molecules without rings (e.g., amino acids, short peptides) have no scaffold.
-%[text] RDKit returns an empty Mol (0 atoms) for these.
-%[text] Label them as `"<acyclic>"` to retain in the dataset.
-logSection("A07", "Section 1: Loading FDA-approved Drugs and Extracting Murcko Scaffolds", "Analytics L3");
+%[text] - Single-atom linkers between rings \
+%[text] All side chains attached to the ring system are removed.
+%[text] For example, Aspirin (SMILES: `CC(=O)Oc1ccccc1C(=O)O`) and Ibuprofen (SMILES: `CC(C)Cc1ccc(C(C)C(=O)O)cc1`) both have a benzene ring `c1ccccc1` as their scaffold.
+%[text] Although both share the benzene scaffold, their R groups (side chains) differ significantly.
+%[text] Scaffold analysis clarifies which frameworks support multiple drugs.
+%[text] Molecules without rings (e.g., amino acids, short peptides) do not have scaffolds.
+%[text] RDKit returns an empty Mol (0 atoms) for these, so label them as `"<acyclic>"` in the dataset.
+logSection("A07", "Section 1: Loading FDA-approved Drugs and Extracting Murcko Scaffolds", "Analytics L3"); %[output:5c08084f]
 DATA_FILE   = "data/list/fda_drugs.csv";
 ACYCLIC_TAG = "<acyclic>";   % placeholder for ring-free molecules
-
 rawTbl = readtable(DATA_FILE, TextType="string");
 nRaw   = height(rawTbl);
-logInfo("Loaded %d rows from %s", nRaw, DATA_FILE);
-
-%[text] Extract scaffolds for each drug
+logInfo("Loaded %d rows from %s", nRaw, DATA_FILE); %[output:9740a528]
+%[text] Extract the scaffold for each drug.
 scaffoldSmiles = strings(nRaw, 1);   % Scaffold SMILES for each drug
 scaffoldNAtoms = nan(nRaw, 1);       % Number of heavy atoms in the scaffold
 mols           = cell(1, nRaw);
 valid          = false(1, nRaw);
-
 for k = 1:nRaw
     try
         mol        = emk.mol.fromSmiles(rawTbl.SMILES(k));
@@ -137,58 +101,32 @@ for k = 1:nRaw
         logWarn("Skipping row %d (%s): %s", k, rawTbl.Name(k), ME.message);
     end
 end
-
 validIdx = find(valid);
 nMols    = numel(validIdx);
-logInfo("Extracted scaffolds for %d / %d molecules", nMols, nRaw);
-
-%[text] Restrict working arrays to valid molecules
+logInfo("Extracted scaffolds for %d / %d molecules", nMols, nRaw); %[output:61b9a904]
+%[text] Narrow down the working array to valid molecules only.
 molNames    = rawTbl.Name(validIdx);
 molSmiles   = rawTbl.SMILES(validIdx);
 scafSmi     = scaffoldSmiles(validIdx);
 scafNAtoms  = scaffoldNAtoms(validIdx);
-
-%[text] Preview (first 5 rows)
+%[text] Preview the first 5 rows.
 previewTbl = table( ...
     molNames(1:5), molSmiles(1:5), scafSmi(1:5), scafNAtoms(1:5), ...
     VariableNames=["Name", "SMILES", "Scaffold", "ScaffoldAtoms"]);
-disp(previewTbl);
-
-%[text] **💡 Observation Point 1 — Let's check the scaffold extraction results**
-%[text] Out of 200 drugs, how many are acyclic (ring-free)?
-%[text] Run `sum(scafSmi == "<acyclic>")` to check.
-%[text] Do you recognize any names among the acyclic drugs? (Hint: simple amino acids, some antiviral drugs)
-%[text] Which is the largest scaffold (most heavy atoms)?
-%[text] Does the scaffold SMILES appear as a complex ring system?
-%[text] The SMILES for Aspirin is `"CC(=O)Oc1ccccc1C(=O)O"`.
-%[text] What scaffold is obtained? Next, try with Ibuprofen `"CC(C)Cc1ccc(C(C)C(=O)O)cc1"`.
-%[text] Do they share the same scaffold?
-% ... (Try writing code here)
+disp(previewTbl); %[output:223c844e]
 %%
 %[text] ## Section 2: Scaffold Frequency Analysis
-%[text]
-%[text] Scaffold extraction is complete. Next, we will examine the frequency distribution of how often each scaffold appears in different drugs.
-%[text] Let's check how concentrated the privileged structures are.
-%[text]
+%[text] With scaffolds extracted, we now examine how often each scaffold appears across the drug set.
 %[text] ### Concept: Scaffold Diversity and Scaffold Frequency
-logSection("A07", "Section 2: Scaffold Frequency Analysis", "Analytics L3");
-%[text] By examining the distribution of scaffold frequency, we can determine whether a drug library is "diverse" (many unique scaffolds each appearing only once) or "concentrated" (many compounds sharing a few scaffolds).
-%[text]
-%[text] Trends in the FDA drug set (Langdon et al. 2011):
-%[text] - About 50% of scaffolds are "singletons" (appear in only one drug)
-%[text] - A few scaffolds (benzene, pyridine, piperidine rings) appear in 5-10 or more drugs
-%[text]
-%[text] **Why is this important?**
-%[text] - High scaffold diversity = indicates broad coverage of chemical space
-%[text] - High-frequency scaffolds are "**privileged structures**",
-%[text] evolutionarily selected frameworks that fit many protein binding sites
-%[text]
-%[text] **Definition of Scaffold Diversity Index (SDI):**
-%[text] $\text{SDI} = N_{\text{unique}} / N_{\text{total}}$
-%[text] The range of SDI is from $1/N$ (all the same scaffold) to $1.0$ (all unique).
-%[text] A random drug-like library typically achieves SDI ~ 0.7-0.9.
-%[text]
-%[text] Map scaffold SMILES to a list of molecule indices (using containers.Map).
+%[text] By checking the distribution of scaffold frequency, we can determine whether a drug library is "diverse" (many unique scaffolds each appearing only once) or "focused" (many compounds sharing a few scaffolds).
+%[text] In the FDA drug set (Langdon et al. 2011), it is known that about 50% of scaffolds are "singletons" (appearing in only one drug).
+%[text] On the other hand, benzene, pyridine, and piperidine ring systems appear in 5 to 10 or more drugs.
+%[text] High scaffold diversity indicates broad coverage of chemical space, while high-frequency scaffolds are called "**privileged scaffolds**" that fit many protein binding sites.
+%[text] The **Scaffold Diversity Index (SDI)** is an indicator that represents the diversity of the entire library as a single number.
+%[text] $SDI = N(unique) / N(total)$ (Number of unique scaffolds / Total number of molecules)
+%[text] The range of SDI is from $1/N$ (all the same scaffold) to $1.0$ (all unique), and a random drug-like library typically achieves SDI ~ 0.7 to 0.9.
+%[text] Use `containers.Map` to map scaffold SMILES to a list of molecule indices.
+logSection("A07", "Section 2: Scaffold Frequency Analysis", "Analytics L3"); %[output:02be919c]
 scafMap = containers.Map("KeyType", "char", "ValueType", "any");
 for k = 1:nMols
     key = char(scafSmi(k));
@@ -198,45 +136,38 @@ for k = 1:nMols
         scafMap(key) = k;
     end
 end
-
 uniqueScafs = keys(scafMap);
 nUnique     = numel(uniqueScafs);
 SDI         = nUnique / nMols;
-
-logInfo("Unique scaffolds: %d / %d molecules  (SDI = %.3f)", ...
-    nUnique, nMols, SDI);
-
-%[text] Calculate the frequency of each scaffold.
+logInfo("Unique scaffolds: %d / %d molecules  (SDI = %.3f)", ... %[output:group:6a6f248a] %[output:5db0bbf4]
+    nUnique, nMols, SDI); %[output:group:6a6f248a] %[output:5db0bbf4]
+%[text] Calculate the occurrence frequency of each scaffold.
 scafFreq = zeros(1, nUnique);
 for i = 1:nUnique
     scafFreq(i) = numel(scafMap(uniqueScafs{i}));
 end
-
 %[text] Sort frequencies in descending order.
 [scafFreqSorted, sortOrd] = sort(scafFreq, "descend");
 uniqueScafsSorted = uniqueScafs(sortOrd);
-
-%[text] Report the top 10 scaffolds.
+%[text] Display the top 10 scaffolds.
 TOP_N = 10;
-logInfo("Top %d scaffolds by frequency:", TOP_N);
-for i = 1:min(TOP_N, nUnique)
+logInfo("Top %d scaffolds by frequency:", TOP_N); %[output:0dd4d642]
+for i = 1:min(TOP_N, nUnique) %[output:group:4ee35e55]
     memberIdx  = scafMap(uniqueScafsSorted{i});
     memberList = strjoin(molNames(memberIdx), ", ");
     if strlength(memberList) > 80
         memberList = extractBefore(memberList, 81) + "...";
     end
-    logInfo("  [%2d] Frequency=%d  Scaffold=%s  Members=%s", ...
-        i, scafFreqSorted(i), uniqueScafsSorted{i}, memberList);
-end
-
+    logInfo("  [%2d] Frequency=%d  Scaffold=%s  Members=%s", ... %[output:098318bb]
+        i, scafFreqSorted(i), uniqueScafsSorted{i}, memberList); %[output:098318bb]
+end %[output:group:4ee35e55]
 nSingletons = sum(scafFreq == 1);
-logInfo("Singletons (frequency=1): %d / %d scaffolds (%.0f%%)", ...
-    nSingletons, nUnique, 100 * nSingletons / nUnique);
-
-%[text] -- Bar Graph: Frequency of Top 10 Scaffolds --
-figure("Name", "A07 Scaffold Frequency");
-barh(scafFreqSorted(1:TOP_N), FaceColor=[0.3 0.6 0.9]);
-yticks(1:TOP_N);
+logInfo("Singletons (Frequency=1): %d / %d scaffolds (%.0f%%)", ... %[output:group:931f14fc] %[output:65b6ba78]
+    nSingletons, nUnique, 100 * nSingletons / nUnique); %[output:group:931f14fc] %[output:65b6ba78]
+%[text] Visualize the frequency of the top 10 scaffolds with a bar graph.
+figure("Name", "A07 Scaffold Frequency"); %[output:530228ac]
+barh(scafFreqSorted(1:TOP_N), FaceColor=[0.3 0.6 0.9]); %[output:530228ac]
+yticks(1:TOP_N); %[output:530228ac]
 %[text] Use the first 30 characters of scaffold SMILES as labels.
 shortLabels = cell(TOP_N, 1);
 for i = 1:TOP_N
@@ -247,69 +178,42 @@ for i = 1:TOP_N
         shortLabels{i} = s;
     end
 end
-yticklabels(shortLabels);   % YDir="reverse" makes y=1 the top, so no flipud needed
-xlabel("Number of FDA drugs with the same scaffold");
-title(sprintf("Top %d Most Frequent Murcko Scaffolds (FDA Drugs)", TOP_N));
-grid on;
-set(gca, FontSize=8, YDir="reverse");
-
-%[text] -- Histogram: Distribution of All Scaffold Frequencies --
-figure("Name", "A07 Scaffold Frequency Distribution");
-histogram(scafFreq, max(scafFreq), FaceColor=[0.3 0.6 0.9], EdgeColor="none");
-xlabel("Number of drugs per scaffold");
-ylabel("Number of scaffolds");
-title(sprintf("Scaffold Frequency Distribution (Unique N=%d)", nUnique));
-xline(mean(scafFreq), "--r", sprintf("Mean=%.1f", mean(scafFreq)), ...
-    LabelHorizontalAlignment="right");
-grid on;
-
-%[text] **💡 Observation Point 2 ―― Let's Analyze the Frequency Distribution**
-%[text] Check the proportion of scaffolds appearing in 3 or more drugs.
-%[text] You can calculate this using `sum(scafFreq >= 3) / nUnique * 100`.
-%[text] Consider why these are called "privileged" scaffolds.
-%[text] Calculate the Shannon entropy of the scaffold frequency distribution.
-%[text] A higher H means a more even distribution among scaffolds.
-%[text] Compared to a hypothetical "all singletons" library, `H = log2(nMols)`.
-%[text] In many FDA analyses, the most frequent scaffold is a simple benzene ring (`c1ccccc1`).
-%[text] Check if this is the case in this dataset as well. Check `uniqueScafsSorted{1}`.
-%[text] Why is benzene so common?
-%[text] (Hint: Aromatic rings provide hydrophobic surfaces, pi-stacking, and metabolic stability)
-% ... (Try writing code here)
+yticklabels(shortLabels);   % YDir="reverse" makes y=1 the top, so flipud is unnecessary %[output:530228ac]
+xlabel("Number of FDA drugs with the same scaffold"); %[output:530228ac]
+title(sprintf("Top %d Most Frequent Murcko Scaffolds (FDA Drugs)", TOP_N)); %[output:530228ac]
+grid on; %[output:530228ac]
+set(gca, FontSize=8, YDir="reverse"); %[output:530228ac]
+%[text] Check the frequency distribution of all scaffolds with a histogram.
+figure("Name", "A07 Scaffold Frequency Distribution"); %[output:06fe6905]
+histogram(scafFreq, max(scafFreq), FaceColor=[0.3 0.6 0.9], EdgeColor="none"); %[output:06fe6905]
+xlabel("Number of drugs per scaffold"); %[output:06fe6905]
+ylabel("Number of scaffolds"); %[output:06fe6905]
+title(sprintf("Scaffold Frequency Distribution (Unique N=%d)", nUnique)); %[output:06fe6905]
+xline(mean(scafFreq), "--r", sprintf("Mean=%.1f", mean(scafFreq)), ... %[output:06fe6905]
+    LabelHorizontalAlignment="right"); %[output:06fe6905]
+grid on; %[output:06fe6905]
 %%
 %[text] ## Section 3: R-Group Property Table
-%[text]
-%[text] We have understood the distribution of scaffolds. Next, we will quantify how R-groups (side chains) within each scaffold family affect properties.
-%[text] You will see how much ALogP (an indicator of lipophilicity) and TPSA (topological polar surface area) can vary even with the same scaffold.
-%[text]
+%[text] With the frequency distribution in hand, we now quantify how R groups within each scaffold family affect key properties such as ALogP (lipophilicity) and TPSA (topological polar surface area), even when the core scaffold is held constant.
 %[text] ### Concept: R-Group Analysis and Structure-Activity Relationship (SAR)
-%[text] In medicinal chemistry, "R-group" refers to variable substituents added to a fixed scaffold. R-group analysis poses the following question:
-%[text]
-%[text] With a fixed scaffold, how do different side chains affect properties such as lipophilicity (ALogP), polarity (TPSA), and molecular weight?
-%[text]
-%[text] This is the core of lead optimization. Drug discovery researchers modify the R-groups of promising scaffolds to improve ADMET (absorption, distribution, metabolism, excretion, toxicity) properties while maintaining activity.
-%[text]
-%[text] In this section, we will construct a property summary table for each scaffold family with three or more members. The report for each family includes:
-%[text] - Number of members (number of approved drugs sharing the same scaffold)
-%[text] - Mean and standard deviation of ALogP, TPSA, MolecularWeight, HBondDonors, HBondAcceptors, RotatableBonds
-%[text]
-%[text] A high `std(ALogP)` within a scaffold indicates that the scaffold allows a wide range of lipophilicity due to R-group changes. This is a "flexible" scaffold.
-%[text] A low std indicates that all drugs on that scaffold have similar lipophilicity.
-logSection("A07", "Section 3: R-Group Property Table", "Analytics L3");
+%[text] In medicinal chemistry, "R group" refers to variable substituents added to a fixed scaffold.
+%[text] R-group analysis quantitatively examines "how different side chains affect properties such as ALogP, TPSA, and molecular weight on a fixed scaffold."
+%[text] This is central to lead optimization, where drug discovery researchers modify R groups to improve ADMET (absorption, distribution, metabolism, excretion, toxicity) properties while maintaining activity.
+%[text] We construct a property summary table for each scaffold family with three or more members, reporting mean and standard deviation of ALogP, TPSA, MolecularWeight, HBondDonors, HBondAcceptors, and RotatableBonds.
+%[text] If the standard deviation of ALogP within a scaffold is large, it means that the scaffold is "flexible," allowing a wide range of lipophilicity due to R-group changes.
+logSection("A07", "Section 3: R-Group Property Table", "Analytics L3"); %[output:6f169e33]
 MIN_FAMILY_SIZE = 3;   % minimum members to include in the R-group table
-
 %[text] Select scaffold families that meet the size threshold.
-%[text] Note: Exclude the `<acyclic>` placeholder. Molecules without ring systems do not have a fixed scaffold,
-%[text] and thus are not subject to R-group analysis (only ring system drugs can be compared in SAR).
+%[text] Exclude the `<acyclic>` placeholder.
+%[text] Molecules without ring systems do not have a fixed scaffold and cannot be compared in SAR.
 realScafMask = scafFreqSorted >= MIN_FAMILY_SIZE & ~strcmp(uniqueScafsSorted, char(ACYCLIC_TAG));
 familyScafs  = uniqueScafsSorted(realScafMask);
 familyFreqs  = scafFreqSorted(realScafMask);
 nFamilies    = numel(familyScafs);
-logInfo("Scaffold families with members >= %d (ring systems only): %d", MIN_FAMILY_SIZE, nFamilies);
-
-%[text] Use property columns present in the CSV (to avoid RDKit overhead).
+logInfo("Scaffold families with members >= %d (ring systems only): %d", MIN_FAMILY_SIZE, nFamilies); %[output:26be145c]
+%[text] To improve speed by avoiding RDKit calls, use the property columns present in the CSV as is.
 PROP_COLS = ["ALogP", "TPSA", "MolecularWeight", "HBondDonors", ...
              "HBondAcceptors", "RotatableBonds"];
-
 %[text] Construct the R-group summary table.
 familyNames     = cell(nFamilies, 1);
 familyNMembers  = zeros(nFamilies, 1);
@@ -319,18 +223,15 @@ familyMeanTPSA  = zeros(nFamilies, 1);
 familyMeanMW    = zeros(nFamilies, 1);
 familyMeanHBD   = zeros(nFamilies, 1);
 familyMeanHBA   = zeros(nFamilies, 1);
-
-for f = 1:nFamilies
+for f = 1:nFamilies %[output:group:249fbf53]
     memberIdx = scafMap(familyScafs{f});   % indices into validIdx
     % Retrieve rows from rawTbl for these members
     rawRows = rawTbl(validIdx(memberIdx), :);
-
     logP = double(rawRows.ALogP);
     tpsa = double(rawRows.TPSA);
     mw   = double(rawRows.MolecularWeight);
     hbd  = double(rawRows.HBondDonors);
     hba  = double(rawRows.HBondAcceptors);
-
     familyNames{f}    = familyScafs{f};
     familyNMembers(f) = numel(memberIdx);
     familyMeanLogP(f) = mean(logP);
@@ -339,18 +240,16 @@ for f = 1:nFamilies
     familyMeanMW(f)   = mean(mw);
     familyMeanHBD(f)  = mean(hbd);
     familyMeanHBA(f)  = mean(hba);
-
     % Display member names for the first 5 families
     if f <= 5
         memberStr = strjoin(rawRows.Name, " | ");
         if strlength(memberStr) > 100
             memberStr = extractBefore(memberStr, 101) + "...";
         end
-        logInfo("Family %d (n=%d): %s", f, familyNMembers(f), memberStr);
+        logInfo("Family %d (n=%d): %s", f, familyNMembers(f), memberStr); %[output:68b74799]
     end
-end
-
-%[text] Assemble the summary table.
+end %[output:group:249fbf53]
+%[text] Assemble and display the summary table.
 rgroupTbl = table( ...
     string(familyNames), familyNMembers, ...
     round(familyMeanLogP, 2), round(familyStdLogP, 2), ...
@@ -359,258 +258,264 @@ rgroupTbl = table( ...
     VariableNames=["Scaffold","N","mean_ALogP","std_ALogP", ...
                    "mean_TPSA","mean_MW","mean_HBD","mean_HBA"]);
 rgroupTbl = sortrows(rgroupTbl, "N", "descend");
-
-logInfo("R-Group Property Table (%d scaffold families, >= %d members):", ...
-    nFamilies, MIN_FAMILY_SIZE);
-disp(rgroupTbl);
-
-%[text] **💡 Observation Point 3 ―― Let's interpret the R-Group Table**
-%[text] Check the scaffold family with the widest ALogP range (highest `std_ALogP`).
-%[text] Is the scaffold's SMILES a common aromatic ring?
-%[text] What does high LogP variance indicate about R-group flexibility?
-%[text] Check the scaffold with the highest mean TPSA and interpret if it is the most polar.
-%[text] High TPSA ($> 140\,\text{Å}^2$) is associated with poor oral absorption (Veber rule).
-%[text] Can you list drug classes that are usually administered intravenously?
-%[text] Display all member drug names of the most frequent scaffold.
-%[text] Do these drugs belong to the same pharmacological class?
-%[text] Scaffolds with n=1 member (singletons) have no variation within the family.
-%[text] What does this mean for SAR? Is R-group optimization possible with a single data point?
-%[text] (Hint: SAR requires multiple analogs)
-% ... (Try writing code here)
+logInfo("R-Group Property Table (%d scaffold families, >= %d members):", ... %[output:group:24c719d2] %[output:22ad50ca]
+    nFamilies, MIN_FAMILY_SIZE); %[output:group:24c719d2] %[output:22ad50ca]
+disp(rgroupTbl); %[output:5121837f]
 %%
-%[text] ## Section 4: SAR Visualization — Property Variation Among Scaffold Families
-%[text]
-%[text] The R group property table is complete. Next, we will visually examine the structure-activity relationship (SAR) using box plots and principal component analysis (PCA).
-%[text] Let's see how scaffold families partition the chemical space.
-%[text]
-%[text] ### Concept: Structure-Activity Relationship (SAR) Visualization
-logSection("A07", "Section 4: SAR Visualization — Property Variation Among Scaffold Families", "Analytics L3");
+%[text] ## Section 4: SAR Visualization  -- Property Variation Among Scaffold Families
+%[text] With the property table in hand, we now visualize the SAR using box plots and PCA to see how scaffold families partition chemical space.
+%[text] ### Concept: Two Perspectives of SAR Visualization
 %[text] SAR plots show how structural changes by different scaffold families affect physicochemical properties.
-%[text]
-%[text] Here, we use two complementary perspectives.
-%[text]
 %[text] **(a) ALogP Box Plot for Each Scaffold Family**
-%[text] Each box shows the median and interquartile range of ALogP within a family.
-%[text] A wide box (large interquartile range) indicates diverse R groups affecting lipophilicity.
-%[text]
+%[text] Each box shows the median and interquartile range (IQR) of ALogP within one family.
+%[text] A wider box (larger IQR) indicates diverse R groups affecting lipophilicity.
 %[text] **(b) PCA of Descriptor Matrix Colored by Scaffold Class**
-%[text] Project all drugs into a 2D chemical space. If scaffold families form distinct clusters, it indicates that scaffold identity predicts the overall physicochemical profile.
-%[text] This is characteristic of "scaffold-driven" SAR.
-%[text] Overlapping families suggest R groups dominate properties.
-%[text]
-%[text] PCA Coloring by Scaffold:
-%[text] - Assign a unique color to each "top scaffold family."
-%[text] - Plot singletons and small families in gray.
-%[text] - Separation in PCA space is evidence that scaffolds drive overall properties.
-%[text]
-%[text] Use only drugs from scaffold families with at least MIN_FAMILY_SIZE members for the box plot.
+%[text] Project all drugs into a 2D chemical space.
+%[text] If scaffold families form distinct clusters, it indicates "scaffold-driven SAR"; if they overlap, R groups dominate the properties.
+%[text] Assign individual colors to the top 6 frequent families, and display others in gray.
+logSection("A07", "Section 4: SAR Visualization  -- Property Variation Among Scaffold Families", "Analytics L3"); %[output:22c9ea87]
+%[text] Use only drugs with members equal to or greater than MIN\_FAMILY\_SIZE for the box plot.
 familyMask   = ismember(scafSmi, string(familyScafs));
 nFamilyMols  = sum(familyMask);
-logInfo("Molecules in scaffold families (>= %d members): %d / %d", ...
-    MIN_FAMILY_SIZE, nFamilyMols, nMols);
-
-if nFamilyMols > 0
+logInfo("Molecules in scaffold families (>= %d members): %d / %d", ... %[output:group:34d1da6d] %[output:3a89b3a4]
+    MIN_FAMILY_SIZE, nFamilyMols, nMols); %[output:group:34d1da6d] %[output:3a89b3a4]
+%[text] `LabelOrientation="inline"` causes graphic timeout in MATLAB Online, so execute `boxplot` with numeric groups and set labels separately with `yticklabels`.
+if nFamilyMols > 0 %[output:group:85bcd910]
     % Construct label vector for grouped box plot
     familyScafStr = string(familyScafs);
     [~, familyLabelIdx] = ismember(scafSmi(familyMask), familyScafStr);
-
-    % Abbreviate scaffold labels for display (12 characters)
+    % Shorten scaffold labels for display (12 characters)
     shortScafLabels = cell(nFamilies, 1);
     for f = 1:nFamilies
         s = familyScafs{f};
         shortScafLabels{f} = s(1:min(12, numel(s)));
     end
-
-    % Retrieve ALogP for family molecules
+    % Obtain ALogP for family molecules
     logP_family = double(rawTbl.ALogP(validIdx(familyMask)));
-
     % Sort families by mean ALogP for ordered display
     [~, sortByMean] = sort(familyMeanLogP, "descend");
     remappedLabels  = zeros(size(familyLabelIdx));
     for fi = 1:nFamilies
         remappedLabels(familyLabelIdx == sortByMean(fi)) = fi;
     end
-
-    % Note: LabelOrientation="inline" causes graphics timeout in MATLAB Online
-    % (renderLabels freezes with many labels). Use boxplot with numeric groups
-    % and set XTickLabel separately -- faster rendering.
-    figure("Name", "A07 ALogP by Scaffold Family");
-    boxplot(logP_family, remappedLabels, Labels=shortScafLabels(sortByMean));
-    xtickangle(30);
-    xlabel("Scaffold (First 12 SMILES Characters, Sorted by Mean ALogP)");
-    ylabel("ALogP");
-    title(sprintf("ALogP Distribution by Scaffold Family (Family >= %d Members)", ...
-        MIN_FAMILY_SIZE));
-    yline(0, "--", "LogP=0", Color=[0.5 0.5 0.5]);
-    yline(5, "--", "Ro5 Limit", Color=[0.8 0.2 0.2]);
-    grid on;
+    figure("Name", "A07 ALogP by Scaffold Family"); %[output:17204139]
+    boxplot(logP_family, remappedLabels, Labels=shortScafLabels(sortByMean)); %[output:17204139]
+    xtickangle(30); %[output:17204139]
+    xlabel("Scaffold (First 12 SMILES Characters, Sorted by Mean ALogP)"); %[output:17204139]
+    ylabel("ALogP"); %[output:17204139]
+    title(sprintf("ALogP Distribution by Scaffold Family (Family >= %d Members)", ... %[output:17204139]
+        MIN_FAMILY_SIZE)); %[output:17204139]
+    yline(0, "--", "LogP=0", Color=[0.5 0.5 0.5]); %[output:17204139]
+    yline(5, "--", "Ro5 Limit", Color=[0.8 0.2 0.2]); %[output:17204139]
+    grid on; %[output:17204139]
 else
-    logWarn("No scaffold families with >= %d members found -- skipping box plot.", ...
+    logWarn("No scaffold families with >= %d members found -- Skipping box plot.", ...
         MIN_FAMILY_SIZE);
-end
-
-%[text] --- PCA of Descriptor Matrix Colored by Scaffold Family ---
-%[text] Use descriptors provided by CSV to avoid per-molecule RDKit calls for speed.
+end %[output:group:85bcd910]
+%[text] Perform PCA on the descriptor matrix.
+%[text] By using descriptors provided in CSV, avoid per-molecule RDKit calls and speed up processing.
 FEAT_COLS = ["MolecularWeight", "ALogP", "TPSA", "HBondDonors", ...
              "HBondAcceptors", "RotatableBonds"];
 nFeats    = numel(FEAT_COLS);
-
-%[text] Construct the feature matrix for all valid molecules.
+%[text] Construct the feature matrix $X$ for all valid molecules. Rows of $X$ correspond to molecules, columns to descriptors.
 X_pca = zeros(nMols, nFeats);
 for fi = 1:nFeats
     X_pca(:, fi) = double(rawTbl.(FEAT_COLS(fi))(validIdx));
 end
-
-%[text] Perform standardization (zero mean, unit variance).
+%[text] Standardize due to different scales of each descriptor (MW is 100-500, TPSA is 0-200, etc.).
+%[text] The standardized matrix is $X' = (X - \\mu) / \\sigma$, which is passed to PCA.
 mu_pca    = mean(X_pca, 1);
 sigma_pca = std(X_pca, 0, 1);
 sigma_pca(sigma_pca == 0) = 1;   % Guard against zero variance columns
 X_std = (X_pca - mu_pca) ./ sigma_pca;
-
-%[text] Perform PCA.
+%[text] Execute principal component analysis with the `pca` function.
 [~, scores, ~, ~, explained] = pca(X_std);
-
-logInfo("PCA: PC1=%.1f%%, PC2=%.1f%%, Cumulative=%.1f%%", ...
-    explained(1), explained(2), sum(explained(1:2)));
-
+logInfo("PCA: PC1=%.1f%%, PC2=%.1f%%, Cumulative=%.1f%%", ... %[output:group:5e5aff18] %[output:0c9b01da]
+    explained(1), explained(2), sum(explained(1:2))); %[output:group:5e5aff18] %[output:0c9b01da]
 %[text] Assign colors based on scaffold family membership.
-%[text] Rank families by frequency, assign distinct colors to the top 6, others in gray.
+%[text] Use individual colors for the top 6 frequent families, and gray for others (singletons/small families).
 MAX_COLOUR_FAMILIES = 6;
 palette = lines(MAX_COLOUR_FAMILIES);   % MATLAB colourmap with distinct colours
 colourIdx = zeros(nMols, 1);            % 0 = grey (singleton / small family)
-
 for f = 1:min(MAX_COLOUR_FAMILIES, nFamilies)
     memberIdx = scafMap(familyScafs{f});
     colourIdx(memberIdx) = f;
 end
-
-figure("Name", "A07 Chemical Space PCA by Scaffold");
-hold on;
-
-%[text] Plot gray "other" molecules first to create a background layer.
+figure("Name", "A07 Chemical Space PCA by Scaffold"); %[output:3744b371]
+hold on; %[output:3744b371]
+%[text] First, plot gray "other" molecules to create a background layer.
 greyMask = colourIdx == 0;
-scatter(scores(greyMask, 1), scores(greyMask, 2), 30, ...
-    [0.75 0.75 0.75], "filled", MarkerFaceAlpha=0.4, DisplayName="Others");
-
-%[text] Then plot colored scaffold families.
+scatter(scores(greyMask, 1), scores(greyMask, 2), 30, ... %[output:3744b371]
+    [0.75 0.75 0.75], "filled", MarkerFaceAlpha=0.4, DisplayName="Others"); %[output:3744b371]
+%[text] Next, plot colored scaffold families.
 legendHandles = gobjects(1, min(MAX_COLOUR_FAMILIES, nFamilies) + 1);
-legendHandles(1) = scatter(scores(greyMask, 1), scores(greyMask, 2), 30, ...
-    [0.75 0.75 0.75], "filled", MarkerFaceAlpha=0.4);  % Others
-
+legendHandles(1) = scatter(scores(greyMask, 1), scores(greyMask, 2), 30, ... %[output:3744b371]
+    [0.75 0.75 0.75], "filled", MarkerFaceAlpha=0.4);  % Others %[output:3744b371]
 for f = 1:min(MAX_COLOUR_FAMILIES, nFamilies)
     memberIdx = scafMap(familyScafs{f});
     col = palette(f, :);
     s = familyScafs{f};
     labelStr = sprintf("Scaf %d (n=%d): %s", f, familyFreqs(f), ...
         s(1:min(20, numel(s))));
-    legendHandles(f + 1) = scatter( ...
-        scores(memberIdx, 1), scores(memberIdx, 2), ...
-        50, col, "filled", MarkerFaceAlpha=0.85, DisplayName=labelStr);
+    legendHandles(f + 1) = scatter( ... %[output:3744b371]
+        scores(memberIdx, 1), scores(memberIdx, 2), ... %[output:3744b371]
+        50, col, "filled", MarkerFaceAlpha=0.85, DisplayName=labelStr); %[output:3744b371]
 end
-
-hold off;
-xlabel(sprintf("PC1 (%.1f%%)", explained(1)));
-ylabel(sprintf("PC2 (%.1f%%)", explained(2)));
-title("Chemical Space PCA -- Colored by Scaffold Family");
-legend(legendHandles, ["Others (Singleton / Small Family)", ...
-    arrayfun(@(f) sprintf("Scaffold %d (n=%d)", f, familyFreqs(f)), ...
-    1:min(MAX_COLOUR_FAMILIES, nFamilies), UniformOutput=false)], ...
-    Location="best", FontSize=7);
-grid on;
-
-%[text] **💡 Observation Point 4 — Let's Visualize SAR**
-%[text] Do molecules of the same scaffold family form clusters in PCA space?
-%[text] If they do, scaffolds strongly determine the physicochemical profile.
-%[text] If not, R groups are often dominant, seen in flexible scaffolds.
-%[text] How much of the total variance do PC1 and PC2 explain?
-%[text] If less than 60%, the 2D projection might miss important structures.
-%[text] Try this: Check how much 3D PCA captures with `sum(explained(1:3))`.
-%[text] Calculate pairwise Tanimoto similarity within the largest scaffold family,
-%[text] and compare with random pairs across the dataset.
-%[text] `mean(simMat_family(~logical(eye(numel(memberIdx)))))`
-%[text] Is the intra-family Tanimoto similarity higher than the global average in A02?
-% ... (Try writing code here)
+hold off; %[output:3744b371]
+xlabel(sprintf("PC1 (%.1f%%)", explained(1))); %[output:3744b371]
+ylabel(sprintf("PC2 (%.1f%%)", explained(2))); %[output:3744b371]
+title("Chemical Space PCA  -- Colored by Scaffold Family"); %[output:3744b371]
+legend(legendHandles, ["Others (Singleton / Small Family)", ... %[output:3744b371]
+    arrayfun(@(f) sprintf("Scaffold %d (n=%d)", f, familyFreqs(f)), ... %[output:3744b371]
+    1:min(MAX_COLOUR_FAMILIES, nFamilies), UniformOutput=false)], ... %[output:3744b371]
+    Location="best", FontSize=7); %[output:3744b371]
+grid on; %[output:3744b371]
 %%
 %[text] ## Section 5: Scaffold Diversity Summary
-%[text]
-%[text] Visualization is complete. Finally, we will summarize the diversity of this library numerically using the Scaffold Diversity Index (SDI).
-%[text] Does the FDA drug dataset cover a broad chemical space?
-%[text]
-%[text] ### Concept: Scaffold Diversity Index and Library Design
-logSection("A07", "Section 5: Scaffold Diversity Summary", "Analytics L3");
-%[text] The Scaffold Diversity Index (SDI) is a single number that indicates how much a compound library "spreads" in chemical space:
-%[text]
-%[text] **SDI = Number of Unique Scaffolds / Total Number of Molecules**
-%[text]
-%[text] **Interpretation**:
-%[text] - If SDI is close to 1.0 → Each molecule has a unique scaffold (maximum diversity)
-%[text] - If SDI is close to 0.0 → All molecules share one scaffold (focused library)
-%[text]
-%[text] **Related Metrics**:
-%[text] - Singleton Ratio: Proportion of scaffolds appearing only once
-%[text] (High ratio = diverse set, difficult to establish structure-activity relationship (SAR) without analogs)
-%[text] - Average Family Size: Total molecules / Unique scaffolds (inverse of SDI)
-%[text] - Maximum Family Size: Dominance of a single privileged scaffold
-%[text]
-%[text] **Library Design Heuristics**:
-%[text] - Diverse Screening Library: SDI > 0.7, Singleton Ratio > 50%
-%[text] - Focused SAR Library: Target SDI < 0.5, families of 5-20 analogs
-%[text] - FDA Approved Drugs: SDI typically 0.7-0.8 (Langdon 2011)
-logInfo("=== Scaffold Diversity Summary ===");
-logInfo("Total Number of Analyzed Molecules: %d", nMols);
-logInfo("Unique Scaffolds: %d", nUnique);
-logInfo("Scaffold Diversity Index: %.3f", SDI);
-logInfo("Singleton Scaffolds: %d (%.0f%%)", ...
-    nSingletons, 100 * nSingletons / nUnique);
-logInfo("Average Family Size: %.2f molecules / scaffold", nMols / nUnique);
-logInfo("Maximum Scaffold Family: %d molecules (%s)", ...
-    scafFreqSorted(1), uniqueScafsSorted{1});
-logInfo("Acyclic Molecules: %d (no ring systems)", ...
-    sum(scafSmi == ACYCLIC_TAG));
-
-%[text] Scaffold Size Distribution (Number of Heavy Atoms in Scaffolds)
+%[text] We summarize library diversity with a single metric: the Scaffold Diversity Index (SDI).
+%[text] ### Concept: Library Design Guidelines Using SDI
+%[text] SDI is defined as $SDI = N(unique) / N(total)$ (number of unique scaffolds / total number of molecules).
+%[text] An SDI close to 1.0 means each molecule has a unique scaffold (maximum diversity), while an SDI close to 0.0 indicates that all molecules are concentrated on a few scaffolds.
+%[text] As a related metric, a higher proportion of singletons (scaffolds appearing only once) indicates a more diverse set, but it becomes challenging for SAR analysis as multiple analogs are needed.
+%[text] As a guideline for library design, diverse screening libraries should have SDI \> 0.7 and singleton proportion \> 50%, while focused SAR libraries are recommended to have SDI \< 0.5 and families of 5-20 analogs.
+%[text] It has been reported that FDA-approved drugs typically have an SDI of 0.7-0.8 (Langdon 2011).
+logSection("A07", "Section 5: Scaffold Diversity Summary", "Analytics L3"); %[output:3abf78a1]
+logInfo("=== Scaffold Diversity Summary ==="); %[output:219d179c]
+logInfo("Total number of analyzed molecules: %d", nMols); %[output:701cc69c]
+logInfo("Unique scaffolds                 : %d", nUnique); %[output:282ab323]
+logInfo("Scaffold Diversity Index         : %.3f", SDI); %[output:6b12e6dc]
+logInfo("Singleton scaffolds              : %d (%.0f%%)", ... %[output:group:1f50da9b] %[output:6bcdf182]
+    nSingletons, 100 * nSingletons / nUnique); %[output:group:1f50da9b] %[output:6bcdf182]
+logInfo("Average family size              : %.2f molecules / scaffold", nMols / nUnique); %[output:8f38f37a]
+logInfo("Largest scaffold family          : %d molecules (%s)", ... %[output:group:427b2025] %[output:14a64389]
+    scafFreqSorted(1), uniqueScafsSorted{1}); %[output:group:427b2025] %[output:14a64389]
+logInfo("Acyclic molecules                : %d (no ring system)", ... %[output:group:313a7e3a] %[output:696559bf]
+    sum(scafSmi == ACYCLIC_TAG)); %[output:group:313a7e3a] %[output:696559bf]
+%[text] Check the distribution of scaffold size (heavy atom count).
 scafAtomsNonAcyclic = scafNAtoms(scafNAtoms > 0);
-logInfo("Scaffold Heavy Atom Count: Mean=%.1f, Std Dev=%.1f, Range=[%d,%d]", ...
-    mean(scafAtomsNonAcyclic), std(scafAtomsNonAcyclic), ...
-    min(scafAtomsNonAcyclic), max(scafAtomsNonAcyclic));
-
-figure("Name", "A07 Scaffold Size Distribution");
-histogram(scafAtomsNonAcyclic, "BinWidth", 2, ...
-    FaceColor=[0.3 0.6 0.9], EdgeColor="none");
-xlabel("Number of Heavy Atoms in Scaffold");
-ylabel("Number of Drugs");
-title("Distribution of Scaffold Sizes (Murcko Scaffolds)");
-xline(mean(scafAtomsNonAcyclic), "--r", ...
-    sprintf("Mean=%.1f", mean(scafAtomsNonAcyclic)), ...
-    LabelHorizontalAlignment="right");
-grid on;
-
-%[text] **Summary**
-%[text]
-%[text] - Bemis-Murcko scaffolds extract ring system cores and automatically group drug families
-%[text] - In FDA approved drugs, a few "privileged scaffolds" are shared by many drugs
-%[text] - R group analysis clarifies structure-activity relationships (SAR) within the same scaffold
-%[text] - The Scaffold Diversity Index (SDI) allows quantitative evaluation of library chemical space coverage
-%[text]
-
-%[text] **💡 Observation Point 5 — Let's Evaluate Scaffold Diversity**
-%[text] How does the SDI of the FDA drug set compare to the value expected in a random diversity library? (Langdon 2011 reports SDI ~ 0.75 for 836 FDA approved drugs)
-%[text] Hint: Since this exercise uses a subset of 200 drugs, the SDI may be slightly lower.
-%[text] What can be said about the relationship between subset size and SDI?
-%[text] Let's calculate the "Scaffold Richness" curve:
-%[text] Examine how many unique scaffolds appear as you add the first 10, 20, ... 200 drugs.
-%[text] `figure; plot(1:nMols, richness, "-");`
-%[text] `xlabel("Number of Molecules Added"); ylabel("Unique Scaffolds"); title("Scaffold Richness Curve");`
-%[text] How quickly does the curve flatten?
-%[text] Let's redo the scaffold analysis using the `everyday_chemicals.csv` dataset.
-%[text] Is the SDI of a smaller, curated set high or low?
-%[text] What does it tell us about how dataset size affects diversity metrics?
-% ... (Try writing code here)
+logInfo("Scaffold heavy atom count        : Mean=%.1f, Std Dev=%.1f, Range=[%d,%d]", ... %[output:group:20e4ec94] %[output:7fa10436]
+    mean(scafAtomsNonAcyclic), std(scafAtomsNonAcyclic), ... %[output:7fa10436]
+    min(scafAtomsNonAcyclic), max(scafAtomsNonAcyclic)); %[output:group:20e4ec94] %[output:7fa10436]
+figure("Name", "A07 Scaffold Size Distribution"); %[output:42aa7dbe]
+histogram(scafAtomsNonAcyclic, "BinWidth", 2, ... %[output:42aa7dbe]
+    FaceColor=[0.3 0.6 0.9], EdgeColor="none"); %[output:42aa7dbe]
+xlabel("Scaffold Heavy Atom Count"); %[output:42aa7dbe]
+ylabel("Number of Drugs"); %[output:42aa7dbe]
+title("Distribution of Scaffold Size (Murcko Scaffolds)"); %[output:42aa7dbe]
+xline(mean(scafAtomsNonAcyclic), "--r", ... %[output:42aa7dbe]
+    sprintf("Mean=%.1f", mean(scafAtomsNonAcyclic)), ... %[output:42aa7dbe]
+    LabelHorizontalAlignment="right"); %[output:42aa7dbe]
+grid on; %[output:42aa7dbe]
+%[text] ## Summary
+%[text] - Bemis-Murcko scaffolds extract ring system cores and automatically group drug families.
+%[text] - A few "privileged scaffolds" are shared by many drugs in FDA-approved drugs.
+%[text] - R-group analysis clarifies structure-activity relationships (SAR) within the same scaffold.
+%[text] - The Scaffold Diversity Index (SDI) allows quantitative evaluation of library chemical space coverage. \
 
 %[appendix]{"version":"1.0"}
-%[metadata:view]
-
 %---
-
-%   data: {"layout":"inline","rightPanelPercent":40}
+%[metadata:view]
+%   data: {"layout":"inline"}
+%---
+%[output:00dd0ff1]
+%   data: {"dataType":"text","outputData":{"text":"[21:16:36][INFO]  initPython: Python 3.10 already active (Status: Loaded) -- skipping.\n","truncated":false}}
+%---
+%[output:39f6ca9d]
+%   data: {"dataType":"text","outputData":{"text":"[21:16:36][INFO]  --- A07 | Section 0: Setup  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:5c08084f]
+%   data: {"dataType":"text","outputData":{"text":"[21:16:36][INFO]  --- A07 | Section 1: Loading FDA-approved Drugs and Extracting Murcko Scaffolds  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:9740a528]
+%   data: {"dataType":"text","outputData":{"text":"[21:16:36][INFO]  Loaded 200 rows from data\/list\/fda_drugs.csv\n","truncated":false}}
+%---
+%[output:61b9a904]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]  Extracted scaffolds for 200 \/ 200 molecules\n","truncated":false}}
+%---
+%[output:223c844e]
+%   data: {"dataType":"text","outputData":{"text":"          Name                                SMILES                                         Scaffold                   ScaffoldAtoms\n    ________________    __________________________________________________    ______________________________________    _____________\n\n    \"PRAZOSIN\"          \"COc1cc2nc(N3CCN(C(=O)c4ccco4)CC3)nc(N)c2cc1OC\"       \"O=C(c1ccco1)N1CCN(c2ncc3ccccc3n2)CC1\"         23      \n    \"NICOTINE\"          \"CN1CCC[C@H]1c1cccnc1\"                                \"c1cncc([C@@H]2CCCN2)c1\"                       11      \n    \"OFLOXACIN\"         \"CC1COc2c(N3CCN(C)CC3)c(F)cc3c(=O)c(C(=O)O)cn1c23\"    \"O=c1ccn2c3c(c(N4CCNCC4)ccc13)OCC2\"            20      \n    \"NALIDIXIC ACID\"    \"CCn1cc(C(=O)O)c(=O)c2ccc(C)nc21\"                     \"O=c1cc[nH]c2ncccc12\"                          11      \n    \"INDOMETHACIN\"      \"COc1ccc2c(c1)c(CC(=O)O)c(C)n2C(=O)c1ccc(Cl)cc1\"      \"O=C(c1ccccc1)n1ccc2ccccc21\"                   17      \n\n","truncated":false}}
+%---
+%[output:02be919c]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]  --- A07 | Section 2: Scaffold Frequency Analysis  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:5db0bbf4]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]  Unique scaffolds: 135 \/ 200 molecules  (SDI = 0.675)\n","truncated":false}}
+%---
+%[output:0dd4d642]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]  Top 10 scaffolds by frequency:\n","truncated":false}}
+%---
+%[output:098318bb]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]    [ 1] Frequency=34  Scaffold=c1ccccc1  Members=AMPHETAMINE, METOPROLOL, DICHLORPHENAMIDE, MAFENIDE, SULFANILAMIDE, GUANABENZ, A...\n[21:17:30][INFO]    [ 2] Frequency=10  Scaffold=<acyclic>  Members=CARBACHOL, MECHLORETHAMINE, VALPROATE SODIUM, HYDROXYUREA, DIMETHYL SULFOXIDE, C...\n[21:17:30][INFO]    [ 3] Frequency=4  Scaffold=O=C1CC(=O)NC(=O)N1  Members=METHOHEXITAL, BUTABARBITAL, METHARBITAL, BUTALBITAL\n[21:17:30][INFO]    [ 4] Frequency=3  Scaffold=O=C1CN=C(c2ccccc2)c2ccccc2N1  Members=DIAZEPAM, CLONAZEPAM, OXAZEPAM\n[21:17:30][INFO]    [ 5] Frequency=3  Scaffold=c1c[nH]cn1  Members=CIMETIDINE, DACARBAZINE, HISTAMINE\n[21:17:30][INFO]    [ 6] Frequency=3  Scaffold=c1ccc2c(c1)CCc1ccccc1N2  Members=IMIPRAMINE, CLOMIPRAMINE, DESIPRAMINE\n[21:17:30][INFO]    [ 7] Frequency=3  Scaffold=c1ccc2c(c1)Nc1ccccc1S2  Members=CHLORPROMAZINE, PROMAZINE, TRIFLUPROMAZINE\n[21:17:30][INFO]    [ 8] Frequency=2  Scaffold=C1=CCCCC1  Members=TRETINOIN, ISOTRETINOIN\n[21:17:30][INFO]    [ 9] Frequency=2  Scaffold=O=C1CC(=O)NC(=S)N1  Members=THIAMYLAL, THIOPENTAL\n[21:17:30][INFO]    [10] Frequency=2  Scaffold=O=C1CCCC1  Members=ALPROSTADIL, DINOPROSTONE\n","truncated":false}}
+%---
+%[output:65b6ba78]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:30][INFO]  Singletons (Frequency=1): 116 \/ 135 scaffolds (86%)\n","truncated":false}}
+%---
+%[output:530228ac]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAEpCAYAAABRDxFnAAAQAElEQVR4AeydP28kR7blE2OIJNaQHIoillhQ7QvCyhENgYZMrTHOc9gDzBCyFyAwwIyzH4HAWALWoQSMDH4SOTTHfYaewQaKaK\/dfgTe4y+7b\/dlVET+qfwXmXmEPro3zr0RceNkVV5VQ5X1h\/\/SP1JACkgBKSAFpED2Cvyh0D9SQApIASkgBaRA9grk3bCzl08FSgEpIAWkgBQYRwE17HF01i5SQApIASkgBTopoIa9u3yaKQWkgBSQAlJgNAXUsEeTWhtJASkgBaSAFNhdATXs3bXLe6aqkwJSQApIgUUpoIa9qMupw0gBKSAFpMBSFVDDXuqVzftcqk4KSAEpIAVaKqCG3VIwpUsBKSAFpED\/Crx48aL\/RRe2ohr2wi6ojtODAlpCCkiBURWgWf\/++++j7jnHzdSw53jVZlYzb8YUhj4K+1btQdxQlWcxcs2P2bp4bE4Xjv1S6LJu7nM5c1WNdfGquU1ifa\/PeiGa1NEmx69v82KcxWKW\/BgPVxUj3haslwJrVcWIx8CcGB\/jyI0hljsWp4Y9ltIr3of\/cjYgg\/lYxkOBN1vV2sSpwcC4Kt9iqbwUb\/Pa2Iq1tpax+kO7lTgDos25U7kpPtfjU2947RjD91Uza7GmgXVjHPzYsDpi+1q9obXckGfMehb3Fr4q7nPNJz8E61h8bKuGPbbi2m8UBereVMR5I\/piGMN7Tr4UkALzUmDo9\/HQ61eprYZdpY5ioypAs\/QINycGhzUwjoE3FYjFunKsy\/5+HcbwIQdv8DF8483CAcZmzWe8C2w+FrAG1gMuRBhnTI5ZfIPnXrx4UTA2WI5ZeHysgTFgbNZ8ximgd5jHGN7PgfNjfM+ZjwXEAb4HXArkWQzfw\/i2NjwH8\/26+HAGxh6ex7eY+Wbh8QG+B1wKVXk+hp9aYwm8nQ8LOJNZfEPIMQ5BboyDB2rYqCBMrgAvUm5QHnBhYXB1OeGcKcZhndQMZ7Xgw3nAEYczaz7jFJgXwucSYx3gfcYALpUfi\/tc77MO+R5wPgcfLpYDRxwL8MeCr4k9\/ZhaAByxEPDE4c1nbIAjlgJ55BhSecTJ9YAjH+t5fDhi+Ga9H3LkE\/eAIy8EfCovjJEHF67RZMy8EE3mhTmsQR3wWMb4fYH1WBc0WdPn2xxsyBtna6phmxKys1CAF\/AsCt2hyF3PxrwQfntiftzW7zo\/3K\/v9cL1K8bJUJOaYjl2g00u3DDA2gbWBE2mMoc8s\/hToG7\/uniqZuaFSOVOyVPjUPv7tdWwh1JZ6y5aAd5EdlPFMm5zYPKZ59Fmfpdcvyd+l7XCuaznEcb7HpuOrMu+jPHHgO2H7XM\/zgDarku+R581tVnLas+hFuqmDrP4wMbYnFCnnRp2TldLtaxKAd6cHnYjGVoEv6f5fe1p63nb19pTrxNeH87YR00f1t1hMZuLpR6PHZbrbYqvA5\/6elt8h4WoIcQOy\/Q2hVrQxMDYFsf3IMdiatimhOwsFPAv3i4F84YI12IM32XdpnPZq2nu0Hl1tVTFq2LUXRcnZ2z0XROvmb7X7KrJ2PX4\/bzf5Bx968f+rNlk711ydlmfOX4vxtRosBi8+TGrhh1TRdzoCvDC5cXqARcWAleXE85JjbuuZfOx4R5wvk58OMvDh\/OAi8WN68Oyh98TH86vzRjewNji+MZjGadiYdzyqizrMQ9U5fmYzcF63nx41jMwtljKkmP5ZuHq8smxfLNwqXnwxC3XW3jiBsY+jg9HHMvYwBi+DZhj883CvV\/jmYG3HCxjS8CH84CzeJ\/W72G+3wvOj\/3e8MQ9F\/rEQzAvzAvH5Ph5jMMcH8cnTh6+BxwxoIaNCsJoCvgXX7gpMY8wbuMmOT7X\/JhtsxbzyccaqsbEPGyOWR\/DN94sHLBxzO4SZ45Hal3LCePGY4mZNZ+xAc4D3o\/xQ44xIJZCGG8yJgewptnQZ2wgx8N4LDzWwzish89J+T7f\/Fiuxcz6HOOw8GZDnzHwccYAzgPOg5iN8Q1w+FiA7wFXBXJpUj4Hzo9Dn3gMPo+4H4d+VZxYDE3X8HOZwxjLOfFDwBMPeTiDGrYpISsFpIAUkAKTKUCj2nnzGU3knDTnEPB1x1DDrlNI8WwUaPKCzqbYhRUi7Rd2QXWcSRXg\/RSiSUFq2E1UUo4UeFLg1atXhSAN9BqY92vg6a089p\/e9lPD7k1KLbRkBbhJ\/+1vfyvOz88FaaDXwIxfAxcXF+V\/eM\/xfqWGPcerpppHV4CGfXd3V1xfXxe3t7fCkwZXV1fldZAmH18P0uSjFvY+yUkTauF9XL5wZ\/ivQRr2DHVQyVKgkQLffvttcXZ2Jjxp8Mc\/\/rH485\/\/XGClybvXBFpIk3da2GsiJ014\/zZ6o2eapIad6YVRWVIgdwW++OKL4i9\/+UvuZY5anzTZlluabGuyK7PChr2rVJonBaSAFJACUmA6BdSwp9NeO0sBKSAFpIAUaKyAGnZjqcZJ1C5SQApIASkgBWIKqGHHVBEnBaSAFJACUiAzBdSwM7sgeZej6qSAFJACUmAqBdSwp1Je+0oBKSAFpIAUaKGAGnYLsZSatwKqTgpIASmwZAXUsJd8dXU2KSAFpIAUWIwCatiLuZQ6SN4KqDopIAWkQDcF1LC76afZUkAKSAEpIAVGUUANexSZtYkUyFsBVScFpED+Cqhh53+NVGFGCvCrXcKr8ucJHx4eCiA93umBDugB8IV3uqAHGFOPjG4ZvZaiht2rnFps6Qq8fPlSv4X8\/reQv\/\/+++JPf\/pTgR32d8LPZ6M5WkiT59drCk0uLi7K\/6hc2v1IDXtpV1TnGVSB\/\/l\/\/l\/x5cufBGmg10Cmr4HPv\/uxuLu7G\/Q+MNXiathTKa99Z6nA\/\/hf\/7sQpIF\/DcjP7fXwzSzvLU2KVsNuopJypIAUkAJSQApMrIAa9sQXQNtLASkgBYZTQCsvSQE17CVdzUzP8uLFi0wre17WXOp8XrVGUkAKrEUBNey1XOkJzkkDBBNs3WpLagStJilZCkiBzgpogXYKqGG300vZLRT4\/fffC9BiyiSp1Agm2VybSgEpIAUaKqCG3VAopcUV4JOpRzxrm\/Vz8H0GY4+hY379Ov8\/3zwUb99s6tIUlwJSYGIFHh8fC4M9tKVdSfllq2Hnd01mUxFNlU+mHnB1ByDHz8GHYx6WsQfcUDHWbYP\/uP2\/xb\/\/\/38rXv\/2c5tpypUCUmBkBTabTXF\/f1\/i5uamfPgODz4auYxet1PD7lVOLUaj3UWFqnljx6rqtwenfPbVD1VpikkBKTCxAoeHh8Xx8XGJy8vL4vb2tri6upq4qm7b+4bdbSXNlgIrUMAekvHJp8crOK2OKAXmq8D+\/n5hOD09Lc7Ozopvv\/12vgd6qlwN+0kE\/elPAfvr67YrVs0bO9a2duVLASkgBcZQYD4Neww1tEcrBfirapqpB1zdIuT4OfhwzMMy9oAbKsa6ghSQAlJgDgqoYc\/hKmVcI83UI1Yq8ZCH8\/Bxz+MPHbP1w72Ml5UCUkAK5KCAGnY\/V0GrSAEpIAWkgBQYVAE17EHl1eJLU8C+h813sYVN+Z106SAdcnoNLO2e48+jhu3VWKqvc\/WmgH0Pm+9iC\/9WfiddOkiHnF4DvEf5v8FPTk56e9\/nspAadi5XQnXMQoHr6+vy+5x8p3Pt+OWXX4p\/\/OMfxa+\/\/ipNbm9LDaTJOx38e2MKTXifzuKG0rJINeyWgim9dwVmtSD\/5c73OYWz8nutX3\/9dWmlxzs90EGafNQCPcDYmizx0zU3SjVsVBCkQEMF7JnEsq+Kh4eHhqopTQpIgT4UUMPuQ0WtsVwFgpPxLOLz8\/PyucRrt99\/\/33x17\/+VY07eI1oKAWGUkANeyhlte4iFbBniX\/58qdi7fj8ux+Lf\/3rX4u8zjqUFMhRATXsHK+KaspWAXuWeCa2mLaOb7K9TipMCixRATXsJV5VnUkKSAEpIAUWp4Aa9uIuqQ4kBTJRQGVIASnQqwJq2L3KqcW8AvyAhx+P4fs9vZ\/au0lOaq54KSAFpMCYCqhhj6n2ivaiEc7hxzSokVpXdGl01HcK6N9SYHYKqGHP7pLlXzANkEY4daVNayCPmqeuV\/tLASkgBaoUUMOuUkex1grQ+GiAfiKcR5MY+WGejYl5GB9acozD9zDeLDUTt3HK2o9\/pOJr5B8fHwuhZw2kaa+vKXvQ0dzfn2rYc7+CGdVPw6PxhSXBeZBHDtbz+HDEUiBOngdcKh+euM\/HhyPmkeJ9Dj8swA8dvP7tZ0+v2t9sNsX9\/b3wpAGNgSfASY+Pr4ccNLm5uSkfdsSDj+b8ZlXDnvPVy6z2qoZHgzRUlc0axLHk42MZ48dQFYvlw8Xm1O3DPHtwymdf\/cBQeFLg8PCwOD4+Fp40ODo6KlagR6trnYMml5eX5Y+zXF1dPb1i5\/tHDXu+1y7LymmEND5fHGN4g4\/l4luNdfXYg0o++fS4LnU18f39\/UJ4p8HBwUGxt7cnPdxrIgdNTk9Pyx+p4cd75vzGVMOe89XLtHYaMw1wl\/L8PFsHW7WWn1OV52N+Dn7dHn6ufCkgBTJWYMGlqWEv+OJOeTQaII2QGsxnDOBAyBODI5YCcfI84FL58MR9Pj4cMe8zFqSAFJACuSqghp3rlVlAXdYUOQq+BxzwHD6cIdVMyfOwfCw8FoQ+YwNxwBgrSAEpIAVGUKDTFmrYneTT5KEUSDXrofbTulJACkiB3BVQw879Cq20vlw\/+dr3sN++2RRrx0pfmjq2FJhMgcEb9mQn08ZSYAAF7HvYfBd77UCLr7\/+uvjiiy8GUFpLSgEpECqghh0qorEUqFDg+vq6\/D7n7e3t6u0vv\/xS\/P3vf69QSyEpIAX6VGDlDbtPKbXWGhTge5xnZ2fldzplz\/Tpeg0vep0xGwXUsLO5FCpkDgrwmMWxMAc9VKMUkALjKaCGPZ7WrXfShPwU4FnE5+fn5XOJh7YXFxcF\/3GQnwqqSApIgSkUUMOeQnXtOVsF7FniX778qRgSn3\/3Y3F3dzdbnVS4FJAC\/Sught2\/pitZcZ3HtGeJD2+\/WafAOrUUkAJJBdSwk9IsJ8BDSPo4TV\/rxGrpa+2+1onVKE4KSAEpMKUCathTqj\/C3jSwvh5Cwjqs13fZrMnafazLOqzXx1paQwpIASmQkwJq2BVXgxu\/R0VqNOTn4keTnshUDN7jKXXrj4\/jbyW0JFjDo2o6ebF4yDP2iM1pw\/m18KvmpuIxPsZVra2YFJACUmBMBdSwE2pz8+bTmgdcIn2LJtfPxYfziYyB58yHZ44HnMWxjH0cH44YwIfDbwLLZ44Bzs+F95z3fZ75xJnjARfGbVxnmevXwofz80IujPtcfOIAfxxoFykgBaRAewXUsCOacfPmph+G4IjBY2OwGLn4HnDMMY4xsLFZcmI8HDHysIzxPeCIec58+BiIwzMX3wOOmOe8XxVnHnGfjw9HDD8EfAzkwTMX3wOOmOe87j3IcAAAEABJREFU3yROjp8jXwpIASmQmwJq2DteEW7wMdQtx5y6nKp4k\/mpHPgYqvYbKkYdsbXhY4jlTsHZj3+Mtffj42MxNrSfNF\/aa4DnGYCx3rdD7aOGPZSyK1qXBlv1CTcHKfqqkR+84Ec\/Xv\/28yjH2mw2xf39fZbgBvjw8JBlbVNpJk22X6s5aHJzc1M+7IgHH43yxh1oEzXsHYWlQcVQtxxz6nKq4k3mp3LgY6jab6gYdcTWho8hljsFZw9O+eyrH0bZ\/vDwsDg+Ps4SR0dHxfj15amFXSNpsn19ctDk8vKy\/LGeq6urUd63Q22ihr2jsnxii2HH5UaZFqsXro\/NWYdG23Ut1omh67rMZ92uNdoDUz759JglB8f+\/n6RKw4ODoq9vb1s65tCN2my\/XrNQZPT09PyB3v48Z7B37QDbqCGHRE3dWPnZk8sMuUZRQ65z8inARyxJ7fyDznkhklwxOCxjPE94IjBYRnj1yGVy3xiNj8cG48ljzg+CMdwgBxi+FjG+HVI5TKfmM0Px8ZjySOOL0iBvhXQelJgSAXUsBPq2o2dm7sBLpG+RZNr88zCbSUmCHJtnlk4n87YYmbhfE4bn7m2jlm4tmv4fObbWmbhfE4bn7m2jlm4tmu0yVeuFJACUiAHBdSwK64CjcCjIjUa8nPxo0lPZCoG7\/GUuvXHx\/HDBDgaW8inxuR7+DzWIWac943DhjxjD3I8iLG256p88j18LusQM877xmFjfIwjV5ACy1BAp5i7AmrYc7+CDervqxH1tU6s5L7W7mudWI3ipIAUkAJTKqCGPaX62nt2Ctj3sN++2RRDYnbCqGAp0FEBTa9XQA27XiNlSIEPCtj3sPku9pBgH\/6P1pOTkw97y5ECUmDdCqhhr\/v66\/QtFbi+vi6\/z3l7ezu4Za+W5SldCkiBQRTIY1E17Dyug6qYiQJ86j07Oyu\/0zm01afrmbwoVKYUGEkBNeyRhNY2y1CAxyz2iWWoolNIASkwhgKphj3G3tpDCsxOAZ5FfH5+Xj6XuA97cXFR8B8AsxNCBUsBKTC6AmrYo0uuDeesgD1L\/MuXPxVd8fl3PxZ3d3dzlkO1SwEpMKIC82zYIwqkraSAV8CeJd6P\/cYvLV8KSAEpUKmAGvZ7eXhC1nt30WYt51z0RdThpIAUWKUCathPl50m1uMTsp5WzPcP5+S8+VaoyqSAFJACUiCmQNmwuYF7xBKrOD8XP5WbisF7+Pnwfmx+ire4t+R6+Ngufp9r7bJ\/0zl91dnXOk3r3jUvVidcbL0YH+Nic8VJASkgBaZQ4A\/cpPjU5QHXtBhy\/Vx8OD+fMfCc+fDM8YCzODYcwzUFc\/3a+HA2Hx\/OxnXW8pkDGNfNmSJOXdRnYFzW8fQvOD9+opJ\/yCPfwDiZPGGAuqxGLGMrx\/vGeUsceE6+FJACUiA3Bf7AzS0sCs5uYNgYmANPLr4HHDHjGAMbmyUnxsMRs7xwbDyWvBgsxlx8DzjmeK6JzxzmNsmdMqevOvtaZ2gt6urkmpGTqoM4SMXFSwEpIAVyUKD8K\/GqQriRxVA1hxhzsLui6XzyYqjblzmpHG7uHqm8kPdz8H2cscfQMb9+ne\/rwq\/Ltzi5HsZjPY8PZ2DsYXxRFIXn8ZvGfN6Qvv34R597PD4+FoI00GtguNcAzzoAfb5vp1irtmFPUVRsTxpseAOP5XXl2IO9POBYFw5rgDfOfMYGOHKxxpmFGyrGHqxtYK+QC2PEDeQTZ4w1wBtnPmMDHLlY48zCDRVjD9Y2sFfIMYa3nF0tP8rBj368\/u3nXZfYmrfZbIr7+\/vZgRvgw8PD7OoeUmtpsv06zkGTm5ub8mFHPPho6w04I6K2YXOTi6HujMypy6mKN51PXgxVaxNjDrYJuNmHecyP8T6vKj5WrEmdvmb8WG1N1onNYz0wVqxJndSzE54m2YNTPvvqh6dRP38ODw+L4+Pj2eHo6KiYa+1D6S1Ntl\/HOWhyeXlZ\/ljP1dVVP2\/aiVapbdjcaGOYol7q4Ibs94aLwef07VMDe\/a9bt\/r9VVnX+v0fb5wvbo6uWbkhPPajO2BKZ98etxmWmXu\/v5+MUccHBwUe3t7s6x9KL2lyfZrOQdNTk9Pyx\/s4cd7Kt+MmQfL\/0s8rJGbGje3kA\/H5JAb8nDEQj4ck0NuyMMRC3nG8MTx65DKZT4x5mMZ46fg4\/jMSeV6nlw\/9v7QMdZP1VkVo0biWICfWoe4B7l+7P2hY6zfpE5yyPW1LcTXMaSAFFi4AuX\/Jc4NzIObWtNzk+vn4sMNOX\/I9VmbM3jAcR44s\/gGOHJsbBZuihj7sy\/WAy4ENfocfDjy8M3iG+DIsbFZuCli7M++WA+4GKzOWEycFJACUiBXBcq\/EucG5tG2WD8XPzU\/FYP38PPh\/dj8FG9xb8n18DF8Ytzo8QFjDzjgOe8TA57DhzMw9jAe63l8OANjD+OxnseHA\/gxEOOcxPANjD1SvOWk4sZjLdcsnME4s8ZjjTMLZzDObIr3cXzL8zbGxzg\/R34HBTRVCkiBzgqUDbvzKgtYYC0367WccwEvSR1BCkgBKfBMATXsZ3JoIAWqFbDvYb99sym6ononRUdUQFtJgVkooIY9i8ukInNRwL6HzXexu4K1+L9WT05Ocjme6pACUiBjBdSwM744Ki0\/Ba6vr8vvc97e3vZiWS+\/U6qirBRQMVLgvQJq2O+FkJECTRTgE\/HZ2Vn5nc4+rD5dN1FdOVJACqCAGjYqCFKgoQI8ZrFPNNxWaVIgVwVU14gKqGGPKLa2mr8CPIv4\/Py8fC5xH\/bi4qLgPwDmr4xOIAWkwNAKqGEPrbDWX5QC9izxL1\/+VHTF59\/9WNzd3S1KHx1GCmSlwMKKUcNe2AXVcYZVwJ4l3o\/9ZthitboUkAKLUkANe1GXM+\/D8JQ1Q9dKbR1s17U0XwpIASkwgQKtt1TDbi2ZJnRRgCetgS5rMJc1AL4gBaSAFFiDAmrYa7jKA55xqE+4qXVTfB9HHHLtPurTGlJACqxbgVEb9rqlXtbpaW5gCafiHGAJZ9EZpIAUWK4CatjLvbaDnoy\/jgaDbjLS4pwDjLSdtpECUkAK7KSAGvYH2eSECvCp0yOMp8Z+Dn5VHjFyDIx3ha1h1tZhjI81MN4F9uMfu8xNzXl8fCwEaaDXwHCvAZ51AFLvwbnwathzuVIj10lj41OnB1xdGeT4OfhwqXnEyDEwtlz8EBYLLXm2hlk4y8M3HsvYYm0sP9jBj368\/u3nNtMqczebTXF\/fz87cAN8eHiYXd1Dai1Ntl\/HOWhyc3NTPuyIBx9VvhkzD6phZ36BrLwcLI1ulzqq5tXFiHu02Z95lu9943ax9uCUz776YZfp0TmHh4fF8fHx7HB0dFTMtfah9JYm26\/jHDS5vLwsf6zn6uoq+h6cC6mGPZcrpTqzUMAemPLJp8e91bO\/v1\/MEQcHB8Xe3t4sax9Kb2my\/VrOQZPT09PyB3v48Z7e3rgTLKSGPYHoc90y\/dfI1SfadV71qvXRqfatr0wZUkAKSIH2Cqhht9dsFTP4K2Qangdc3eHJ8XPw4ermdY2zB3t5wHVdV\/OlgBSQArkooIady5XIsA4ankesROIhD+fh49ZQ4cjBehhn1sfwjffrwANiHnAADuvRlPNz5EsBKSAFplRADXtK9Ve2N03S0PXotg6261qaLwWkgBSYgwJq2HO4SqoxGwXse9hv32yKrnh3KP1bCkgBKdBMATXsZjopSwqUCtj3sPkudlewFv\/X6snJSbm2\/iUFpIAUqFJADbtKHcWkQKDA9fV1+X3O29vbXizrBVtkNVQxUkAK5KOAGnY+10KVzEABPhGfnZ2V3+nsw+rT9QwuukqUApkooIadyYVQGfNQgMcs9ol5nDrXKlWXFFiXAmrY67reOm1HBXgW8fn5eflc4j7sxcVFwX8AdCxL06WAFFiBAmrYK7jIOmJ\/CtizxL98+VPRFZ9\/92Nxd3fXX3FaKSsFVIwU6FsBNey+FdV6i1bAniXej\/1m0VrpcFJACvSrgBp2v3omV+PJXMlgg0DX+Q22UIoUkAKrUUAHnaMCatgjXDWabdcncjGfdUYoV1tIASkgBaRAhgosomGP2cjYyzDk9WSPJuuT5xGb4+P4sZw6btd5dev2HQ\/rDMe2X8gzNliOrBSQAtMooF3jCsy6YY99g2U\/PukaGMdl\/ciSQ\/5HptojH8SyWMfH8OE84Pxcxj6OD+dzqnxyQVVODjFqBLFaUrzlEkcXA2OLyUoBKSAFclFg1g3bbrBjiMlNnP2G3os9QN0+qXqYS4z5WMb4HnDEPJfyyQWpeC48NYJYPfCp88ITj82LcfYs8VhsV+7x8bEQpIFeA8O9BvjqJNj1Pfp83nSj7Bs2N1SPplL5Ofh+HmOPpjGfF\/p+Pfww7sfEPXysD79JA\/I5vhb8pjWQ6+HneR5\/6Jhff0if53\/zDPHXv\/3c2zabzaa4v7+fHbgBPjw8zK7uIbWWJtuv4xw0ubm5KZ+dwHMUenvjTrBQ1g2bGz2NxQOuTidy\/Bx8OOZhGXvA1cXIJ8fAHOPMZ2yAs1xv4S3HLJzPGdNnb6vDLFxdDeRYvlk45mGNMws3VIx160AdVoPPhfdjckLOx+172J999YOnO\/mHh4fF8fHx7HB0dFTMtfah9JYm26\/jHDS5vLwsn\/1\/dXXV6b069eQmDXvqGp\/tX3UzfZYYDKrmtY3V3dTZumpN4h5tcv28lE99qZjxVTm71lM1b+yYnbONRZOqOlnLvn\/9yafHDHvB\/v5+MUccHBwUe3t7s6x9KL2lyfZrOQdNTk9Py+f\/81sAvbxpJ1pkdg17Ip0+bNvkpv4hWU5WCtCMuX6xouCJx2LipIAUkAI5KDC7hs2N9ZlwDQdV85rGyGt6UyeX0sg3n3EMdXGbQx7rMcYyxveAIwaHZYzvAUfMc94n7sdN\/ap5Y8dSNXPusBbG8Kk54qWAFJACOSiQdcPmJsrN1AOuTjhy\/Bx8OOZhGXvA1cXIJwfrAcd8z+HDEQsBT9wDLsxrMmaeXwcfzs9lDO8BZzn4PoYPZ\/GUJYdcDzjysZ7HhxsqxrptYLUwh9rM4hvgBCkgBaRATgpk3bARipurB1wI4jEO3uDjxpltErPc0NrcBF+GidEIysHTvxh7PFFbf4h7kvkhRxzOAy6Ej+O3jZPfdh75Hqxh8Dy+8VjGHnAGz+Mb723Ih2PLNR4bg+XJSgEpIAVyUSD7hp2LUF3roCl0WaPr\/C57a64UkAJSQApMr4Aa9vTXYLoKtHNrBezBKW\/fbIquaL25JkgBKbBqBdSwV335dfi2CtiDU3h4SlewFl8zOTk5aVuG8qWAFFihAmrYK7zoMzlylmVeX1+XD2C4vb3txbJelgdVUVJACmSngBp2dpdEBeWsAJ+Iz87Oyocw9GH16Trnq63apEBeCqhh53U9VE3mCvBc5BKvXhV92MyPq\/KkgBTISAE17NgcCZgAABAASURBVIwuhkrJXwF+POD8\/Lz8IYE+7MXFRdn48z+5KpQCUmBqBdSwp74C2n9WCtiPf3z58qeiKz7\/7sfi7u5uiPNrTSkgBRaogBr2Ai+qjjScAvbjH\/3Yb4YrVCtLASmwOAXUsDO7pDzRrEtJXed32VtzpUAjBZQkBaTATgqoYe8k2zCTaLZdn2jGfNYZpkKtKgWkgBSQAlMpsKqGPWYjYy\/DkBeXParWT8VTfGqttvmpdYbmY3XChQjr8PEwpvGqFNBhpUC2CqyiYdvNeKyrwH580jUwrtubHPLr8ixOPrCxt6zjY973eU185oImuVPmUCMIa4BDjxDwlovv44wtJisFpIAUyEWBVTRsuxmPITo3e\/Ybei\/2AE32IY+6muSGOcwFIZ\/bmBpB27rQpc08e5Z4232q8h8fHwtBGjR6Dei1stN7xZ6ZUPU+nENsMQ2bG69HU\/H9HHw\/j7FH05jPC32\/Hn4Y92PiHj7Wp+\/3wG+6Nrkefp7n8YeO+fW9TzNmfxDyftzU5\/nfPEP89W8\/N51Sm7fZbIr7+\/vZgZvgw8PD7OoeUmtpsv06zkGTm5ub8tkJPEeh9g2ZccIiGjY3Y27MHnB1upPj5+DDMQ\/L2AOuLkY+OQbmGGc+YwOc5XoLbzlm4XxOG581YvPhiHnA1a1Njp+DD8c8LGMPuKFirFsFq4MagM8l5sfEQ87H7XvYn331g6c7+YeHh8Xx8fHscHR0VMy19qH0Xrkm0ddwDppcXl6Wz\/6\/urrq9F6devIiGnZMxKqbbizfuKp5bWN1N3\/2rFqTuEebXD+vrb\/rPlXzxo7FzkwNgOsSi8MTj8WMs+9ff\/LpsVGd7f7+fjFHHBwcFHt7e7OsfSi9pcn2azkHTU5PT8vn\/\/NbAJ3fsBMusNiGPaGm5dZNbv5l4oj\/ohlR14hbTr5V7LwxHciDn7xgFSAFpMAwCixg1cU2bG7Au1yfqnlNY+Q1vfmTS53km884hrq4zSGP9WzsLTxxz4V+XTzMt3HVvLFjVlMTS23o0iRXOVJACkiBqRRYRMPmZstN1wOuTlRy\/Bx8OOZhGXvA1cXIJwfrAcd8z+HDEQsBT9wDLszbZezXwfd74MPVrUsOuR5wzMN6Hh9uqBjrpsC+7B8CnjnwZvENcIIUkAJSYCQFGm2ziIbNSbkBe8CFIB7j4A0+bpzZJjHLDa3NTfHEidEw8AFjD7gQxD3HfM953+d5Ht\/D55lP3HyzcB7GYz2PD2dg7GE81vP4cAbGHsZ7S9yP8eFCwIOQtzExQQpIASmQkwKLadg5idqlFhrGlPO77K25UkAKSAEpMJwCkzXs4Y6klaXAcArYg1PevtkUXTFclVpZCkiBJSqghr3Eq6ozDaaAPTiFh6d0BWvxNZOTk5PB6tXCUkAKLEcBNezotRQpBeIKXF9flw9guL297cWyXnwnsVJACkiB5wqoYT\/XQyMpUKkAn4jPzs7KhzD0YfXpulJuBaWAFHAKqGE7Mebiqs7pFOC5yG0xXbXaWQpIgSUpoIa9pKupswyuAD8ecH5+Xv6QQFN7cXFR0OQHL04bSAEpsGgF1LAXfXmnONyy97Qf\/\/jy5U9FE3z+3Y\/F3d3dskXR6aSAFBhFATXsUWTWJktRwH78o7n9ZilH1zmkgBSYWAE17IkvgLYfVwHtJgWkgBSYqwJq2HO9cqpbCkgBKSAFVqWAGvaqLvfHw\/LMcY+PkeceOc+Z+hFzPGIzfBx\/6hz2T9VBbBxoFykgBaRAWgE17LQ2i43QmHhmuQecPzBj4LkmPnP8uvhwfi5jeA+4KXPC\/X0t8qWAFJACOSighp3DVRixBhoTjTLcEo6Y8YyBjc2SEwNx+NgcOGI55lAT9QH8OtizxOvywvjj42Mxd6h+XcO5vgb4WiUI35dzG6thz+2KDVhvk6ZFTgx1ZTFnbjmxenn+N88Qf\/3bz7FwkttsNsX9\/f2iwA3w4eFhUWfqeo2kyfZrPAdNbm5uymcn8ByF5Jt0BgE17BlcJJWYjwL2PezPvvqhVVGHh4fF8fHxonB0dFTkc648tJUm29chB00uLy\/LZ\/9fXV21et\/mlqyGndsVmbAe+2vrqhLIiaFqDjHmYKuQW06sVvv+9SefHsfCSW5\/f79YGg4ODoq9vb3FnavLdZIm26\/zHDQ5PT0tn\/\/PbwEk36QzCKhhz+Ai5VQif7UdQ041qhYpkJsCqkcK9KGAGnYfKs5oDZpt7JMsHLEuR2E+64RrwBGDxzLG94AjBodljO8BRwwOyxjfA44YHJYxvgccMc\/JlwJSQArkroAadu5XaID6aFY0LQ+4PrZiHb8uPpxfmzG8B9xUOX5f+VJgfQroxHNRQA17Lleq5zppkB6p5clJxVI8czxieT6OP3UO+6fqICZIASkgBaZWQA176iug\/aWAFJACUiCpgAIfFVDD\/qiFPClQq4A9OOXtm03RBLULKkEKSAEp0FABNeyGQilNCqCAPTiFh6c0Afl8leTk5ITpghSQAotSYNzDqGGPq7d2m7kC19fX5QMYbm9vG1vmzPzYKl8KSIEMFFDDzuAiqIT5KMCn5bOzs\/IhDE2tPl3P5\/qqUimQswJtG3bOZ1FtUmBwBXguclsMXpQ2kAJSYBUKqGGv4jLrkH0pwI8HnJ+flz8k0NReXFwUNPm+atA6UkAKrFOBZTXsdV5DnXpEBezHP758+VPRBJ9\/92Nxd3c3YoXaSgpIgaUqoIa91Curcw2igP34R3P7zSB1aFEpIAXWp4Aa9njXfNKdeAxoHwX0tU6slj7W7mONWG3ipIAUkAJTK6CGPfUVGGF\/mlhfj91kHdbru2zWZO2u67IGa3VdR\/OlgBSQArkpoIZdc0W4+XvUpG+F\/Vz8rYT3RCoG7\/E+\/ZnxcfxnwaYDl8caHi605ZK3RT4RIc\/Y4yll5z9+HfNTixGPxWJ8jIvNFScFpIAUmEIBNewK1bmB84nNA65iyrMQuX4uPpxPYgw8Zz48czzgLI5l7OP4cMQAPhx+E1g+cwxwfi6857zv88wnzhwPuDBu4yrLPL+O+fA2D86PvW853hIHnpMvBaSAFMhNATXsxBXhBs6NPwzDEYPHxmAxcvE94JhjHGNgY7PkxHg4YuRhGeN7wBHznPnwMRCHZy6+Bxwxz3m\/Ks484j4fH44Yfgj4AAXjMK\/puGov1iAO8OtgzxKvywvjj4+PhSAN9BqY5jXA1ypB+L6c21gNu8MV4yYfQ92SzKnLqYo3mZ\/KgY+har+hYtQRWxs+BnLhad6AsQHe\/CEtzwbnGeKvf\/u51Tabzaa4v79fFLgBPjw8LOpMXa+RNNl+jeegyc3NTfnsBJ6j0OqNm1myGnZmF2Su5dAwwyY61FnYC7AfaLKP5TfJrcqx72F\/9tUPH9MaeIeHh8Xx8fGicHR0VCzxXF2ukzTZfo3noMnl5WX57P+rq6sG79Z8U9SwO1wbmkUMdUsypy6nKt5kfioHPoaq\/YaKUUdsbfgYwlyaMCA3jA01tu9ff\/Lpcast9vf3i6Xh4OCg2NvbW9y5ulwnabL9Os9Bk9PT0\/L5\/\/wWQKs3bmbJatgdLgjNIoYOSw4+NVYvXB8bs04fzZN1YqDG2PrkxnjyPZrm+TkL8HUEKSAFFqKAGnbiQqZu7jQGYolpH2hyyP1AvHfgiL0fJg055IYJcMTgsYzxPeCIwWEZ49chlct8YjY\/HBuPJY84PgjHcIAcYvhYxvh9gLVYM7YWPPFYTJwUkAJSIGcF1LArro7d3LnBG+AqpjwLkWvzzMI9S6oYkGvzzML5KYwtZhbO57TxmWvrmIVru4bPZ76tZRbO5zT1mWdreAvfZo2mucobWAEtLwWkQGMF1LBrpKIReNSkb4X9XPythPdEKgbv8T79mfFx\/GfBpwEcze3JbfSHfA8\/iXWIGed947Ahz9iDHA9irO25lE9uCMtlDWI29r5x2Bgf48gVpIAUkAI5KKCGncNVGKGGvppRX+vEjtzH2n2sEatN3CoV0KGlQFYKqGFndTlUTO4K2INT3r7ZFE2Q+3lUnxSQAvNRQA17PtdKlWaggD04hYenNAH5fJXk5OQkg+pVwqIU0GFWp4Aa9uouuQ7cRYHr6+vyAQy3t7eNLXO67Km5UkAKSAEUUMNGBUEKNFSAT8tnZ2flQxiaWn26biiu0pakgM4ygAJq2AOIqiWXqwDPRW6L5aqhk0kBKTCmAmrYY6qtvWavAD8ecH5+Xv6QQFN7cXFR0ORnf3gdQAosRYGZnkMNe6YXTmVPo4D9+MeXL38qmuDz734s7u7upilWu0oBKbAoBdSwF3U5dZihFbAf\/2huvxm6JK0vBaTAshRInkYNOymNAlJACkgBKSAF8lFADTufa6FKpIAUkAJSQAokFciiYSerU2AwBXjmtkfbjfxc\/NT8VAzeIzbfx\/GHzGHt1B7EBCkgBaTA1AqoYU99BSbYn8bEM7c94JqWQq6fiw\/n5zMGnjMfnjkecBbHMvZxfDhiBsbwHnAWxzL2cXw4YgbGwMayUkAKSIEcFVDDrr0qy0qgMdG0wlPBEYPHxmAxcvE94JhjHGNgY7PkxHg4YuRhGeN7wBGDwzLG94AjBodljO8BR8w4xsDGVdaeJV6VE4s9Pj4WgjTQa2Ca1wBfqwSx9+acODXsOV2tkWqlecVQtz1z6nKq4k3mj5kTq5Vng\/MM8de\/\/RwLJ7nNZlPc398vCtwAHx4eFnWmrtdImmy\/xnPQ5Obmpnx2As9RSL5JZxBQw57BRaoqUbFxFbDvYX\/21Q+tNj48PCyOj48XhaOjo2KJ5+pynaTJ9ms8B00uLy\/LZ\/9fXV21et\/mlqyGndsVyaAe\/ro4hrrSmFOXUxVvMn\/MnFit9v3rTz49joWT3P7+frE0HBwcFHt7e4s7V5frJE22X+c5aHJ6elo+\/5\/fAki+SWcQUMOewUUau0T+2jmG9nVohhSQAlJACvSlgBp2X0rOZB0acexTKhyxumOQQ26YB0cs5MMxOeSGPBwxeCxjfA84YnBYxvgecMTgsIzxPeCIeU6+FJACUiB3BdSwc79CA9RHs6JpecA13YpcPxcfrs\/5rMe6HnB+D8Y+jg\/XNMfnyZcCUkAK5K6AGnbuV2ig+mhsHm238XPxU\/NTMXiP2Hwfxx8yh7VTexATpIAUkAJTK6CGPfUV0P5SIKqASCkgBaTAcwXUsJ\/roZEUqFTAHpzy9s2maILKxRSUAlJACrRQQA27hVhKlQL24BQentIE5PNVkpOTk0WJp8NIASkwvgJq2ONrrh1nrMD19XX5AIbb29vGljkzPrJKlwJSIBMF1LAzuRAqYx4K8Gn57OysfAhDU6tP12NfW+0nBZapgBr2Mq+rTiUFpIAUkAILU0ANe2EXVMeRAlIgbwVUnRTYVQE17F2V0zwpIAWkgBSQAiMqoIY9otjaSgpIASmQtwKqLmcF1LBzvjqqTQpIASkgBaTAewXUsN8LISMFpIAUkAJ5K7BK1P3ZAAAH50lEQVT26tSw1\/4K0PmlgBSQAlJgFgqoYc\/iMqlIKSAFpIAUyFuB4atTwx5eY+0gBaSAFJACUqCzAmrYnSXUAlJACkgBKSAFhlegS8MevjrtIAWkgBSQAlJACpQKqGGXMuhfUkAKtFXg4eGh+Oc\/\/1lg285daj5aSJPnV1eaPNejy2i5DbuLKporBRIKvHr1qhDeacCN+Ndff5Ue7jUhTd69Nvx7JCdNEm\/r2dBq2LO5VCp0SgX4xS1+qevly5fF+fm58KQBWnBNsNLk3WsCLaTJOy3sNZGTJtTC+5j3M9dpblDDnuaKadeZKcAb\/Pr6uri9vRWkgV4DM34N8D6e2e3nQ7lq2B+kkCMFqhWgaZ+dnRWCNNBrYL6vAd7H1e\/0fKNq2Plem+kq085SQApIASmQnQJq2NldEhUkBaSAFJACUmBbATXsbU3E5K2AqpMCUkAKrFIBNexVXnYdWgpIASkgBeamgBr23K6Y6p1MgRcvXhSgsoAVBFMawIMVSPDsiJzZ8CzwNEjxT6HF\/rEzmw0PmuLDPI23FVDD3tZEjBTYUoCbzO+\/\/14A\/K2EFRCcG8SOCo82AD+Ws0SOs3JmA2M7J36Mt\/gSrT9z7Ow+jr9EDYY8kxr2kOpq7UUowI2Fm48dBh\/OxjOynUrl3CBcBC08jw8X5i1tzBk5a+xcYYw8uFjuWjjOjw52Xnw4G8vWK6CGXa+RMqSAFJACUqCBAjThBmlK2VEBNewdhdM0KSAFelZgZsuFzYlPiyE3syP1Vi5aGKRJb7IWatj9aamVpIAUWKkCNCc1po8XHy0MaPMxIq+LAmrYXdTTXCkgBdaiQPKcNCSaUzJhRQG0WNFxRz+qGvbokmvDuSnAzdjfiPDh5naOoepFCzSx9fHhbLxkmzor5ydmZ8eHs\/EaLedHBzs7PpyNZesVUMOu10gZUuDD17l0k4m\/GLjxog3Aj2cti+WsnAjrAQfQwXh8uMGQycKc085sFs7Kw4\/xFpetVkANu1ofRaXABwW42YAPxEqdlAbwYC2ycNYY\/Pkt7rml+3Zms+F5U3yYp\/G2AmrY25qIkQJSQApIgf4U0Eo9KaCG3ZOQWkYKSAEpIAWkwJAKqGEPqa7WlgJSQApIgbwVmFF1atgzulgqVQpIASkgBdargBr2eq+9Ti4FpIAUkAJ5K\/CsOjXsZ3JosAQF+NpI6hxVsdScJvxQ6zbZ2+dQh8Hz3rd4zJIX4+GIpVAXT82D7zKX+VOgrua6eNOa+1qn6X5LzUNHg53RxljjqmxVXlWsas22MTXstoopfxYKjPUGykkMzmxfmcFW1UY8BpsTi7G+xb2FJx\/r+bX4fZ27r3XWonvTc6Irr08D82IcfO7IrmHnLpjqm4cCvDl5U86j2nlUKU0\/Xie0+DiSJwXGUUANexydtUuGCsQauufMxwI7Aj6wsbfwBuNtbNZ4s\/D4WIAfAzEPnwPPGAvwcwX1GcIa4eGwwHysh8WMYxyCWIyDj4Fcz1eNLeat+eEa8MDzoW9xLIjF4YGPMfbwsZTv8\/F9HmOPMMbY4vggHHsuFiMeg+WaDXOMN+vjxpm1GGN8LDDfrHF+DAfgUiBuSOUMwatht1JVyXNSgE9BvKm61Mx81gH4AB\/g+7UZwxsYAxubhfPz8OEszjiEj1senOXB4WMBfhWYG6IqPxVjDdsPyziVC0+cPANjeA84i3s+5ft85pGHDXnjiPcF1mQtLMA3hPsztlhobS4W+Djz4AyMiWONMwtHLAXilmsWjnyscWbhiBkY+1g4Js9zPpdYCnVzquJVMfZnTyww36xxVWuQ6xHmMvbxIX017CHV1dqTK8Absssbivn+EOG4acznxfyqdWP5XTn2C9F1zV3mU0M4L8aFObuOq9YmlnqtwBNvs2\/b\/NTafa1Tt36TfcKccJzaYxe+bm2Lm91ljz7mjLm\/GnYfVyyTNVRGngpws\/fIs8r2VXEmZmENNsZODW6kVpfZpjWRb\/Obzpkijzo96mqwM6XmeB6\/br1UnLkeqTzj6+qyvJT1e+Gn8ubOq2HP\/Qqq\/loF7GZQmzhQAvuHGGir0ZcNz8V47CLYk5u0gbHVgO9BjsWWYP3ZzK87l+WZNU2wxpmtWysVt\/nepnKN97n41GOxmLU4lnyPWP4SODXsJVzFWZxh2iJ5M\/PGrqqiLl41l1jT+U3zWDMnUDc69lkTa7ZdL5zDmLoMth68+U0tazAPyxysH8PlDGqtqq8u7ue2yfXzYn7dWnXx2Joprs+1Unt4fsz91LC98vIXrQA3X39AxrzZDIx9vK3PfFsLyxjge8B1XZv1dlmn6b6sH8LvR8yP\/brwxD1nvsWIA8YWS1lyyDUwDnMtZpY4eTY2C0esT7Cmrd9l3bbr+HzbH66qBuKWaxaOOVjjsIzh24J5zPeAq1qHuM\/Hh7M5+HAecMSxMZ5YU4RrsB5cbD48cQPjWN4QnBr2EKpqzUkVqHoDhTHGAFC02dCvG9s8rIE5wMZm4Tzg\/Tjlk+cR5hELudi4Lo94DH4t4n4c+lVxYgbm4WOB9xkb4A1w+Fhumvgh4ImHPFwdmONzwjGxkGMMiAHvMwYxDt6DHGCc92MccQ\/LqbI+H9\/nMjbA42OB9+vG5HqQXwefjx\/mw3n4eMgztrj36zhyDZZrFt77jAGcWfwhoYY9pLpaWwpIgUEV4EZJcw4BP+jGWlwKTKDAfwMAAP\/\/I+9RTQAAAAZJREFUAwACqw9PqL1RqgAAAABJRU5ErkJggg==","height":237,"width":394}}
+%---
+%[output:06fe6905]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAEpCAYAAABRDxFnAAAQAElEQVR4AeycTWhdW5bf93vy04fxxNhql6EGjgY9MPSkJxI0iBAIoTE9yCS4NKhyQjILaBAqeNKEgOkYFDJ51aM4g6qBcGdUdONklkmPqiGTCnG6CRF0WRXUTzF2daFSVbVKjv5XXn5LW+ecez7u2Xefc3+mlvdea+2PtX\/76Pzfvbbr8w\/8ggAEIAABCEAgewKfB35BAAIQgAAEIJA9gbwFO3t8FAgBCEAAAhBIQwDBTsOZXSAAAQhAAAKdCCDY7fExEwIQgAAEIJCMAIKdDDUbQQACEIAABNoTQLDbs8t7JtVBAAIQgMCoCCDYo7pODgMBCEAAAmMlgGCP9WbzPhfVQSApgY2NjaT7sdlVAvC\/yqOth2C3Jcc8CEBgEAQkFgcHB4OodaxFir\/uYaznS3UuBDsV6Sn76GH2NmV463TRHkWxsg00tk3O5mh+mdmYubcZFVDEqqg8jSuKd435dX2\/67p+fl\/r+j3iftWeVbkm68Rj+\/Craq3KldVSNkdxb36+j\/u+H0N\/NgQQ7Nlw7LSKHnL9F6g3xTotWjBZa\/o9NKQopnif5mvw\/T73HPLanpH6urMhnydl7WIlZin3TL2XzjiLPcvWUVwMvSnm9\/Q56\/u8+orH8xTH6hNAsOuz6mWkHmA9yPHiiikXx\/EXnkAoejYUq0umyXPVZN06+xftPes96tQxqzE51K4airg2OWPX+U32Ymx7Agh2e3a9z9QPYu+bsMEgCejZ4CU7yKtLXrSekzKzYvQ8ycz3bVncj4nX9zn6syOAYM+OZauV9MNgD\/u0BWyctX68xawtyilmeWt9TH2Z5dTKLzPlzcrGtIlrTZunviz2fawsF4+Jfc2LY\/LNlPemuHy1ZvK9Wdxay8m3vm\/L4n5Mnb5fR31vNt9i8n3ffLUyn1NfMW+KmcXx4AMXfY27aIJaWdw3X62ZxplZzFrF1VdrJr8v0x5aW62ZfDPFfF++TDFr1ZfFflFMY8yUr2v2Hikar1yZFY1vE4vX1xnarMOcagIIdjWfJFl72PWQm8UbK27jrFVM49RazFrFlJNZzPeLYsprnuXUylc8NsWVN5MfjynzNTa2eKzlbX3lFTNfrXzFZeorZiZf8SamOTZfrfx4vmLKmcm3Mepb3FrFlJdvffky+YqrPyuzNbWumWJa3\/y4L1+mcTI\/TnFvPq9x8n2+rK+xMuXVytSPTespZya\/zZh4ThdfNVg9auXH6ymmnJn8eMw0X3Nsvlr50+akzqsmmeqzvX3fYrT9EECw++HaalU9+Gb6obBF1FfcfGstZq3F27ZF+2htxaetqXHTxlheY2OznLWWN181KGa+WvmKqx+bcnGsytc68Rz5ivt5innf+hpXlCuK2ZxUbd0aNE5WVde0fNXcabkihtpPcT9XMe836Lca2ma\/pnN0xniOfMXrFt10fN11\/TjtIWtSl59PvxsBBLsbv86zyx78pj8UWsdb58IyXMCfz\/qzLNPW9O0s10+xlj03Qz5DCk457uHvzPpN67T79\/NsraLWjyvra15ZjnhaAgh2Wt697KYfKP2geutlozkv6s\/n+7Mqy6\/p+7NcX3el9dRqD\/XbWNV8retNY9vsMYY54jCU8x8cHEz+BYBq9tb1Hvxacb\/r2ppfl6\/GaX\/NwdoRQLDbcZvZLD3AepDjBRVTTnG18tX3VhRTviyuXJUV7aO1FK+ap5zGqe3LVEPRHkUx1VAWV87Mj2m6vq1hbdf5tk6dVnVrv6KxyhXFZxVrsn6TsapPZ4rnyFdc+Vma1tTa8ZqKKRfHm\/paZ9ocP0Z7et\/mFsUsV9aWrVU2nvhwCGQv2FUPrHJmMXKLq41zufn2A6ZazRTzdcq3nLWKaYxai6mVr3gb01ytYSa\/aB3FbYxa+UXjZhnTHtrLm2LaQ21RXDmzaWPivNZTzOZPazVWc7wp5ufJV16tj1f1Nd5b1Vzl\/Fj1FfPry1dc5uN1+n6u5su3eeorZibfctYqZnmL+dbnNU6+z7fpaw2tFc+1uHJmisXj6viaZ2uolR\/PU0w5M\/l+jHzLWauYH1O333Ze0fpaa2Nj49Pf9FdtitlY9RXzppjl1SoXxxTHmhHIWrB1yWXHUU4PgJl8G6u+xdXKt1yurer0VlSnz6vvx8g3U1x9td6axDRW5uer72Pqm8U5+UWm8UVxH6sao5y3eJ7lfNz3La9WcWvVl8n3ppiZ4ta3No7J92bj2rZ+LesXraWcxdX3ZnHfWt5i8q3vWx+3vlozP1Z9i6s1X6035WQW833F5JvJ96a499UviinuTWOK3gOKe\/Nz1FdOrTcfi\/vyZX687ytnprj6as3ke7N4WauxbXJN52gfb\/F8n1Pf58U9jvk8\/foEshVsXXLZMZQrewCKchqreNl6xCGQgoCeQZmexxT7scdVAnC\/yiOVl4R7qsPMeZ9sBVuXLJszH7YfMIHcnh\/VIxswUkpvQIC7bgCLobUIZCvYVdXHPwhtP7UcHh4GDAY8AzwDPAOL8wxUaUtPuZktO0jB9qfvItbf\/e53w\/b2di\/2j3\/v98K\/\/93fDWr72oN1+7k7uMKVZ2C8z8C3vvWtyQc1ryND6Q9asNuKtS5H\/0X9ox\/9KOzt7YX9\/f1rtru7q2Gl+aI5PvblH\/5h+De\/\/dvhyy+\/vLa2H5eq3\/U8qeqsuw\/nuf7M1mWXYhz3w\/2keM5sj7rPm8bpvT95uQ\/wt14EOwWHLmLt69vc3AxbW1vXTHGNU1uUnxq7WPf27dvX1p06r6CWWczROTqdp6e62p6N81x\/Ztuy7GMe98P99PFcla1Z93mzcXoXDtEGKdhVYq0\/31beX4Z8xX1sWv8b3\/hG+Pa3vx3UThs7hLzOwXnyvSnuJ9+7UWXcjyjka2O7nzLSgxRsHUYiHJviMomzz8lX\/NLq\/a4H4Dvf+U69wQMYxXnyviTuh\/tJSYDnLSXt2e2VvWAXia1iReax+LyP04cABCAAAQgMkUD2gj1EqJU1f\/bZ9bRiH+16kggEIAABCEAgBAS7r6fgd34nhD\/7sxB+67eqd5BQf\/gQgpn86hlkIQABCEBgAQkg2DO49B\/++CT88Z\/\/bKr95d\/8+upuEmcJtY\/KV9zHsulTCAQgAAEIzIsAgj0v8uwLAQhAAAIQaEAAwW4Ai6F5E6A6CEAAAmMmgGDP43b1lbdMe1trffn6Wlw+BgEIQAACEPhIAMH+CCJZIzGOzTa3uPm0IyLAUSAAAQh0I4Bgd+PXz2x9yu5nZVaFAAQgAIGBEkCwe7q4Owevw6Onj8Pau+PmO+iTdvNZzIBAawJMhAAE8ieAYOd\/R1QIAQhAAAIQ4P84hWcAAhDInQD1QQACIsAnbFHAIAABCEAAApkTQLAzvyDKgwAE8iZAdRBIRQDBTkWafSAAAQhAAAIdCCDYHeC1mqp\/slXHWi3OJAhAAAKeAP0xEUCwU9+m\/ydb6pdZ6rrYDwIQgAAEsiaAYM\/jeiTS89iXPSEAAQhkRIBSmhFAsJvxmt1oRHt2LFkJAhCAwAIQQLDndcn6c2y\/d+z7HH0IQAACEEhMIL\/tEOz87oSKIAABCEAAAtcIINjXkBCAAAQgAAEI5EfAC3Z+1Q24orcbD8Or5y\/D6e31AZ+C0iEAAQhAIBcCCHYuN0EdEIAABCAAgQoCwxHsikOQggAEIAABCIydAII99hvmfBCAAAQgMAoCCPZsrrH5KvG\/w4795isyAwIQgAAERkwAwZ735erfXxfZvOtifwhAAAIQyIoAgj3P65BQ65N1kc2yLtaCAAQgAIHBE0CwB3+FHAACEIAABBaBQPaCvbGxUXoPypnFgyyuNs6l8O8cvA6Pnj4Oa++OU2w35D2oHQIQgAAEahDIWrCrxFa5g4ODYCbfzqu+xdXKt1xWrb4K19fiWRVFMRCAAAQgkCOBbAW7SmSVkxB7oPIVl6lflPOxLPom1mpjy6JAiggggAAEIJAJgWwFW6Ir65vT4eFhMDs7Owtt7PzDeTg\/v27h4hP0Bxe\/tvbf\/V04K7OWtVzbg3Va3Skc2\/0swA1uuT0D9n5X27ee9L1+toLd98Ft\/Z2dnbC9vT2xZ8+ehTdv3kxMl3t0dDTpW6ysff\/ufTg5Oblip6en4ew3vwknv\/jFp\/hXx8e11ivbp0u8yXm67JNqLueZPKdze56m3TP3w\/1Me0Zmma963l68eDF5v+s9r\/e9vfuH2C68YO\/t7YX9\/f2JPXnyJNy\/f39i9+7dC+vr65O+xcraW7duhbW1tSu2sroSlpY+D2urq0G5mzdvhrt37l5b7+9tbIQiK9urbbzJedrukXIe57l8TlMyb7IX98P9NHleuo6tet70Xrd3\/O7ubhjyr4UX7M3NzbC1tTWxBw8ehNULgZVJZFdWVj75ipXZ8vJyuHHjxlVbuhE+++zzsPQxvrS0FJaXv7i63oXI62vziYWLXxdfoV\/8HuSX7dU23uQ8bfdIOY\/zrF59lj4+tynvoGqvyf3U\/PmpWieXHOcZ7vOm97q94\/W+n7xjB\/rbwgt2dvcm0dZfQMuuMAqCAAQgAIF5EhikYOsvo+lvg3tw8hWXqV+U8zH6EIDAQhPg8BAYHIFBCrYomzBLnGXyFZepr5iZfMUxCEAAAhCAwFAJZC\/YVWKrnFl8ARZXG+ey8f3X39bX1+HqZ1MkhUAAAskJsCEECghkL9gFNY8r5MVZfdm4TshpIAABCEBgBgQQ7BlAZAkIQAACC0SAo86JAII9J\/CfttVX4GYKqq8WgwAEIAABCDgCCLaDMcvu242H4dXzl+H09nr5shJnfQUus1HqK24+LQQgAAEI1Ccw4pEI9ogvl6NBAAIQgMB4CCDY47lLTgIBCEAAAnkT6FRdMsHWv4m2StWXmU8LAQhAAAIQgEA1gSSCLXG2fw9tffnqV5c38qz9ebX9mbVameIjPzrHgwAEIACBZgR6F+xm5SzgaIlzbAuIgSNDAAIQgEA1AQS7ms\/ss\/oEXcdmvzMrQgACEIDAgAksuGD3d3N3Dl6HR08fh7V3x1c30adpi6hfZjaGFgIQgAAEIHBBIIlg259X68+s1b\/YN\/i+\/IUyE2n\/SXuhAHBYCEAAAhBoSiCJYKsoCbVMfZnvy19IM+FWWyDeC8mEQ0MAAhCAQCGBZIJduDvBrwlItM0k3l9n6EEAAhCAAARCL4Ktr7vrGnfwkYBE2kzC\/TGcb0NlEIAABCCQkkAvgq2vu2PToXzMfLULaybQaiXSZgsLhINDAAIQgEAZgV4EO95Mn7Yl1j4uX3EfW5i+BFpmAq12YQ6f5qDsAgEIQGBsBJII9tigdTqPhNoWUL\/MbAwtBCAAAQhA4IIAgn0BIen\/9Gm6jiUtis3SEmA3CEAAAs0JJBFs+\/pbX4F7U7x5ycyAAAQgAAEILB6BJIItrBLn2BTHIACBvAhQDQQgkCeBXgTbf4qe1s8TC1VBAAIQgAAE8iLQi2DHn6Sr\/LxwUA0EIJA3AaqDwOIS6EWwFxfnEUeVTgAAEABJREFU1yd\/u\/EwvHr+MpzeXv86SA8CEIAABCDQkkBSwfZfj7esl2kQgAAEsiVAYRDok0AywZZY+6\/G5fd5MNaGAAQgAAEIjIlAEsGWOEusPTj5ivsYfQhAAAIQ6IsA6w6dQBLBHjok6ocABCAAAQjMm8BgBVufzr3FIKty8Vh8CEAAAhCYLwF2n04giWAXff0tQVV8eonXR9hczTdTzEaqb3G18i1HCwEIQAACEBgigV4Eu0ggTTiVk8nvA1jR2tpL8T72Y00IQAACEBg7gTzO14tgx0czsZRwmsVjxubfOXgdHj19HNbeHY\/taJwHAhCAAATmQCCJYM\/6XBJ9\/UeAN8Xa7HN4eBjMzs7OQhs7\/3Aezs+vW\/jwIXxw8TZrM6fdncANbjwDPAN6Buz9rraNRuQ0p0ywO9Uo8fRiqsW87\/vKNTXN1x7eFGu6jsbv7OyE7e3tiT179iy8efNmYrrco6OjSd9iZe37d+\/DycnJFTs9PQ1nv\/lNOPnFLz7Fvzo+rrVe2T5d4k3O02WfVHM5z+Vzmop30324H+6n6TPTZXzV8\/bixYvJ+13veb3v9d4fqvUi2ILhxTT245zy87K9vb2wv78\/sSdPnoT79+9P7N69e2F9fX3St1hZe+vWrbC2tnbFVlZXwtLS52FtdTUod\/PmzXD3zt1a65Xt0yXe5Dxd9kk1l\/NcPqepeDfdh\/vhfpo+M13GVz1veq\/bO353dzcM+Vcvgt32025tkDMcuLm5Gba2tib24MGDsHohsDKJ7MrKyidfsTJbXl4ON27cuGpLN8Jnn30elj7Gl5aWwvLyF7XWK9unS7zJebrsk2ou51md27NU5465H+6nznMyqzFVz5ve6\/aO1\/s+DPhXL4I9Tx769B7\/B4N8xedZF3tDAAIQgAAEuhAYpGBLfCXC3hQzEOqX5WxMjy1LQwACEIAABGZOoBfBjgVTVXsB9X3l2pj28BavUZWLx+JDAAIQgAAEcifQi2Dr0LFget\/3NRZLSICtIAABCEBgkAR6E+xB0qBoCEAAAhCAQKYEkgi2PlFnen7KyosA1UAAAhCAQAmBJIJdsjdhCEAAAhCAAARqEkgm2P4vmvl+zToZBoH5E6ACCEAAAnMkkESwJdD6Wlyms8atYmOztxsPw6vnL8Pp7fWxHY3zQAACEIDAHAgkEeyic0m0JeRFOWIQgEBjAkyAAARGTmBugj1yrhwPAhCAAAQgMFMCCPZMcbIYBCBQSIAgBCDQmUASwfZff1tfX4er3\/kELAABCEAAAhBYAAJJBFscvTirL1McgwAEIDBnAmwPgUEQSCbY+kTticS+z9GHAAQgAAEIQOAqgSSCLXGOP1HLV\/xqOePx7hy8Do+ePg5r747HcyhOAgEIpCfAjhD4SCCJYH\/ciwYCEIAABCAAgZYEEOyW4JgGAQhAAAIBBAkJINgJYbMVBCAAAQhAoC2BJIJd9OfV+vNrxdsWzjwIQAACEIBAJYGRJZMItphJnCXSZvIVxyAAAQhAAAIQmE4gmWCrFIm0mXwMAhCAAAQgsKAEGh87mWDrk7VVp77MfFoIQAACEIAABKoJJBFsibM+WasU68tXXzEMAhCAAAQgAIFqAkkE20qghQAEIAABCECgHQEEux03ZkEAAhCAAASSEkCwP+GmAwEIQAACEMiXQBLBtj+v1p9Zqy8cvi8fgwAEIAABCECgnEASwdb2EmqZ+jLfl49VEyALAQhAAAKLTSCZYC8a5rcbD8Or5y\/D6e31RTs654UABCAAgR4IINg9QF28JTkxBCAAAQj0TWDQgq0\/BzeLQVlcbZzDhwAEIAABCAyNQC+CnUIktYf+HNxMvsFX3+Jq5VuOdvEIcGIIQAACYyDQi2DHYGYtmFpPQuz3Mb8sp7gfTx8CEIAABCAwJAJJBLsvIBJhs772YF0I9EuA1SEAAQjUI9CLYOvTrgmpWpWitsiUa2NaS\/uYyW+zzuHhYTA7OzsLbez8w3k4P59ubdZmTrs7gRvceAZ4BvQM2PtdbRuNyGlOL4KtA5qQqo19xcyUa2Oa32ZePGdnZydsb29P7NmzZ+HNmzcT0+UeHR1N+hYra9+\/ex9OTk6u2M3\/+d\/D7\/\/rfxI+\/PSvP8W\/Oj6utV7ZPl3iTc7TZZ9UcznP5XPaN++263M\/3E\/bZ6fNvKrn7cWLF5P3u97zet\/HGjAkvzfBHgqEvb29sL+\/P7EnT56E+\/fvT+zevXthfX190rdYWXvr1q2wtrZ2xVZWV8LS0udhbXU1KHfz5s1w987dWuuV7dMl3uQ8XfZJNZfzXD6nqXg33Yf74X6aPjNdxlc9b3qv2zt+d3c3DPlXEsGe1afhPkBvbm6Gra2tiT148CCsXgisTCK7srLyyVeszJaXl8ONGzeu2tKN8Nlnn4elj\/GlpaWwvPxFrfXK9ukSb3KeLvukmst5Vuf2LNW54zT3k44B50nHus7zFY+puh+91+0dr\/d9GPCvJIJtfPTnzGYWa9PqPwC0TtHcopzGKl40nhgEIAABCEBgCASSCbaJpoRTJr8LIFtD68jk23rqK2Ym33K0EIAABFIQYA8IzJpAEsGWcMaiKV\/xLgfSGmbxOhZXG+fwIQABCEAAAkMjkESwhwaFeiEAAQiMmwCnGyIBBHuIt0bNEIAABCCwcASSCLa+lo6\/\/pav+MIR58AQgAAEIFBJgGQxgSSCra0lzhJpM\/mKYxCAAAQgAAEITCeQTLBVikTaTD4GAQhAAAIQGBaB+VWbVLDnd0x2hgAEIAABCAybAII97PujeghAAAIQWBACdQR7QVBwTAhAAAIQgEC+BBDsnu7m7cbD8Or5y3B6e72nHVgWAhCAAAQWiUASwdbfDO8NKgtDAAIQgAAEFoBAEsFeAI4cEQIQgAAEINArgSSCrX\/KtaCfsnu9PBaHAAQgAIHFIZBEsBcHJyeFAAQgAAEI9EMgiWDbp2u1sfVzLFatRYBBEIAABCAwGAJJBFtfiZfZYEhRKAQgAAEIQGCOBJII9hzPN7et7xy8Do+ePg5r747nVsPAN6Z8CEAAAhBwBJIKtn0drv3VV4tBAAIQgAAEIDCdQDLBlkDra3ErSX3FzKeFwKAIUCwEIACBxASSCLaEWQKd+GxsBwEIQAACEBgNgSSCPRpaHAQCwyBAlRCAwAgJINgjvFSOBAEIQAAC4yOQRLD1dbi+Fvf45CvuY\/QhAIEFIMARIQCBVgSSCLYqkzhLpNVXK199DAIQgAAEIACB6QSSCbZKkUibyccgAAEIZEaAciCQLYFkgq1P1bFlS4XCIAABCEAAApkRSCLYEmr7ZO1bxTPjQTkQgAAE8iVAZQtNIIlgLzRhDg8BCEAAAhCYAQEEewYQWQICEIAABAIIeiaQRLD1NXj89bd8xXs+H8tDAAIQgAAERkGgF8GWGMcmWj5mvtouZmvGa1hcbZxL4b\/deBhePX8ZTm+vp9iOPSAAAQhAoIrACHK9CLY+Ode1PhhKpP3+8vvYhzUhAAEIQAACqQj0ItipipcQS5j9fkUxjVHcj6MPAQhAAAIQyIRArTIGLdi1Tjhl0OHhYTA7OzsLbez8w3k4P59ubdZmTrs7gRvceAZ4BvQM2Ptd7RQ5yD6dTLD1CbfI2hLSWvrk3Ha+zdvZ2Qnb29sTe\/bsWXjz5s3EdLlHR0eTvsXK2vfv3oeTk5Op9tXxca31yvbpEm9yni77pJrLeS6f01S8m+7D\/XA\/TZ+ZLuOrnrcXL15M3u96z+t9b+\/+IbZJBNvEVQJrZm0baLZem7nxnL29vbC\/vz+xJ0+ehPv370\/s3r17YX19fdK3WFl769atsLa2Vmk3b94Md+\/crbVe2T5d4k3O02WfVHM5z+Vzmop30324H+6n6TPTZXzV86b3ur3jd3d3w5B\/JRHsPgBJtM20vvpqm9rm5mbY2tqa2IMHD8Lq6urEJMArKyuTvsXK2uXl5XDjxo1KW1paCsvLX9Rar2yfLvEm5+myT6q5nOfyOU3Fu+k+3A\/30\/SZ6TK+6nnTe93e8XrfhwH\/SiLY+jTdVlCL2Go9bxojX+1srPsqdw5eh0dPH4e1d8fdF2MFCEAAAhBYeAJJBNsoS7Rjs9ysWgm39vDryVfcx+hDAAIQgAAEhkQgiWCbYEo0Y+sDlvbQnmby+9hnXmuyLwQgAAEILB6BJILdN9YiQVbMrO\/9WR8CEIAABCDQN4Ekgi3h1Kfdvg\/D+jkQoAYIQAACEOiDQBLBNrFWG1sfh2JNCEAAAhCAwNgIJBFsfcIus7EB5Tx5E6A6CEAAAkMlkESwhwqHuiEAAQhAAAK5EEgi2PHX4N7PBQR1QGD+BKgAAhCAQDmBJIJd9HW4SlJcLQYBCEAAAhCAQDWBJIJdVILEWp+0i3LEIACB\/AhQEQQgMF8CcxPs+R6b3SEAAQhAAALDIoBgD+u+qBYCECgkQBAC4yeQRLD11XeR6Wvx8SPmhBCAAAQgAIHuBJIItoS5yLqXn+8KbzcehlfPX4bT2+v5FkllEIBAEgJsAoFZEEgi2LMolDUgAAEIQAACi0ygF8Eu+vq7LLbI8Dk7BCAAgfkToIKhEOhFsIu+\/o5jAqSYWgwCEIAABCAAgWoCvQh21Zb2SRuxrqJEDgIQgAAERAD7mkBSwZZYS6hlX5dADwIQgAAEIACBaQSSCLaEWoZQT7sO8hCAAAQgMBwCaSvtVbAl0jIJtSzt0ea7252D1+HR08dh7d3xfAthdwhAAAIQGAWB3gR7UYV6FE8Fh4AABCAAgewINBXsWgeQWGug2mmmcRgEIAABCEAAAtUEehFsff1d16rLIwsBCEAAAhCAgAj0IthaeC7GphCAAAQgAIGREkCwR3qxHAsCEIAABMZFAMFOd5\/sBAEIQAACEGhNAMFujY6JEIAABCAAgXQEEOx0rPPeieogAAEIQCBrAgh21tdDcRCAAAQgAIFLAgj2JQd+z5sA1UEAAhBYeAKDFmz\/f8oS32RVLh6LDwEIQAACEMidwGAFW4Ls\/89Z5Bts9ctyNoYWAjMjwEIQgAAEEhAYpGCbIBfxKcpJvBUvGk8MAhCAAAQgMAQCgxTsIYB9u\/EwvHr+MpzeXh9CudQ4XgKcDAIQGAmBQQq2PjF7\/vr0HMd8vqp\/eHgYzM7OzkIbO\/9wHs7Pp1ubtZnT7k7gBjeeAZ4BPQP2fldbpQVDyA1SsD3YLmKtdXZ2dsL29vbEnj17Ft68eTMxXe7R0dGkb7Gy9v279+Hk5GSqfXV8XGu9sn26xJucp8s+qeZynsvnNBXvpvvUvp+PP29N1089nvMM93l78eLF5P2u97ze93rvD9UGLdhdxVqXtre3F\/b39yf25MmTcP\/+\/Yndu3cvrK+vT\/oWK2tv3boV1tbWKu3mzZvh7p27tdYr26dLvMl5uuyTai7nuXxOU\/Fuug\/3w\/00fWa6jK963vRet3f87u5uGPKvwQr2LMRaF7e5uRm2trYm9uDBg7C6ujoxCfDKylRWQsoAAAwQSURBVMqkb7Gydnl5Ody4caPSlpaWwvLyF7XWK9unS7zJebrsk2ou57l8TlPxbrrPSO7n088r5xnu86b3ur3j9b4PA\/41SMGuEmv9Wbby\/k7kK+5j9CEAAQhAAAJDIjBIwRZgiXBsisskzj4nX3EMAhCAwGgIcJCFIzBIwZYAF5m\/PZ\/38VT9Owevw6Onj8Pau+NUW7IPBCAAAQiMmMAgBXvE98HRIAABCIyBAGfogQCC3QNUloQABCAAAQjMmgCCPWuirAcBCEAAAnkTGGh1CPZAL46yIQABCEBgsQgg2It135wWAhCAAATyJlBaHYJdioYEBCAAAQhAIB8CCHY+d0ElEIAABCAAgVICWQh2aXUkIAABCEAAAhCYEECwJxj4DQIQgAAEIJA3AQR76v0wAAIQgAAEIDB\/Agh2wjv4i5\/8KvzwxydT7S\/++pcJq2IrCEAAAhAYAgEEO+Et\/fyX5+GnPzubaj\/\/1YfaVTEQAhCAAAQWgwCCvRj3zCkhAAEIQGDgBBDsni7w7cbD8Or5y3B6e72nHYawLDVCAAIQgMCsCCDYsyLJOhCAAAQgAIEeCSDYPcJl6bwJUB0EIACBIRFAsId0W9QKAQhAAAILSwDBXtir5+B5E6A6CEAAAlcJINhXeeBBAAIQgAAEsiSAYGd5LRQFgbwJUB0EIJCeAILdE\/M7B6\/Do6ePw9q74552YFkIQAACEFgkAgj2It02Z4XAQhDgkBAYJwEEe5z3yqkgAAEIQGBkBBDskV0ox4EABPImQHUQaEsAwW5LjnkQgAAEIACBhAQQ7ISw2QoCEIBA3gSoLmcCCHaGt\/OXf\/Pr8Md\/\/rOp9sMfn2RYPSVBAAIQgEAfBBDsPqiyJgQgAAEIzJzAoi+IYC\/6E8D5IQABCEBgEARGK9gbGxvBbBA3QZEQgAAEIDBgAv2XPkrBllAfHBwEM\/lNUR4dHYXvf\/\/7QW3TuTmO1zk4T443c1kT93PJIdffuZ9cb+ayrrHdz+Wprv8+OsGWOEuo\/VHlK+5j0\/p6AH7wgx9MGzbX\/N\/+6jz8\/Jf1bAjnqQPTzmvn+XkFgzrr5TLGzpNLPV3r4DxdCfY7P6f7sZ\/paW0VkZzOU1Vn11wXwe66dxbzDw8PQ5FZcUW5OPaz\/\/d\/w\/uvDq\/Yr395Gs5+dfop9rcXY2TxuLa+1vrpRe3f+69\/FepYk\/PE58vJF2ud94f\/4\/JvyH\/\/v\/3v0vP\/r\/\/zk8K7zek8VstY7ofzFL9PjEsubU7P2+uLn1P9TE+1\/\/JXpT\/Pdc9j44baLqxgf\/Ob3wybm5thZ2cnbG9vXzPFdalqi\/I+9m\/\/+T8K\/+m7f3DFvvyjfxq+95PX4Xt\/9M8m8f\/4rx4FWTyura+1mpjOUfc8\/mw59nXu\/\/zv\/oWOE9TKL7JH\/\/DvX7vXHM+jmsZ0P5zn+vtETHKynJ63b\/3BP5i8G4t+hn3sP\/zL3y\/9ea57Ho3Te1\/v\/8kLZGC\/jVewp1yELmxvby\/s7+\/3Yl\/+yZ+Ex3\/6p72s3VfNrNvPswBXuPIM5PMM6L0\/RR6yTS+sYOtGJNpbW1sBgwHPAM8Az8BiPAN67+v9P0RbaMGe44WxNQQgAAEIQKARgdEJdtHfCNffEFe8ERkGQwACEIAABDIiMDrBFluJs0TaTL7iWE0CDIMABCAAgewIjFKwRVkibSYfgwAEIAABCAyZwGgFe8iXQu2VBEhCAAIQWEgCCHbFtdtX6morhmWfUv1Fln3hUYE6QxT65Cpn9imYeUf1xiUqVmTxuBx9X3dcX1UuHpuLX1Szj\/l+LjWX1eFrVT8ep5hZnMvRt1qttRrNj1vLD71FsEtuUBduX6mrlV8ydBBhnSG2QRT+scgq\/sr5s8n\/OC19U3PHqhr9Waxfc9m5DdN5rFa18q0Y9RUzk2+5XFvVaPWqlW+1yo\/Ncjm2qj2uVzGrVX2fl2+5HFvV5+tVXzGrVX5slht6i2AX3KAuXxfuU\/IV9zH6aQhUcVdOd+Mrka+4j+XUz7m2Npx0HjEvmluU01jFi8bnEFNtqjGHWvquoeisOrvife\/N+s0JINjNmQ1yhn4AzYZ2AL1AZEOru6xenUVWlrd7Uls2pmWcaTMgoHsxm8FyvS9R9az1vnkPG0w7j92N2h62n+uSCPZc8afbXA+52Rgf5HQk+9\/J7kntEO5KdXoqqjmO+Xzu\/bj2+DzKmymX+3msPtVqpvotPtTWzqLWn0d9M+WGer6iuhHsIioji+nh9UeSP7YH2Z9vyH3dja9f\/pDuSrWqZn+G2v0MB8bnic8mX2MyLP1aSarVbCg1XzuEC9hZ1Np51HdDgnzL+fhQ+wj2UG+OuiGQGQG9GPWCzKys1uWM7TytQTAxGwIIdjZX0V8hevH0tzorz5LAUO9KdY9crCfXrHNOOgP6bYg1V+GtOk9VrmrNoeQQ7IKb0osnvnj5ihcMH1xoTGfRneg8\/hLkK+5jQ+0P4SxVNeoelPf85SvuYzn1m9TXZGxOZ7RadA86g\/lq5Suu\/tBtTGfRXSDYolBgemB12WbyC4YNIqTa7Rxq5Q+i8JpF6jw6l5n8mlOzG6ba7Rxq5WdXZEFBqjU2G6Yz+Jx8y+Xa+nqtr1pVu\/lq5Ss+d6soQDWqVm+K2RT1y3I2Jqc2rle1K6Ya1co3k6\/4WAzBrrhJXbZZxbBBpOwcagdRcEGRVbUrZ1YwNcuQ6i0qTHGzonxuMas1bn2dPufjOfZ9rb5vtRbFLJdr62tWP65TMbM4l6NvtVrra7SYWh8fQx\/BHsMtcgYIQAAC+RKgshkRQLBnBJJlIAABCEAAAn0SQLD7pMvaEIAABCCQN4EBVYdgD+iyKBUCEIAABBaXAIK9uHc\/15Prb3GWFVCVK5tTN97n2nVriMepJrM4V+RrbFGc2OwIiLGZrWq+WouVtVVjqnJl6xFfWAJXDo5gX8GBk5IAL64QxEB\/m9UsJX\/2KiZQdCdFseLZRCHQHwEEuz+2rDyFgERKL8Ipw0hDAAIQgMAFgewE+6Im\/gcBCEAAAhCAQEQAwY6A4KYlMO1TdtEncB+zvlqZVa++zPy4Vc6sac7Gl823vFobo1a+mXyZfLUy9YtMObOyvMX9OPUtbm0ckx+bxhbFFC8zjVdOrZl8bxZX6+Pq+5j6MsWLTDlv8RifU9\/n5Xsryinmx6jvY+rLFDeTX2Y2Rm3ZGOIQqEMAwa5D6dMYOjkS0ItQwi9TX6a+TP24ZsWUM5NvY9S3uFr5lrNWMZnyMovHrR+jcfJtjHyZfLUy9WPTHOXM5Mdj5Csus3GKTTM\/XvM0Xm0ct5jyVRbPk2\/j1dc6ZvItZ61iMhtjcd\/6vI1TzMaob3FrFVNercWsVUw5mcV8vyimvOZZTq18xWNTXHkz+fEYfAjUJYBg1yXFuN4I6GXW5UWm+b642Pc59cvyqiHOyVdc88wUk5lf1GpOPEa+4kXj68a0RtFYxWVFuVnE6qxdNkZnjnPyFfe1KSbzsTp9m6P1rO\/nWcxan2vTL9pHays+bT2NmzaGPATKCCDYZWQGGB9yyXqR1Xnh9X1G1RBb33vmtr7dhefQtUa\/lvXbrNm1Ntvb2jY1MAcC8yKAYM+LPPtmSUCCUGRZFtuxKJ3ThEutfFtSfW\/KW65N69fy\/VmsVbc2jfN7q99mf+ZAYF4EEOx5kV+4facfWC9QvVSrRk7LV821XNkaZfuXjbf1itqitbSO4kXj68a0Rt2x8bh4rnzVY2bjFbd+k7ZsntYvyhXFpu1XNafpPlVrVdVRtI\/WUrxqnnIapxaDQBsCCHYbaszpjUD80pOvl5yZ\/K6baw1bT618W1N9xbwpZvkmreZ1XafLGnXm+vrU1\/nieYorplyVaYzGmsm38epb3FrFLF+31Rybb61iNl99i1urmPJqLaZWvuJtTHO1hpn8onUUtzFq5ReNIwaBOgQQ7DqUGDNzAlUvrjgn30yFqK9W5vtNfM0z0zxvFrc2znl\/Wt\/WUFs0tizux2qMmeLqqzWLfYurVc7MfLUmHpazVnHlzbdWsTpm49XG4xXz5vOKe7+qr7He4rE+p77PyzdTXH213prENFbm56vvY+qbxTn5GATqEkCw65JiHARGREACInGOTfERHZOjQGBUBP4\/AAAA\/\/+1ZUKuAAAABklEQVQDAGR9hhFZZu8GAAAAAElFTkSuQmCC","height":237,"width":394}}
+%---
+%[output:6f169e33]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  --- A07 | Section 3: R-Group Property Table  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:26be145c]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  Scaffold families with members >= 3 (ring systems only): 6\n","truncated":false}}
+%---
+%[output:68b74799]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  Family 1 (n=34): AMPHETAMINE | METOPROLOL | DICHLORPHENAMIDE | MAFENIDE | SULFANILAMIDE | GUANABENZ | ATENOLOL | ASPI...\n[21:17:31][INFO]  Family 2 (n=4): METHOHEXITAL | BUTABARBITAL | METHARBITAL | BUTALBITAL\n[21:17:31][INFO]  Family 3 (n=3): DIAZEPAM | CLONAZEPAM | OXAZEPAM\n[21:17:31][INFO]  Family 4 (n=3): CIMETIDINE | DACARBAZINE | HISTAMINE\n[21:17:31][INFO]  Family 5 (n=3): IMIPRAMINE | CLOMIPRAMINE | DESIPRAMINE\n","truncated":false}}
+%---
+%[output:22ad50ca]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  R-Group Property Table (6 scaffold families, >= 3 members):\n","truncated":false}}
+%---
+%[output:5121837f]
+%   data: {"dataType":"text","outputData":{"text":"               Scaffold               N     mean_ALogP    std_ALogP    mean_TPSA    mean_MW    mean_HBD    mean_HBA\n    ______________________________    __    __________    _________    _________    _______    ________    ________\n\n    \"c1ccccc1\"                        34       1.72          1.2           60        226.9       1.85        2.82  \n    \"O=C1CC(=O)NC(=O)N1\"               4       0.89         0.34         70.9        224.3        1.5           3  \n    \"O=C1CN=C(c2ccccc2)c2ccccc2N1\"     3       2.88         0.38         59.7        295.7          1           3  \n    \"c1c[nH]cn1\"                       3       0.19         0.36         81.1        181.9       2.33        3.33  \n    \"c1ccc2c(c1)CCc1ccccc1N2\"          3       3.98         0.51          9.4        287.2       0.33           2  \n    \"c1ccc2c(c1)Nc1ccccc1S2\"           3        4.8         0.52          6.5        318.6          0           3  \n\n","truncated":false}}
+%---
+%[output:22c9ea87]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  --- A07 | Section 4: SAR Visualization  -- Property Variation Among Scaffold Families  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:3a89b3a4]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:31][INFO]  Molecules in scaffold families (>= 3 members): 50 \/ 200\n","truncated":false}}
+%---
+%[output:17204139]
+%   data: {"dataType":"image","outputData":{"height":237,"width":394}}
+%---
+%[output:0c9b01da]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:33][INFO]  PCA: PC1=55.2%, PC2=25.7%, Cumulative=80.9%\n","truncated":false}}
+%---
+%[output:3744b371]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAEoCAYAAACaU8LCAAAQAElEQVR4Aey9CZxlVXXvv86tuYfquZtmbJpBaUBUUBAVlZioBDUKiQL5m37xaYiJQ57Pf5L3Yl58dsZ+MYmZiMbkaT62SQSNSsAkTgT\/KoIICM0kTUM3PVWP1dU1D\/\/z3VXr9r67zrlD1R1Pre5ad+017LX3Xufc8zt7n+HmpuyfZcAyYBmwDFgGLANNn4Gc2D\/LgGXAMmAZsAxYBpo+A80N2E2fPuugZcAyYBmwDFgG6pMBA+z65NlasQxYBiwDlgHLwLwyYIA99\/RZTcuAZcAyYBmwDNQtAwbYdUu1NWQZsAxYBiwDloG5Z8AAe+65a+6a1jvLgGXAMmAZyFQGDLAztTltMJYBy4BlwDKQ1QwYYGd1yzb3uKx3lgHLgGXAMlBhBgywK0yYuVsGLAOWAcuAZaARGTDAnkfWN27cKD4lhcKepK+VrprtlRsLP59qNbZqxvX765ddGwkfvg\/lBJcCFT5QgbKJBPrm01y6Rv251JtPnXLaLMdnrn0gtk9zjVOqXlIbSbq0OPjOxaZ1qJ9G6lNtTnsa0y+rzriIAfYc9wJ2qB07dohP6OYYrmWrMWY\/B5TRtcKA6GtISX1HV45fK4yZPmZtPIypHlSvvIXtMLYkHfpaUrjPq1zLNi128QwYYBfPT6JVvzyhkR0aW6ivp0wf6tUeY01qDx22evWjmu2EfWcc6MI20GEL9cjosUOU0VWR5hWK\/tCvMAg6bKHe5OkMkBtyNC2d\/ESH7aTGSnPNALmca92FUs8Au8ItzZfTdqzSSctCjrK2rbM2ntJ7YX08srCv1ydT1sp8M2CAPd8MBvXTvrwcLJWCKkWvg1MHfzhEGaIMUfYp1CH7FPqm2Xy\/tDJj1fppPujxUU4ZQlZC9kn1PvftlH0bZXRKyPUgxl+PdurVRtJ4NKfwUv3AZ+PMfR2hLzbVUYZC2deVY1OfNE48JfVB1rLP0\/TqQ27wgVSXxvHxyffz9ZSTbOiw+eTrKEOhHV0SleuXVLeYzo9LOfRVHRxSO2VIZeXl6vBP8kWfdTLArsMWZufiC6+ErM1SVj0cWW3K0WGDKEOUIcrqF3Js+PiEDj+4r6eMDlslRD2IukpJ9bHhp4SMH1x1ytFhU0JWm3J0aXbfpj7lcurSRrn+oV9Yn1joQr9SMnXSiLppNvTYq0HEov9KyGlxsakfHDn0RQdhh7D7Mjpk9BBldErI6MshfLUeHJl6fhkZwoaecjHCB8JfKfRHj49P6PCD+3rK6LBByJBfRoZ8HWXqoVdCRh8SevWBI4c+aTK+IakveuL5hE7tytGpD2XIl9UvjeNLHd+OjN7XLZSyAXYdtnTazpW04+GL3u8WumKyb9MyMcJ62FSnHF01iHhKtB3GxBbqkNP02CBiJfmoLsmODT31ixE+IVG3WJ162ehHGtGHNBt67PMl8hLGQkYfxkaHzdcjow916FWH3ZfRI6OnHBK2UJcmp\/imuVekJ7aS31fK6MNgqlMe2iuVk9ohNvpSsfAr5aN2fEPybVouxqnv20PZt1m5dAYMsEvnqCKPcr40fkD8Q\/LttSzPt13qJ\/WPL2WaLckfX5+SfIrp\/LpaLuavNvoZktrK4bTl+6kM9wkfZHgzUyP6SJshNWOO6GNSv9h\/0mxJ\/vj6lOTTKjp\/HJRbpd+t3E8D7Aq3XqVf0FLhiZdEperN184XLGx3vjHnUr8a\/QjHofJc+uPXIQ7983WlytRJolL16mGnX5WOp9b9ok9JVMt2aU\/zAEeuZXsaW9uiPSW1Od5CH\/UcC7miPdIDR6a8EMkAew5bnR2GHSesig5bqE+T8aVOaE\/ShT6l5Epjz6XNYm1g8\/tYbvzQjzihjriqK2XHdz5ULD62+cRuRF36rLnz20eHTXWU0akMR0ZP2Sd02HwdMnpfF5ax4xfqk3T4pOmxhVSJb1g3SS7WV2zUgSe1m6TDP02PrRgltUMs9MXqYcMPXm2qVdxq97PV42UasNmJoFpsJL4cxPYJXaVtUcePQRldpXGS\/IlDPJ\/Q4QtP0mOrhMI4xEQXxkCHTQkZH7jq4MjofUKHzSd06kPZt1FGp\/b5cmIR0yd0flxsoc63Y8PH1zWqrH2hP0rowv6gUzscOfRRGRs+SshqK8bx0zrK0VEHrjo4MvpyCF\/qKCH79ZCxwX19sTK+1PEJnV8H2bdTRocPHFkJGf1ciLoaB46cFAc9diXkJL8ydAUuxNGYcOQChyoLxK9HO1XudtXDZRqwq56tICA7kU+B2YnYXcH7CHXIPnmu7k1q85WLxVYbbVCGK4Wy6kOOn0+hXeU0n1CPrHWUo\/NJ9cp9G2XVp\/FyfPy6+Pvk2yhjgxejcnyK1a+mjb74lBa7mA82vx6ykq+njB6eRNh88n1CPbJvTyqrD1wpyW8uOo2nPCmG2pT7PqqDo1dOWakSHb6Q1lXu6ygrYacML0bl+uAHEUs5ZWg+cliXeEYZfjWpnY3Z7m0ZsAwkZYBjA2SgkJSd5tOxraCi26v5ul2THtkMuyZptaB+BuyL5mfDyo3OAPsj1Oh+WPvlZYBtBZXnnW2vTAJ2uWdju3fvFp\/Gx8fFyHJg+4DtA7YPZHcfaACkV63JzAF2JWD9oQ99SK666qo8bdmyRXbt2tXy9PTTT8sjjzwi8CyMR8fAeLI4LsaX1bFldVy2zVrzOMn+uHPnTjcxqxqK1jFQ5gCb3AHaSirDfWJmfc8998jWrVtl27ZtjjZv3izr169veVq9erV0dXW1\/DjCbZHVcTHOrI4tq+Oybdaax0n2x7GxMR8KWqpcE8BuZAa41uETfUGGJ9Hll18uV1xxhaMNGzZId3d3y1NPT48D7CyMxR9DVsfFGLM6tqyOy7ZZax4n2R\/b29uToKAldJkD7JbIunXSMmAZsAxYBiwDFWZgAQJ2hRkyd8uAZcAyYBmwDDRBBjIP2MWWw5sg\/9YFy4BlwDJgGbAMlJWBzAN2WVloIifrimXAMmAZsAxYBpIyYICdlBXTWQYsA5YBy4BloMkyYIDdZBukubtjvbMMWAYsA5aBRmXAALtRmbd2LQOWAcuAZcAyUEEGDLArSJa5NncGrHeWAcuAZSDLGTDAzvLWtbFZBiwDlgHLQGYyYICdmU1pA2nuDFjvLAOWAcvA\/DJggD2\/\/Flty4BlwDJgGbAM1CUDBth1SbM1Yhlo7gxY7ywDloHmz4ABdvNvI+uhZcAyYBmwDFgGxADbdgLLgGWgyTNg3bMMWAbIgAE2WTCyDFgGLAOWActAk2fAALvJN5B1zzJgGWjuDFjvLAP1yoABdr0ybe1YBiwDlgHLgGVgHhkwwJ5H8qyqZcAyYBlo7gxY77KUAQPsLG1NG4tlwDJgGbAMZDYDBtiZ3bQ2MMuAZcAy0NwZsN5VlgED7MryZd6WAcuAZcAyYBloSAYyCdgbN24UnxqSWWu0ZTIwNjYmfX19sn37dkdPPvmkk1tmANZRy4BloAYZaL6QmQNsgHrHjh3iE7rmS731qBkyAFg\/99xzBQCNDgAHuJuhj9YHy4BlwDJABjIH2AzKyDJQbgYA5sHBwUR3gHvPnj2JtkYq6Rf9thWBRm4Fa9syUP8M+IBd\/9Zr0CIz6xqEtZAZzcCJEyeKjuzo0aNF7fU2Ata2IlDvrFt7loHmyEDmAFvTyjK4UjEQ3717tyiNj4+LUXIORkZGZP\/+\/fLwww87euKJJ5zc6vliXJOTkzI1NZVI2JppjGyDgYGBWX2ln4zl2WeftX3Yvse2DxTZBxQjWpG3DmBXmF1AWgngTqt+4403ylVXXeVoy5YtsmvXrpYnTkD27dtXtXHs3LnT3Yz1zDPPCMvHEDNP5AcffLBq7ZTKfbXHRXuAHONhpp1E2PGrNZU7NgA7qb\/ooGpu92qMudxxVaOtesfI6tiyOi72D8bW39+fBgdNr88sYJeb+a1bt8q2bdscbd68WdavX9\/ytG7dOlmzZk3VxtHe3i5QT0+PhNTZ2SlRFMmqVaucD7M\/aGhoyMnVzGe1x0Xf6Hc4Jl9eu3Zt1fJIe2lU7tjIt9+\/pHJaG43QlzuuRvRtvm1mdWxZHRfbm7EtWrSoXHhoOr\/MAXax2XRS9i+\/\/HK54oorHG3YsEG6u7vnQk1Vh4N4V1dX1frEddO2tjZJIwD68OHDcvz48bwPuUbmrLZaOa32uOgX23zp0qX5fvtjxH7GGWdULY\/ES6NKxub3MSynxW+UvpJxNaqPc203q2PL6rjYzoyNyQfHp1akXCt22vpc3wwA2MVaZNmY5dgkH+o2453Wfl8BbVYkVNfR0eFWKM477zxVNQ1fvHhx0b6UshetbEbLgGWgqTOQOcDmujWzbJ\/QNfVWqHXn5hkfACsWghueitm53l3M3gw2AHvTpk0CAdTIzdCvsA+nnnqqpC3psZ2wh3VMtgxYBrKRgcwBNpsFgPYJndHcM1Bq1pbLZXI3mnvCalyzlVYEapwKC28ZWFAZsCPtgtrccxsss7Zis7re3t6igZn5FXEw0xwywAoAqwFQM68IzGFoVsUyYBlIyYABdkpiTF2YgWKzulIz8FL2wpZMsgxYBiwDloGkDBhgJ2XFdIkZSJvVlZqBY08M2ApK66NlwDJgGWiSDBhgN8mGaPVuFJuBt\/rYrP+WAcuAZaAZMmCA3QxbISN9SJuBZ2R4zTgM65NlwDKwgDJggL2ANrYN1TJgGbAMWAZaNwMG2K277aznloHmzkAT9I4X9\/T19bl34W\/fvl2efPJJQW6CrlkXLAMVZ8AAu+KUWQXLgGWgFTIAWNtPkbbClrI+lpsBA+xyM2V+lgHLQEtlgJl0kVfmSrO\/Mrelkm2drUsGDLDrkmZrpJUywMyMgz1LqJAto7bS1jvZV34u9aQ0u9QKr8yd3WvTLOQMGGAv5K1vY5+VAcBal1H7TkzK9r4x+dqTA3LX9j3u+uesCqZo2gywLZu2c6U6ZnbLQEIGDLATkmKqhZsBZtbP9A3IrY8MyvvuOCIf\/Va\/3HLvgOPXb9snH7vzsYWbnBYbealX4payt9hwrbsLIAMG2AtgI9sQy8\/Azr7jctv2wZiGEit9+vt9cvNnH020mbK5MlDqlbil7M01mqbqjXWmQRkwwG5Q4q3Z5szA1544LnftHCnauR882y+fuHt3UR8zNj4DvBK32I\/WYG98L60HloHyM2CAXX6uzLPJM8A1S5a0uVEMqvRmsb3HRuQLjw4XHWUURc7+yW8\/57h9NHcG7JW5zb19atK7DAc1wM7wxl1IQwOs9WYxHTc6ABzgVl0xvicG7CiaBuQ0vyg6aWemneZn+ubJgL0yt3m2hfVkfhkwwJ5f\/qx2k2QAYJ7vM7fMsNvb2yXngXI4POyqw1\/Lxi0DlgHLQBkZmJeLAfa80meVmyUD1Xzmtr2jQ9ra2gqGhtzZ2VmgW7+sq0A2wTJgGbAM1DIDBti1zG6LxT4wMikP94\/LN\/rGHG+l7rP8Pd\/+XnvxmnwIBWhAGkLOG+MCYH3pHED2aQAAEABJREFUmb1xyf4sA5YBy0B9MlBzwK7PMGa3snHjRlGabTWNnwGA+nO7R+RdDwzI\/3x0UP5sx5Djb76nX9D7vs1aLvVMbSm7jutdrzhNi0W5gXXR9JjRMmAZqEEGMgnYAPWOHTtECbkGuWv5kMxKH99\/WP7iwT3ymaePy+joqExMTBSM6x+fG4nB+0SBrhKBNri+zF3bEDeAIVcSoxzfUs\/UlrJrG+9+5elSCoyZXf+vazdqFeOWAcuAZaAuGcgcYAPOAHV52Vu4XgApd1Xfseu43DvSnU8EgA1w5xVx4eH+ifxMm3oALuALFQNgfGkD\/ziM+0OHTD2nqNIHz9RW65nbW266QJJm2gA1+i+\/54VV6rWFsQxYBiwD5Wcgc4Bd\/tAXtieguXtgRP59aHFiIsbHxwv0zLQB20oAmDbme+d2QSdKCBs2bBAe4VE3lsGRzzvvPFWVzZlpA8yAN7NpODL6soOU4UhOyRMnMHBONuFlVDUXy4BlYIFlIHOAzQHP34alZty7d+8WJUCqmaiWfRkYGJDDEyc3\/9TUlPjETHtyclLow\/DwsECf\/\/7DcvDgQUEf0sjIiDz77LPOnzoQbaifxlYZfvjw4QJ\/6syXVqxYIeeff76js88+W5DnGnPN4ja55NRF8voLVjg+1zhp9cgZ+97+\/fvzuUeH\/MQTT1Q9N2n9MP245To+QV8o+4GPD61WzrVahyvpbymwJtaNN94oV111laMtW7bIrl27Wp4AgX379hUdx9GjR2Xv4FgefBVQfc7SODNAdADswTERQPjQoUPCzDmksE3aUB8eu4JUVl5JvssZVyXxGu37+OOPC7NpckFuhoaG8nkld1xyaHQf59t+1raZn4+sji2r42LbMbb+\/n4O\/S1JmQXscsCaLbZ161bZtm2bo82bN8v69etbntatW+eWhouNpbe3V3hcaTKKZFxyMhoTPIoiiaKI1BRQFEWyTMacDgAfGRmRnp6eWeS3SRtJPqrD7vuXKpczrlIxmslO\/jUX8K6uroJ8RlG0IPbFZtomlfQla\/ujjj2r42J8jC3tXhd3cGvyj0wCdrlgzba5\/PLL5YorrnDENdDu7m5pddKDf7FxjC9eLkenOuTIZLscm2qT4zHBD8by4NT0bgEwkyNoWQzWZ8kgRUcsmTMD5\/lkpbA9AFltSRx7WKeYXM64itVvNhurFkl58XXN1udK+5O1beaPP6tjy+q42HaMzX9boTuYtdDH9JG5hTpcqquVgHWpWFm189z118eWyX8ML5FF0eSsYQLYx6baC\/RnRSfBWg0Atpbh4aNT3LnNF4Tr38eOHRPo+PHjwtIvN4Rhp14tqBVikoNi\/SxlL1Y3KzYuyXDZgMsDkN6cl5Xx2TgsA5VkIHOAzeAB7ZDQG01n4Ot9Y+5tZgBCb0dOOqIp8f9FURTPpyMZjGfd6JldvynaJ7ncyd0ligqXzYkVAjAH2ygq9GPWHkWFOtpYiBSe4JAD8gOHkuzoFwqx\/1TyVMJCyYuNc+Fm4OQROCM54C7xJMrI8OY1jL6hA\/LQkefk7585IiMT07\/5zPLr2u52AbijKMpfv47ilkbi69pXRQflvbkdsTT9B2hHUeTAmzJAnfboFDMjbqhiKWrZsmUC6TI4B+M9e\/bIwvw3PWpOcNKup5FX7NOeC\/NT95+k0dv+k5QV02U9A5kD7KxvsLmMD6C+9cf\/JO+762b57e9\/TI6OHJXDw4dk74k9cnz0uAu5tD2SdV05WdUZyfKOSFZTbpuQs2TI2f0PgHrVqlVyxhlnCM84A9i+Xcvc+azlJH706NEk9YLScd+Enz9uREMmrwsqEQmDtf0nISmmWtAZyC3o0S+AwQPWt8VgDTHc8WgFLE8DY8fl0PBBJ7fF0+quXCSL4gKcu5aHu5Y4Gx9RFAk6wLqcGSCzIOopcaNaeD2bWZTaFypXgIZzKQfeyFw0S9vh\/tMs\/bJ+WAYalYFcoxq2duuTgbue+6ZAxVobnRjNz7RDv5dtOlcuuOACWb16tXsJCYAN6HIwLXUDEKCu8QBrbjbjxSCqgwPYxKFsZBnwM+DvP75ey6Xs6mfcMpCVDBhgZ2VLJoxDZ9e+aenk\/b6YLzPTzgszhbVdObmot909080S7ZIlS9yz21yTxgXQLga4\/k1TgDygTT0lrp9TJs5Cv55NHowKM+DvPyctJ0ul7Cc9rWQZyEYGDLCzsR0TRwFgJxlWTHw9SZ2\/EU2NF\/W2aTH\/Rq68wiukAS43TelNVSFYcx1cbYRqpuvZjIcTER4jglgBQKafRvXLgL\/\/hK0yu8Ye6k22DGQ5AwbYGd66fUN9iaNbGQN2z+TJO7\/VaWJyQovC7Pr9G3vy8lxvANow84McBwcn5fHDk\/LdPZOyo79Nli5dmo8dFhoJmLRtjxKFW6Rxsu4\/2gOAmmv8rPiorpm49cUyUMsMGGDXMrtNGpsbz5hlt08dkSnpyPeyPdfmgPrtp3XJJ1948mYzHAAyeKW099iIfPGxEfmfd0\/In9w3KZ9+eFL+6HsjcsPnD8mtjwzmw3EgRqCdNMDcuXMnLjUlZtI8ipbUCH1LWrpHTz1m45DNyJOyN3cdAL1p0yaBAGrkuUerXU3bD2qXW4s8nQED7Ok8ZPLzVae9pmBcAPXhtp+QZzo+JHs63iXIIhMOtLuiftl60QoH1Dec3lVQD0EBlXISJdkB60\/c\/Zx88tvPCUvgYb3btg\/JR7\/V79R6PRLgKwaYvCnNVfA+qnmgrHQlgbbTTjAAbq+bVsxwBlpjP8jwBlggQzPAzviGvu7ct7kRAs6A9ZEYsJ1i5iOSSYlkTHJtp8jnnhuZ0c5mCqizLdOaJPtXHuqT2380vSzP+3ujKJp29j63943Jl58cF70eWQowuXnNqy7VPlASz49fqlzqBCNpRl4qptlbLwO2H7TeNmvFHhtgt+JWq6DP18eAvWnlhdKfe7EcjympalvUJsu7lsvD\/RPyud3JoA2g+jeJEafvxKQAuP\/5zKjsHS9cQmd2zcwaPyVm4W1tbSpKFEWCzExbZv41GjDp40xXElloL3WC0Uw30yUOyJRVyYDtB\/NPo0UonQED7NI5ammPvqED8ubzbpb+9p8S\/z3VDAqgXtKxVNYuWofo6B+LzLL1BiCAmuvP77\/zqPze3SfkUw+MyM2ffVRe8vv3yCfu3u3i7ImvXbtC8AFAd3Z2CgT4IePyg2enl8bRIaeR+qu92gfKpJUCbQse2is9wSCGUfYyYPtB9rZpM47IALsZt0oV+nRk9LDc+uN\/yr+OdGJqwkWdnJqUXPy\/t61XlrevkK74f\/jI1cP948436WMsBviv7+kSZsWcAFAXUl9m1YA3M2zVlcPVPwTEsC7Xwll+5OYu6PDhwxIuk4d1KpGTVhK0PicT2FWGo4OnUWjnwO73n+vcyGn1Td8aGQi3c9jrUvbQ3+Rmy0Bz9CfXHN2wXlQzA4dHD8m\/H7hT\/uXpW11Yrl+7QvwRSSSA9+DEyTu0AdzR0dHYOv13YGRquhB8Ajaf+87T8qUH9hVYwvrMlj9x93MFPqWE9cu6nIveAXzs2DGBuMksBORDhw45X\/3g7Wn9\/dMzdNUpn8uBUlcS\/Bj0izuUVae81AmGbyd\/aTeo1eMOeO2z8epnwN\/OSdFL2ZPqmM4yEGbAADvMSAbk\/2\/\/3XLf0XuKjmRsakwGJ04U+IyPT8+s13ZFBXoVtu\/cJ5+5d\/q946rzudZHt+fosCiQczIAIWMLCbC+9Mze\/A1k2HkFKnxyctLpqb98+XJXRq\/EzWyUme0nLY\/P9UAJQPMYEQRQI9OOEuDLzJhr1LTLiQWvXlU7nJMFf0aOf6V3wBPHqPkzwHYO7\/HQXof7geqNWwYqzUAaYFcax\/ybJANcs9Yf+tAupb2O1J9l4ws4rp15HSlySDv7pn\/ZK9SrTH3KgOdEDP7PW1m4ewHYAB0+PgHWyD6g8frTZcuWCcRLVrjmvW\/f9Mw+ik6eUPT09Lgb16jvnzAgc6AEaInL8jlUjSVoxuDPlDkpoC1OKgBuyrQL0NMPJYBdy0k8XElI8jFd82agkpWZ5h2F9ayZM1B4RK1TT\/lFojSqUxcy2wyAnTS4FeNfS1LL2ORYgd5\/HWmBIRb2HE2+gzw2FfwBzBPxzPiytRNy7vIpAcgBcZzgPrAyu\/5f127EJKUADaB0jsEH7zjXGTkmBUwOoD6wYiMGAA5wI8+FqB\/OlPUEg5MLABzADmPTdqgzOVsZYLuzKgNxwoacrRHaaBqZgboCtoL0jh07JI3Up2hSFoiRAzzgwMwQAmSQiw2\/L+F1pIDk0pF\/k66Jp2ZVnZiaXgbHsK47J\/7rSNH51NnR4YuuTGwIUIaYZQLI6Fb1iPz3l3bIG89tc3eoY6cSHKB+1ytOky+\/54WoHDFeV0j54IazFJMAmPyimH+gJFchsGp92prrM9KlTixYJtd2fM4d7syiuTYPMRtHVh\/sWjZuGbAMWAbCDNQNsAFiBemwE76sPvj7+oVWBlCqNTtkxguArhn8K+mNgdvPZSQ5WR6Ny0\/1nJDfO21Yiv17w4UrC8zEVFIDYIxuZfeU6JI4gP37r+qQD760XX7xkk758Kt7HVC\/+5WnazXHmRm7gvdB3wE1AI4TAW4wC68VqzszWy3D5wqs1C1GbJti9iQbdcgN\/Ve7ygA3uqTxozeyDFgGLANkoG6ADRDTYLmEf4uCdrlDLOo319lh+DpSGgEY4MxQe0f\/XU458bsCeG8Yu1Pe1dEn72t7Wq5dNpp\/2xi+ScSNNe94yeokk9MR3xXij\/OWRwLAxkX3t6oncgD+0nWTsnZxm3AnOW9BgzuH+CMEXPoNWCvIdXZ2ShRF7sYzBbm4mvsD7OifE2Y+AMmZYlUZbRULmGRne3IiozfJ+fUZJ2NkOd3XW9kyYBmwDPgZqBtg+42WWwa0y\/UN\/Vod7OczO9TXkYY5QQZUO6aOuOXx50d9srF9RLj+y\/U27KXog9dcIC89e4VzA4BcIf4gbszc36p4KfwdF0ZuGdwpZj4ODU3JV348Ie+\/85h70cpHbt\/huL5wBcBdtGjRjLcIIKagT3xuMAO0AURAjpk2Za4TJvUfWz5YQqGUPaGKU4UnFk7pfSTZdXtiI9\/qzriQIdUZb40MsPrDdn3sscek3EtWrTEy62WzZqBpABuA9Wk+CSPOfOo3Q935zA7feMbPyDmLz00eRqyNokhWdq6SG874f4RZHRSry\/775Dsukl+5+myZipfTx6ciGY4vg4+MT8ryzgl5w4Yp+cjLxN1oBqhqUAXr25+alKRZpr5wZcOGDQIAUw+wzuVy7oTC7yPAvWzZMoED1OpPzpjJcvCEmIUzQydWEgGeSfpSuvDEwvfnJAC7r6NM3+AQ19vpP8S4kNEbtU4G2J48teDfI4GO\/Y97TVpnJNbTVspA3QE7CUzRMZv2Cd1cEjnXenNpq5Z1OPAXi1\/KfvPZ75OfOft6FwLQc4X4g7ebvc+LAz8AABAASURBVGblT8oHN\/xmLE3\/VQpc+layGPfdLJrXrExOTsmhoel4\/icHMeTv7pmS7zw3KWk3VjFb\/\/7TR+R\/f\/4+4aDH+KByAY12wmv+ACGzIICbPlBmVs71cHTMjmgLW6Xkn1hQl75y4sAJBHJI2EOdL6flxfexcvNkgP3GB2u\/Z+yLc72h0Y9jZctAmIG6AzagDKgq0aFQhw0dtkqJelC59Xbv3i1KzOiahZg9Tk5O5meqYZkl1FJ9\/ZkN18nHXv4X8uGX\/m+56axfkP+y\/t3ya2f+urx6+U\/k40ZRJGvXrpUDgwdk+6GH5a7d33A8Lfaeo8PyN3fvdu8Mb2\/LSUe8B3W3TcV8yoH3HU+L\/Nn9U6L\/oiiSo2Ntbik8iiKnZqkb8u8on2kv\/8pTbBBvMGOWzJ3XgCz1kMlHFEXuOjl19+\/fLwMDA64PgL8SS+yAITbAmpiAJ4+CUabeE088kY9DrHJpxYoVcv755zs6++yzBTmtbqntyapDWl3Tj89p+9Qyb+xPuo8lcV6ZW8v2Lfbc9wl3EGrRj1wj+g2gKgHOkMrK69WvG2+8Ua666ipHW7ZskV27djUFcZYOcRYfEqDFbDGtr5yAsFyH\/cT+QckdaJfTR86SlWOrBeADBIlBjodyg\/KpH3xC3vP1d8pvf+c35c9\/+CeOv\/3Otzg9MXz69Lcel3+5f687gPoHKmJB6J44IgJwI9NPQJ4yNg40cAjQRQaA8VPd\/c8ed89ko6OfADVlfOHkg3GQH+0bwIueWXNI2g59ALyR1Yc6xGIJXWPVgtNXiPZCYoz0SbeZ3z6vLOUa6f333y\/Qgw8+KMi+TzOX\/X2xmftZad\/YZ9iHOAlke1L2CV2lMZvFP6vbjPwyNo5\/HAtakRoC2AC0EkkDpFWGo6sXbd26VbZt2+Zo8+bNsn79+qahCy64QM4880x3rZYZWm9vr5MvvPDCon1ct26duw68atWq\/IyT+iwv63VT5GWn9cpd\/d+Qbx7+D3ddmVmeT+j\/fs8n8m1NLVrpZsD4AHxQLr7GHEVRfnNFUeTu5L5zZ+R+kYubxEZyi0X9omjaHkWFnABRNK3rn+hwY2YmTD1stAUhQ\/SBfOj2oh3GlEbUSbOhj6IoP06NOYvPYd9gG9D2wYMHhYM7s3ooiiKh\/2xftqduM79N6nISA9FHiHEiE8v3bdZy0riata+V9Ittx\/ZgpQseEvZK4jWTb1a3GTlmbKy6cUxpRcrVu9MAMgDtU6hDhurRt8svv1yuuOIKRxs2bHAv4ODaZ7PQKaecIhdffLGj5z\/\/+YLc3d1dtJ8cPDiQsGzHrA6gC4ncfvXHd8j3D33XAWwURYn8yeOPy+27v+TaOzJy0gcQgqJoWkcZiqJpmfhPHJly16xzbW3uxCGKpm1RVMjxhaJoWr9uaburBzABzPQ9iqZttMH4OCAyi\/FzgV8aRdF0fcCSvEDU9\/Pjx6pGmb7wQyUHDhxwKxJRFLlxoWdGDdftyZjYZn679NHvH\/5KEv9j2dX3b8Zy0riasZ+V9on9T7dFEsdeacxm8c\/qNiO\/jI1jSvz1acm\/ugM2QA0Y+4TOzx4y5OusXHkGWKJLq3V07Ih8de\/taeYCvb6bXG82840AqC\/75UND4mbub7pkra8uWl6zOCeb1nQ4H0CNAjNtXRlghgmwofep1I1zfEmZlQLYWo\/4LEez5E4bqq8W58YkQJWl\/DAmbbOsWuzmpGLbj3jUh8+QsTpmgCcBdKbGiaXfNPsSdl9nZctANTKQq0aQSmMAxj5VWt\/8y8sA13vxhANW3B0NAVD7B\/djKpu2H3440RcgZIaRZAR8OaPlAMbbzgApKDzARVGUr65gjUJPBmgDOSTiqo4DpB5AVaccP24ySwJOfOgTRLmaBOCmtUk72IqBLrNr\/IyaMwOnnXaa+Psc+1mxJwWacxTWq1bKQEMAu5US1Mp9BUgVrMOZ5cGhA+5O8XLHxzvKr714TaI7Byooik4C72kreuS1l5zlDmjMNN\/y\/C45f+W0HcD2ATKKIrccD8Df\/JIl+TYAakAb0M8rvUI4q+aSBgdMdaFPyDxqRRziqc3n2MiTr6tGGcD1x1lpTPpfrE4pe7G6dbdltEH2QS5V+e+wz+hQbVhNkIG6A7a\/FF7L8TODr2X8VojNwYQl3zQwiqLpx6LKGcuanmmw5gc7kvw5OWCpmutE0MvOXe3cuE5MAdD9jSt73A+BIEMKZqcu75Zf\/YmN8rlfOB+1I8CIG7K4ScQpgg\/szKoDtbvZjoMnBFAD2PgAnuSDPiJDURTNeikL+moRfeRkIC1eFEWCT5qd\/qbZ0Jey42NUvwywj3FyyhMHEC9QQa5fD6ylrGcg14gBAqZQvcC7EWNshjYBtLRZ5UU9l7gbwViWZfYNpQH7mp61smnlRW5I\/GCH\/n61UyR88Etc\/GQmS8K+GYC5blOP+D8E8vGfPUfufP9LhLiAK0ALKdiGs2ZODPhVLux+7FJlBUZOJrgeDumNQdRVO+VqEeNNyz9t0CY+lJOI7ecvufo+1MXu66w85wzMuyJgHb64Bx2ADXDPuwELYBmIM9AQwI7bdX+AtpKBt0tJ1T\/Cm7SiKHKzOoDv5YuvKmgPwAa4C5SxsGnlhfHnyb9bbrpAkmbaADV6\/clMDlgna02XmGlvPGW5ex\/5656\/TF616dRpQ5FPBXJAeuXKle5xKA6EzGIgDojIYQjaR48Pz15y7Z5nvkM\/5GLAiX0uBKDyaFYSaDPz5oQBn2KxwxMWgJp8kIti9cxW3wywn+lqUtgy+2GxmwtDf5MtA2kZaChg+51S4IYrePt2K88tAxzgw1klkQDnly95lZzZeRZiATHrVgWz65svfq+Kec6MGGAGvJlNw5HRqxNtazmJl7In1aHf5cxkOEj6fpwoAJJcIgC4\/dj0oxRw+v6VlDds2CAbYtKlePrA8\/Ds4+WCLgDNqgNEHeRK+mC+tc9AuJoUtljs5sLQd5ZsCsvATAaaBrBn+uMYoA05wT7mlYGkmSOgp0F\/fs0vCu8WVxnOtWWAml\/9+virbkGVSMyoWR7nZjR46JTUtu9Tyu77aplZTNosGZDWmUzSjIf2AE7Gx13zADXgBwhq\/Fpw2njxi18sL3vZy4Tn\/i+66CJ3rb0WbVnMxmSAfa8xLVurCykDTQnYC2kD1HqszBzD66AAFu0y2wPErubHQM76TfnF035J3rr25xwHqK8\/9224zZmS2tZggCV2lcvlPAv+aN+43LVzRLb3jc2qpjOZtBmPrjYw4waoAdNZQUxhGagwA+zPxaqUsher2+Q2614dM1B3wLaZc222LkD2g2f75fYf9ckDz50oaOTMU7plRftz0n3iO9Ix\/Lh7mQkzzeHcYgd6gN+eo0vk7J5z5EW9l8n5vc8X\/hHzvmeOya337pZb73pQuBacdr0Y\/yRiOdgHRQ5cyIBlkn+ajr58+vt98t+\/Nihb\/vO43HLvgHz0W\/1yw+cPya2PDM6q1gwzHvrATJ+8QWHufDs2XrLCm9FmDcYUTZ8BTnyLdbKUvVhds1kGNAN1B2xtuBTnGl8pH7OLAGSfuHu3vOmvHpCbP\/uofOT2HfKr\/\/SkvOUfnpMv37tdhp\/+tBz\/zo2yaPfvy6rj22Tt0T+Xsw5\/UAb23ynvu+OIA70Q\/I6Nt7tf43rjX\/5Q3vXpH8lH73ja+b39nw\/K339vvzz++OPy7W9\/2\/0YBUADKBXbFgA0118hgBo5yd8HMB\/gpsf4nPCb2Un1bts+5PqHjRMCn1NOIvVLslVDx1j8a+jEREeuyBnl0M6lCrXjb9Q6GWC1KFzJ0t6zr2FX2XgdM5CxppoWsG0mXnpPKwZkqzuOyP7tn5JnH\/xkQaDxySkZGJ2S5QO3y\/84a\/b16X9+eEg+eMchB44AyOTUlKvPMjovPPnyk+Pyx\/eOu5eucD2ZWWE1QCYJwNARm18IY+WAjkRRBJtFLI8z09aZjPJZjjOKNLu2yQkDBLjSh5lqZTPqkJ+kCrTx6KOPSjG7XotPqm+65sxAtVaTmnN01qtmyEDTAnYzJKfZ+\/CVh\/rcEnjYT4D1lcvulVfENDI+KceGxvMuJ0YmBIqiSC5YskPesuY\/8jYe9Rqdyslj+064OoA0RuXERX7yiMi\/7phyoI2N68WA0HxAJg3g+k5MyuceOOZ+PIP2ue5OH5LoC48Oi85k4IsWLUpyc4+1YQ+NjCGc9aKjbwB36F9MJifF7Nz0lmSPoukTEr0Wn+RjuubNAKtHrCRBxVaTmncE1rM6ZqDipgywK05Zc1Rgdp22RLy643ABECtgj09MOSDWEUQSyXVrvyadnZ2OpiSXt2sd9Q05gK06fQysFMgo+DFzhQBBwJA4PsBNTEwId4Lz3vOnDxxzJwbo8GOFYELahHOQkfHp2T96TjZYeuQ6PjJU6YyHvlRr1stY6UMacaKTZjO9ZcAyYBlIykDdATu8No2cREmdNd3JDOw5NnJSCEqr4+XwQCXDY5MC2IV65Of1\/Bg2yz4aA7wzpHzw85kppllqAKzY7BU7lQBmZp88L43ML37Bxycm5ejgmBwYmJADx0fl2PCkHBmekn0DkzI0kXM\/W4nfD57pF0CbJXR4JTMe\/6SBWCEdPXo0VKXKnDykGmND0stUYnX+r1T9vKMVLAOWgQWTgboCdphVgJpr1UmELfQ3+WQGmGGflApLq+MZdqFGHBinAbb6h\/bJqSgMUyAfHp62R9E0LwYypWavzKgJDp+IZ9iUlThvGBgTOT4yqaoCzmrA\/v4YxONp959\/c1f+5jtuwnvJ79\/jbqArqJAi6ElDirkiddo1cg3CXfpaTuKl6ifVMZ1lwDKQ7Qw0FLCzndrmGl17bhpUk3p1cGxlklra2yK3HM21YyXfce2SNicqUBcDmVKzV+ITLFwqvvK0nAyNTcnwONZpiqLpsVCHe+K4MW5wdEL6Y6fujtm7NJcOAO\/p2umfLKtzwsBSPMQb0ZC1ho5T5WKca+TFrqG\/4AUvcL9kFsZgTLRD\/dBmsmXAMrCwMzD76LZg89FaA+ftYmk9\/vaxlxSY2mKwBsiWdE0DrG8ErB8fOtepfHsumpL2mHK5nEA4RFHkfjCE8upFOXneymkbLyEpBTKlZq\/EAOBCwD40dPI6Ne1CgNrE5FS8aiAxTQllQHs0uMEOXyWWx3n8TeWQ0z\/a1qV47CoD3MjFTkiwh1TqGnpo54SBJXxuVgpjmWwZsAxYBgywW3gf4Ic20rr\/xb6fzJu6209u5mU97Xk9BQVryhB2ALEznl0jQ1EUuWvEADcURZFcsLrN\/TTlypUr3Ws2S4EMgC4J\/9rGDwkvc+k58V05fdlR4T3b6kZbx8bapbe7TbQ\/9I0l8hivZfa\/KL7OPS4sj8+2iXtULUmPjiV7YiddWwa4ubFuLrNeAJg7hiFyhEx7SshqI5f8WIjajFsGLAOWAT8DJ4\/kvrbGZa5PQzSjnDKEDHFdG9loOgNJn\/zQRtJ8h7QUAAAQAElEQVQ7vPH94sGfkscGz5G2eHa9akkHKkcActcMgDO7\/tT+G5xeP7Av6szJ8u7Zu0YURW62vW5pu\/z1f3258H7sJBCShH\/h7BSgXnTsK7Jyz2\/K8gN\/LL1HPi0nfvjfZP2e98h6+U9ZtmyZA+\/+iem+r4pn9Es6I2G+zTL47CZmlsljw0iJmXbsMutPl+zpp399ORevMCC3t7fPqmMKy4BlwDJQzwzMPirXuHWAOCS\/SbX5OiunZ4BfyQpn2lEUCdeXj5z9+7LxRe+eVXn1ilPk6NI3ygee+HXh5zRZDuZGL37Mg1h3\/PxquW5Tz6x6axbn5K0XdMsfXd3jXlMaPpo1q4KnYHY6KN3uVajbn9sn7Ye\/LItjwFYXBUT4kv7bZfn+\/6OmPF\/UEUkURdIen4S0xaRcJBL9pyVuRFOdz7lZj\/Eyo6b\/EI+X6bI3vvq+cT1pQEafdUrKC3nK+rhtfJaBVslA3QG7VRLTSv1kps1PWwLe\/NTln123Uf7mLafIL77sFOk++xdk6ZXbZPGLPiY9F\/y6dF70h9J\/1v+RVWe8WT5+zQr58Kt75ZcuWyz\/45WL5Y9\/crEQi+Xr6y9clLff\/JIlzu9PX79M3rBhSnjsipuyIN50tmvXLgH00nIGSHL9+Je\/1Ce\/d\/cJefjJb8mJvm\/L3uMT7q1rPAfu16X97vGnhBn4qzZ0SRRFwvXdqK1DAORYlBivBS7eP7WpikfZtKx8dU9Okh4vA6x80FZ\/5fRJy1nkjD8pLwB2sW2bxVzYmCwDzZqBhgE2y95KScnBlqQvV0d9pXLrtLIfs2OWx7kZ7dKzeguGMtG2So6MnyZPHDpNfrRzSnbt2iUAbffkCdm4dEIAxU1rOoSDNm8rY1mYAMyo0audO6a5KYtrvdghru+iIx510fk0DdbP5a8fr+s+5l7WEkVRDLiRA+yka84A9IqhfxOu777nNRscYIePndEOwA2H4pCwPHEzWl6IC+TozEUjia8EZWbPWHRpPHYv+NOcFCgzJADMg4ODiSPS\/SLRaErLgGWgbhloCGADpLr0DUeu5oiJR1wl5GrGb6VYHGyZOe3fv9\/NjAFXABdwYjkc2Z9ZHj161L3ekzu2w3Hijw4whftEvL179\/oqVw5fn7qq\/bDT+x\/FrjmPH3nAzfo5GfHr+GVAO4oVLJPHLP+nsiqIkQbIPT097lfMuLlM\/ZUzu2ZJX+WscPYNgJrLApzEsR9wUpY0PvaLJH0r6\/zxkwNWEshHK4\/J+p7tDNQdsAFPgNRPKzJ6XzfXMnGI59dHRu\/rFkqZAxAzJ4AZMAKsdeyUuXYN2LLMrXp4+MgRoIU\/M1HsIWEjBgc+iIPf9p378zNr9deXtKisPO2a8+TwfufCcv97X3WqK\/sfgPLKxR2yOHhkjevbPMomM\/+YXXO5gIP0jGoWYxbNDWZqYMzcxc2NdeioSz4ZH8QYkbG1GjEWTuS0\/+wDEPsJwN1q46m0v+H4qY+OfLBdkY0sA82WgboDdloCFjKopuVkvnpeX3rvzqPC710\/cmDUhYsi5qKu6D44SFPQ2TMghQwBVps2bXLL0oBWMbAG+AFt6kEc\/LY\/s8\/d1IZcDiVdc851r8tX5Zr8+16+QtYu7ZBVMUivXdoppy3vkmU97bKut9NxmfnXNfMCFYCaG+m4xo\/JHx9ySDxW5o+ZHODDeHyAU938D\/BEqj\/Rb07ktOVc7uShgH2Cky+1wUvlDZ9WonD8ft\/Z1kmXd3wfK1sGGpGBk9\/SOrVeDJiL2WrVvd27d4sSM9As0P6BcfnHB\/vlrX\/zI\/nt\/zgkt9w7IFu\/Nyrv\/uqo+5WtpFwCthyomWGm5cC\/Wxp\/iFjUoxxFkXuxCmV0\/NIWZQ6AcCh8qQv1IWzjE5P5+siT7atFll7kfqlL+\/S2ixbJS89cIjx61tV+sj38eV771GWdctEpPfKxt54jf\/G28+QL777I3Xyn9XvipW\/6hr9P6KC08XNJYWBgwL35DT+fmJU+++yzBf3U9pqV61g0B1zm0DKcMfljTMtLs46vVL\/C8ftjpcw9GaVimH28pfZ53V4cb1qV6g7YJEqBOWmZWm341YNuvPFGueqqqxxt2bLF3ZDF9bxmoZ07d8pjjz0m999\/v6MHH3zQyWn9+8GjO+VPv\/q4fPb+I+4mMg4+EAdh6PanJuVP7psoAB52ZHw4SE9MTKTmIIoiVw9\/CCCmDmXqU5c7x7lOzOyN66G0iR4fpS8ceG0BMOPjtvXUZMEBYLjj3IK+cGK1b98++Y2X97jHzjSe8pXdU\/JzMaD\/7VvXyCUrhmVtdKygPjmjzxB99In+Mhb6il9IADY+aUS\/wjqVyDq2SurMx5dr0oxFc8D2YzswfiXsULG8lOpDvcdVqj9qD8dPHvr7++XIkSOOsPO9U\/8k3qxjS+prJbqsjoscMDa2szvetOBHrlF9BpihpPbRQ0m2auu2bt0q27Ztc7R582ZZv3590xBvveIgCjEzhHgECpkly6S+3rNP3BI4MyaWsOFRFLk7ssldFEXy42M5+eozOafDznInsXTZm9kHRBvEwAadf\/75csoppwj9IBb9gPsEeHLAx+e15y1xbURR5G7oIhbtffnIG4Q3rEXRdL+iKLa35WRxd0fer3PJabLiRb9dsC3WrVsnLFHTl197\/fOEZe6\/fcfF8tE3ny\/wL7\/nRYIeezG64IIL5Mwzz3TjoJ+9vb1OvvDCCwva82OQd3yLke9fadkfW6V15+LPmMOxoONmQ7YR+wQyeSqWl1Jt13tcpfqjdsam42f1QPdhxg6xr7J\/8x3QOiFv1rGF\/axUzuq4yANjYx\/X7d1qPNfMHU6agVe7v5dffrlcccUVjrjRqru7W5qFAE1mgxxAQiIPLNv5fT0yEsk\/3HfIvY0siiIHlhx4c\/H1SSiKIqo54vesj090yP7JXnngSLcciZeficcNR9oWjsicmWo755xzjnBzFvGU8IM4wDFTo89cEycOz3PjF0WR6w9l6I+e+1X50qHXUc0RN4hFUSRtPeule+Nm6X35P7pHuWifkzeIWS4nBNqXM1cvkcs2LJM3XrLWcdWXwznxuPjiiwV6\/vOfL8jdM9uefvvtMn5OQtCnkdadKwc8AI651q+0HoCVNBb6sXz5cncCE+al0jbwJ17txtU95++qP372KfbbKJreR6MoEr435Efif3wvGEtIzTq2sJ+VylkdF3lgbJyMxZu1Jf\/qBtiVgi\/+HKQrzSp1qOvXQ0bv61qhzDJdsX6ybOfbucnMl7WsBx+AMooi4V3cA6NT8qFvTbgXmXzqgRF512celjd\/epfc+sjsZ3EBYP8mHHZ4YsKjaPogp23BOfjRd5bEf\/L0MTl3+ZRbngf0sCt96fDr5f\/d+WH5h+P\/TU6\/7Lfcy114yQsve6HNpJu8WKKt5bZMa5e+A+La95BzEhPqmlnmMbW0mQbbFnsz93++fWN8On4A24\/H94QDu+rC75nqjVsG6p2BugE2B1mAEyo2SOwQ\/sX8itmoSwwl5GL+zWoDPMK+AYYAIdeKIR5B4Y5X\/HhJCTyJmC2wrNvW0SnDk20yOB4Dba7NzWLxZ3YMv237kHz0W\/0UC8g\/aNEv+gFRL4qiAl8EbIArB7\/\/\/dpV7pWmgB4zb+wQd3C\/5fKL5Y\/+y\/XSuf510r7ihagdMSbqOyH4IIZ\/AkF\/8OdRK8jPSVC1pEicpHY5gDMWTkTCIK0KcBs2bHCXGHQ8jINLDlwaUV2WuY6ffZVxsn1ZDeBJAeT5ktW3DFQ7A7lqBywWD+CEFEiTOHaoWJxybMRQKse\/GX04gPr9AvC4psZNQOg5wChYAVLoStGJkQmB8GvjjSMUYgJ4Y+b+tveNJc60nTH+aGtrczeNMTPhYAdFUTJoY+PE4nVnTrh3kH\/41b3yvitXCM9Vf\/k9L3QvRYlDzvpLAkZ1iqJI9ASC8SfNxAHecnOiceFJ7WreGS+5Z6bNSRPbp9UBjv4nPcZGLhYCMf7Vq1fnf2yGZdNw3GznUGeyZaARGagrYOsAFUiTuPoYF3et2M8DIAFoqA7g1DLA9eJVYyrmOUDsAGd4VI4PjsiRE2PCb0eHLxbJV5gpMNOeKTqmBy3aAYQhZ5j5oB2KUXQSuNsmDknnyBOydPRe6Rx9Unrbx+SM7mF50apRObNnZNYPiLBCwO9W3\/6jPnlwz+yleeKHBDAnzYjxo6\/+TBxdKaKO7+NyNzSUf56cnDMD0wM7B3zf38qtl4FSlzNK2VtvxPTYqBUz0BDAbsVENaLP\/nU22gc84FAulxO9BocMMevkJSGUIUB0ZHRcjg6OyYETE3JocDK+fj0lvGN7eHxC\/LeLEY86PjHTVlkPWgAkcVk6jKKT4Kx+2Domj8iq0a\/JxhN\/KKeduEVWD3xOTj3+V7LxyAdl2Yk7hRk3cbTOnqMj8tffekbe8Gf3ys2ffVQ+cvsO2XLXcbnh84dSZ\/qcQACu3BBEPIiZLysQGhdOTuDlEnF9X2bUYd45WeHk6eDBg\/KDH\/zA\/fCJPx6\/vpWbPwPh98zvMfsDdl9nZctAozJggN2ozJfZrl5nAzSYXUOUAUZAIwzDr229+MylTj0ag3L\/8IT7gQ0UU3zMUFsMtgC5\/vCG3kA2Y3as78Sk4\/5BS5eMAXCdZTqnmY\/OqaOyeuzrsjoG7BmVY\/SXwvKhf3PgTRnqi08kbn3khHz+4RPCuBQgo2j6ZICZ\/kcTrqnTJ5bCAWniQADp6Oio+Dr0lRDj8v3pky9zYsNJAf1ET3ucOADYc1mCJ4ZR4zOg3zPtCfsXqycL5Xq+jrtZuPUjOQMG2Ml5aSotj9mwDMtBBGBlWRYABDR8cMJOxz9+\/TnythcslcHRSRkan0LlCAjksjXL4U4Rf4yMT+Zn2tQndqx2f6cu73I3JfkHLcDJGeMP+gTAMdumHmDWO\/4D6R27L7ZO\/9HP6dLJz56JHe6nMwHDrz05IN\/cMeSuieML6KKHRxE9FmGmz93r2Gn\/0KFDBW+nOxl5ukRdQBWJMcHLJWZT\/soFsbRuFE33h5Mm1fmcvlW6BO\/Xt3JjMwBAL+Tr+Y3NvrVeTgYMsMvJUoN9mL0NDg66l4qEXQFQFJwAT7Vffc5i6WkXWbUoJ8u7c46f2tsmuRnQUT+4vzQO8AJyp\/R2yHnLRWibmSMcX2xwJdoEsAFTrlmvGvkPiaYmJBoflWhsyHFs6g+PokgWH\/uKPHtwQL742AiqAmJMKKIoyt\/Fzkyb2T1gyUkLMfED3DlxkeAfM19U9A9eCfmzLU5CIMbIs7u058fC5stHjx71RStbBiwDmctA4waUa1zT1nK5GQCo8OXRIgCVsk+AE0DK7FD1B06MS1suks62SHo6pjm2JZ3Ts0TKPukPbwCEE+Pj8ryVubyZmSOADXAnASBL44Bo1+RhyY0OSNtAn7QNHZa24WOOtx\/fJ9HIcffilCiabp92jh15LN9GWACMIcbb2dnp6j52aMK9FAZflWJl3gAAEABJREFU6kOUIUA7BNMwJ\/iVSzrbOuOMM\/I3\/3GdnFyTD22L\/pUb0\/wsA5YBy8B8MnDyqDyfKFa3phkAILSBJUuWCACmci6XE2Z\/\/rI1tgMDJ8ENWWlpV86BuMrKuRGNMkC0alEkN79kCWIBaT\/8JWN1AKR7n\/iC5EYGVFXA0UcDBx3w0mfAtn\/wSIFPMQHwPhhfU6d\/9AOZGH4ddNiiKBKW68Oc+L7llgFu4nJC4NdBx2w\/zAUnCfSBExyeCYc40UH269eqzLuSm4l4xzrUTH2qVl8YF1SteM0ShzFBzdKfufajVt+xRsYtB7Br0j\/\/GeykBrAn6ReiDhDwx81Me9myZflnRwcmO0Ufh4KrL7O\/XAxeKitnmZyZdhRFqnKzcV5k8tYLuuXj16zI68MCS77+kjF2+tfz1N3Ste8RxFRyy+TDxwWwA2zHonjNPfCOoijQiOBLnRVd09fjkWc5xQr6ATHuvhjcb73rQfnrO34oX\/rOdre0H7uU9ecD7kMPPSR6yYHKnGwoZ1XBt6GnfW6G8wFa4wHc+NSKOLB96EMfcj9koz9o02h+9dVXy0033STwRvel2u0zpiyOLSvjuuGGG9y9LrX6vjUibkMAGzD2n8FGbsTgW6XNpGVo+u5A6ZFBef+dx\/KPQ\/FY1Cs+9oAcGBjHRdo7OgQAc8LMB\/Kqpd3CTWVrl3bKRacukf+7+UL3YxrXbeqZ8SrOmHnqDTpnr+yRxQ\/eJqN7pwHVrxnJ9H\/VRTFgA3rjbSvlBaef48A4bwvAOhevHmBjVr2qJ5Lz0s8jJIoiXOXQ0JRwvfsDXz3m3tjGT4vyE6Ov\/avH5A++9JDzKfYBuPqAyyyakwXq0J+VK1e691eTQ3QskcMhwJrVD+43QA6J2LW8KQ3Avueee8T\/QRv9YRvj29wP\/FgeFkYe3v\/+9wvfhfA72Opy3QEbcAas\/cQho\/d1ZZcXgCPXpsOlV8D6tu2D8oVHh4WZXpiGf3rouHAHOHrABSBRQkbP3eLdHTm5KkbCS8\/sReV+9MAVUj4AJd\/kQOixH+aBd\/jp2aA9JYFufERGOs5zS\/tvPLctH46Zs09RNA3C6M5fOV3OOwcFwBSw\/vKTE8IPmwRmJ37ugWOy+e8fSlyNcA7xBzNjH3AVrGOTWxnAFl6WICecwLAEz\/0G1OGRO655Q9zJj0wMVijgtST\/B230h22yxm+88Ub3gz1ZG1c4noUyznDc5cjFcsN3oJbfsUbFrjtgpw3UQDstM9P6DcF7n\/\/zmRH59q7xogDb1Z4TvZlsOsrsT5bB\/9e1G\/OGtNm8OoR2AG5o39P5Ge7wTpHxo+odL2fPgHUkUV45GS2XkfXvdicabz6\/o+AGN3XipIKZNScEq+Nr6r\/2ytVFx0q\/7j\/UKd\/dM6khCvhErD4+Mil3PHJYbvjbH7mXs7Aa8ZLfv0c+cfdu9+MkjIVf5vJBlhMBPxD9QdbLErzWEqAGsNFzrZtlcjgyBIAjA9zIjSLyyQkH\/YCX0w9OpJWK+eNTzF5NG21xvNCYyD6pHo4ePheaT925tBfWoX1\/nL4dm0++bT5lYmp9v6w65dhCUtt8ODG1vl9Wnc\/JTSkf3z8L5boDdrEkF7O1aLKr2m1AgWXoFaedI19+cnzWUrc2xoxUy8yg3\/WK01TMc4AaPe\/zzivjQtJsPla7P2aS2J0w88GMcqaYv4N74IdTojPtKAZqCJ\/JYZHhGNCPdPxXRHf3NTfM\/dplOXnTee0SRZGLAVhL\/G\/N4pz70ZA\/unp6mZ4bydQWm91fFMXRY3qmb0D++UcD+Zm+M858jE9OCWDNL5Sh8h9jQwawf+FT97vr3IArOoB5YGDAXb+mDNihD4kTBV9HfZbRfZ2Wi9nUp1YckN6\/f797BztlZvosz1NOa5ODId9JJWTfN5R9W73K9EH7pxydto9Oy7Xgflu1iJ8UkzYZl0\/oknxrqfPbp1yNtqoVpxp9acYYdQdsksBGYQeDkH1Sm6+zcmEG0n5Gs9DrpHTpWb3u+jQ\/uMFsGg5Qv\/uVp5908krhbB6g5mSBmaTn5ooOzC54rSvzwYw0iiIZeSaS\/u\/GQPnDSTnx6KQMPBCX74kB+8g6mTz9YlyFZf0dx9vk3gNt8uIzl8pfXLtKfvs1y9wd6h9+da9w89v1Fy5yIAzYcb0Yrm1EUeRsnKAcHJzMl5EBWHwpD41NFbxAhsb9lQd8H9k\/mn8NKmOiLn60RRkCiJHRQ+QlPIFBX4yIXcw+HxsrA0n1AWWoEhvfTb6Lfh1k9L6u3mXapx\/F2i1lL1a3WWzljNPvaxbG7I+n3DLjJlfl+re6X0MAm6SRaIhySOihUG\/ydAb4kYzpUnmf+DOjvjS+Tn3txWsE7moW+QCgmc1DADVykjughX788hthBaDJjJrl8dF9ImNHptw14MnTLnZAzZvL3nfHEXdj2N8\/NOY48vYDY\/KqDV2yaU2Hi8cHs3AAk2VlABhdFE2DNWXo0DCf06Q+8PF4LVxn1tPW6U99jA2J2PDbtg\/BZhEgDREPYszkg7yEzu3t7W6pP9QjE4OldMq1IH+1Q+NPTEyUfFUrYI6f1imH60FSudZBhlSGIyshQ8g+1zJ6CLkc4jhRzF9tPteyxkf2SfU+T7Kjw0e5lpEhZEjLcAjdfKiSMWt7yrVdZCXVVYtrXLgfU2U4hE05ZSiUk3RJPvgtBGoYYC+E5DbLGAHr+fYF0OeRsdt\/1Odu2tJ4uiQ8cflNAhgDaGpTDlBRnliyRp564bvktu2DMQ3JqrE+OW\/oUbny+LflvMFHcXH6jwbvDmdmDRBy05xzij\/8dqIoijWFf2qfCO53i6Jp37bcNC+sJfJEfGIR6pBZiufEgbedAdQANvqQAHNygq\/acrmce1aeJX3sqq82T5q9sypQTjucDJXjpz6ABmXllDmQIkOUQ52v921+GR9I62MrRepPHSjNHxu+EGX84MgQsnLKSr4PdmRslH2OHp0SMnaIcpIeW0jqG+p9mVj4Kfk2yujx8cvokCFsSr4eW7lEPSW\/jsaFY\/dtyOjRaRmObFQ6Aw0DbDYS5HcRGfJ1Vp6dAWbJs7XTGq7XjsYoNTg26e4SB6zLmVFP1579CVBzjfdNf\/VAwaNjerMWS8J6B\/vYdX8gwy\/+uYIggNVUb7wM\/rKflxM3\/Y1865lReeDx3fKGg7fJR57+gPza7t+Vn993i3xg9xb5yydukmsOfUHfHV4QBwEQBDgBvSiKUDkCnK9Y74ruI4pO2uIJttPxEUXT+vYYrLm2jy6kg4NT7uY2+q22KIrygKu6NA5YY+Ptb\/6z8sjo1U652kRewpic7IS6JLnSGXZSDD0Qhza+00q+zfenjI\/akbVcDsdfyY\/j18Xuy1rGH1I5iWNXSrKX0qW1XapeMTsxleib74teZb+sOvyVVFcpJ66SX1fjwn09ZfzhkF9GTiP8NBYcOc036\/pcIwaoSQ8Tjwxhb0S\/WqlNbhjz+wtQczPVnqMjcuD4mBwdmnT84T0D7i5o37fc8jRYPyef\/PZziVXQc6e1f8174JK3ytG3\/aUMvWmLTL7ugzL21j+Q0c1\/J\/suukG+\/NSU3P7DffIT+2+T1x\/8ggCmY\/HJhT8J\/ulDt8kHdm1xM22J\/wFCCnax6G5KgyfRNWef1EZR5G5ii2JwPqmdLnV1FO72PjhzRzpeemKg7WsfkLGnkX8CE\/pQF3uor5acdDLAOMqJX65fObFCH77TPoV2lfHhuw+prhSvxDctFu0qleODb5rffPWMp1R8fObTDvVpQ2k+scK6tYwdtrUQ5cIjVx0yoBu0WFPsSPgV81noNm4Y05mzgvWxofGCtDCTXLW4wwEuwFpgLEP4ykN9whJ4MVeWyZmBs0TM9W4ec1q8fqO0b7xUJi54rbvBjJvLbts+KP\/88KC8+sTd8qrBuwtCAtwxbotE4v6xTP7Th78gfbJcWH4G6GTmH+UomnGc0Sn76Y2RhM9rLwrAWXOideAst+fimNyVfuHaTlR5iqLI3c2uijwoqiKB+ycwmOkz+WEsyLUiZvRhbF39CPW+DFiHfknfQb6T6P26lZaJkVRH9cSHVA59i9lC33Jl2lIqpw6+5fiZT\/UyoNsd7kdlW4Q63561ci5rA1pI4+Fub2baJ0YmBNKxt8V4xjvD1y87CT4KrOpTijO7ZgZdyg+77xcCGkut33jqhPATmitGDsjPHv9CXMWfU8di\/DcVq6AoiiSKIvnpeGn8+MT0jWdhTMAliqK41uy\/979IBODGojNnXsPalotkWU+7e7sbtpDaOzrkpWevEGK3tbW5PrAEzzVr9QV4y50hA9CcwEAANbLGqTfn2nmxNhlzkp0DIQdEJWTfDxmbrwvL6oMfhBz6IKPHroSMvhThp3WUoytVz7fjr0QM30YZG3olZPQQZfR+GRnChr5cKrcOcfH1CV257eDr1y23Xjl+tYxdTvtZ98ksYLNDZn3jMb43vmCNLO5qE14xunJxh+MANYCN3ScfWH19UrnSR8c4ISAOgKYAwN3Xu48MubexYVszcRA2QzFCz5SUMdPWMvyV7U\/BxI+JghukmBUDrBDlXO7krszb0\/7yjavlw6\/udY+I\/cm1a+TNl6x1gE39JFq\/rEt+77pNAsC+9KUvlXPOOce9ghRfgBrABXiRW4AKughgQwXKWCB36KFYTPzjAKyU5IANvXLKkC9TVsIGIcN9Qqfk68MyPv73G9kn3x89snLKkMpwYikhY4fCMjKEzSdfR1lJfZC1DA9ldFCaHltI+Prk29GrXKyMTamUv9qVU0\/LIcfmk9rRzbXM9vHrEydJhz7LdPIol6FRsiEzNJyiQwFYWeblJqolMXDDi1VQYC3mg40ZNrxc8v11SRhg3R9fTydGFEVyytQhih7NBu1JptmxB2Nq798bl6b\/iMl7vJG48xmAZuYNATyAak9Pj1u+Hj\/aLu3PRrLi8Q65sm2lvPnKTaKrEdT3CaBmlYLn0n09AA14QwA1sm9vtTKgvG7dOlm+fLn7JTM4MvpWGwv9DQ\/e6OZKxFKaawyrV7sMcDxn+4QtJOlCn6zJdQdskswGKJZI7PgV80mzUTfNlkW9D5TljK9S\/3Ji4gPwwZUAON65fXyi06m4kzuaHJduGZWeySHpnBp1+lkfMxjeFV97bl9Z+Ia2VatWCXEBGYgbwSCu3ULtI0tl\/7\/3yEO\/s1h+9Mft8uT\/bZPvfmRYbrnycbnvUweF6\/4AM+BdzgtkZvWtxRWc2LD6Qe7gDRuONWwZqCADc8WCCppoGde6AzaZYQOkASt67PjNhagLlVuXXzhSYubWasSEFDD0ibH7sl9es7hNio1xz9Fh+cEz\/UJc3gbm100rE\/OSUxcVxGV2zZu3eKyI562vOXSb3HTgb2Xl+GFZPnlMVk0clvXj+2TJ5HG6e5LiS9Ncg1+5\/nRpO\/vFBTG137l4+Zvldp+G+qZkxxcnY5pG\/LCv9\/7tQfnSrzwr2tfXXyVd4gMAABAASURBVLBCwj5r\/FblJ5OYXOJkjZsIuUkQnuy1sLQcb+ox4nq1U4+xtFIbSd\/lVup\/2NeGADadAFTZiUNCj70YhXV8uVi9JNuNN94o+ju5W7ZsEX78oZXooqUDiaDGzV7hzrqye0rWRscSx\/iDR3fK1tsfkWs+fp+889MPyYf\/5XEZHBmTZw8Py5ETowVt9A7tlbP7H5JLD33D8eevys2K+fjjjwtg\/bLF++Waw1+Qa4980aV\/oG2JxJjsynwsnRyIwZul8ilpj\/fG3q6crF0Sn1Ssv3BWTE6s9u3bJ\/zyFT9eofTsoRPyxL8Py4+\/PiHDYxPxycZUQX81D89+v1++\/rGnZsVthu2tY5tPX8gNOU0iQJpn6T9y+w731ABcn6VP8kfnf68oo5sPhTFCOSl2mk+a3o9Rygd7wvHGD1GyTAwoydHX044vJ\/mbrvoZ2Lt3b8H3ne9Zf39\/9RuqU8T4EFmnlhKaYScOKcFtliqs48uznEsotm7dKtu2bXO0efNmWb9+fcsRS73ceAWx7KmE7NOV561JHNvUopXyL4+PuGeftS58+aIO6e5oE17teXhoUtZOHpZrD39RPvr0B+QDu39X3rH\/b+SDe35PPvC9t8uiB24tiM1bybjLetGOb8tPDn87vxVOxIA9GnU60I5ibRR\/dMXL5MumTsiSrnZZsbhTutaeJae+808K4rFduObKkvj5558vXM8+PBzJFx8bkd\/5yqg8dGub9I9MyZFhkX0Dk67PjCGkHV+cmhWX2I0mHdt8+sF16Tils\/4A67QbDtFjDysBLv73ijK60K9cmbrEUP9QVn21OPGrFSstDm0wJoiy7xfKvs3K9csAxwv\/O8X3rJUvBzUMsNmhleq3+Wa3xO+m6m+vcmMT10Rbjd7zmg1y2VnLJIoiYbk4iiJXjqKT\/NTl3fI7bzzX3fkcju9rTxyXrz054OpQ36d1vZ3u7ure4T559d5\/ljccvFX41z7zmNRpy7tcvdFv\/q30f+Jd+fgsVy+ZGJDFD94mPFbVGftHMv3\/aMcqAbhjkVCOWBpfd+YGWXbNe+W0j3wzH8fvKzeVcRIACB8dzcmXnhyT25+alEUnCnfjKIrcr3P1DYy7fPjjiaJIDm+fTIzvt1Xvso5tvu26ZHofLIMDyp5qVhE7frMMgQJgClRNK5bqK8eeUj7VHhzt0e684lrlijIQfp\/4njGJqShIEzkXHunq1DF2WnZeJeQ6NZ3ZZriRirudwwFyMxh6brYKbcgcqDlgU06jZT3t8sbJ78hVA3fLqsXTj46dGgM1er\/OyI+\/L8fu\/HOn4q7tqP+AA8woimRlTyRxVWfj40TbUjncsU4GulZLbulq6Vp5qqy86Q9k2Rvei7ko9fX1yR2PHJbv7J5w8RcPthX4c\/0axcj4pIQvk0F\/fN8YbEEQTxGUM9Dw6QG+m8W+l9iU\/Piqg6tey2kcP2xKyEmkdniSfT46jQmHNBblkNRGjrRs3DJQjwzUHbDZ+cMdHRl9PQac5TZYGgeYP379OfLeK1fIX779fPezmujTxl3OAX3lWJ9ce+hWiXFX2uKZcndH+m7Tf+dfuKZ43Co6vt+VoyhywNrb3SZrFudi8M7JikXtsqq3R9as6JWuxb0SdXbL+OHnpJx\/Ow8cd8v35fgmAfbSUzrKqZoJH24gLGcge46OzHLT7yXfTUgdKGNTQlab6uCqp4w9jeOHTQkZf5\/QqR3u26pV9tugTFzaCgm9En4QPr7Ol1W\/ALgNscYZSD\/y1rhhC1+bDDCjvvSsXrn6nEWiry4dGxsTZqXbt28X6Mknn3QyPWCGDS9GK0cP5M28BjUvpBRGnvz+zMtOFs\/yaI8Bv6s9kt6ejvj6eOHu176y8DGuWZVnFPps94wouzcWnzFzt7v6Ll3fIae+eJGKmeeshJQzyDQ\/gEcJYEqKhV31+CiprlW4P45y+0wdiDGXW8f8LANzzUDhEXOuUZqwHl+iJuxW3bsEWD\/33HN5gKYD6ABwgBs5JJaUucucu7wh7gpHhx+ACw8Ju9bZ+dD3hNjdl71JuN7s+yJ3dnb6KlcGrLvOe6krl\/rwf\/tafZ+8ePYMUW3+ScapL1o4YM34i\/2yG3aIk7zQby4ARB2+d0rEbnViTCHpmNBrOeRqUx7aTW5ABjLQZGYBOwPbpipDAJh5\/CkpGMD94lWFs1OAl8egAN+wTk6mZs2K8QnrTC1dJ8Sm7dGXvF0AaCUAmzohlQvW1Fu8eDboPnnxqBxaO4F5FulJBrPr1\/zWKbPsWVdwD0OxMV578epi5pK2VgQlTirK6Td+IZVKiPrjRxkO0Z4vozOyDFSSAQPsSrLVgr4nTpzI95pfzdreNyZ37RwROIajR4+Kf0AHqAFgbErf673KFTvjpWzA3Aneh19nqnedTJ5+cd46\/tIbZfSUTXk5qcDsmhvOkmxJuhuu3Ci5+Lp4aPvO1YPyyKaR+LQiEl78gh2wXnNml1z2zlVy020bUS044h4GfxtrAphZo8euOuUACwDjEzrs8HL0+JZDafH8uqGPb2tU2e8T5Ub1w9rNRAbKGkRDANv\/smuZ3mpZOTqj+WXAzXRPTMqtjwzK++44Ih\/9Vr\/ccu+A4zd8\/pDTc8C+9Mxe11AI1k4Zf\/zbmutkeXdOeFwrFgv+qKM0tPp84Q1nvJyAF5zgOPIzvyu9b\/hVigUEUKNf\/zvfKNCXI\/zyazbkl9snJsU9d33gxITcc+6wfP61\/fKvVw7Ity4ZlCd+ZtIB9WXvnN8sspw+NbMP25gbEnklKyANR0af1m9AyCffrxw9PlrHL6NLktFB2JV8mbJP6pPG8U2zocfOsUbLcCVsWi7G8YOSfHw97fhykr\/pLAOlMlB3wGanLZdKdd7spTNwdKxNbts+GNNQovMXHh2Wmz\/7aP7HMQBe35G7uq\/b1CM3vPtdMnnayZmz70MdaHzxahl45S87EzKvJz1+\/LiTeVwLYF773n9wj2\/BkdE7hwo\/ABp+DjPX3iGDE9PPXROCdo\/3TMi+eKn\/mQ1j8tTSETc+bAudmFFfe\/Ea9051+ELPB+PnWASvNdWrnVqPw+I3NgN1B2wdrvH6ZOB7e6bcEnhaa1EUCc\/g8rYrQPCvf2atfPjVvXLzS5Y4\/vFrVsj1F05fMx677g8k94rNs0JNLFktgy+8Xo787PQz2L4DM3JdRmdGzbXqxZe\/ReC+31zKPHu+vrdTBobHC6q3xXs1L2vhZAODjo+ykWXAzwAzX1+eb7na8ebbH6ufrQzEh7ZsDchGczIDPGP9uQeOSRRFJ5VBqb293Wn05Skb1iyVTWs65FUbuhx3Ru+j6+p3CTNjZsgrb\/oDgQ+\/41My+KLrPa\/C4h5+UOTZfuEHJwDPQuvcJR5J23t0SNYubpNVi3LCkj0ceWlXLr6OPf1OcVrQ8VFeqMRz7ifu+aJ7uQ28VB4AH59K+ZeyE8v3CWXfpuU0nzS9X68cn2rMfP12iOfL2h\/jloFqZMAAOzGLtVe6a8t9fcJz0RCPQXFXdTVbBtCIx1vHwruzkTuDx6sA01NPPVXS3rVLHOzhTBnQJx5t+XRoaEq+8uMJ+fVvTi9L84MTLL8n\/egEfaX9SkCdExKWwJlRd7ZF0tMRCdzvAzN8lYmv5YXGj93557L3d66Ww5\/9Dem\/8y8c3\/W+5znwTsoFoAP4+IQuybccHXWJpb6hrPpqcI1Ne5SrETMtRq3jp7Vr+oWZgdzCHHZjRw1YV\/ps9Fx6vNd7exWACkArIYcxAU10vFOdl+ZThgBq5PPOOw9xFmFfsmSJe3xLjYeHRW7fMSX\/GlMURarOc2a8gDdtshz\/pr96wF1rBtR\/7W8ek596\/71y+\/\/dK3vuH8zXCQvUBbBDfZqMf5oty\/pjMVj3xyCdNEb0x2J7ki3UAYChrlVlgLZW4yEu8Vs1N9bv5s2AAXYDtg0z6WLPRu\/Zs6dor2pl5KYkjQ1Ab9q0SSCAGlltIV+8ePqNZj09PbJs2TJHPzjYId99btK5RtFswMZwz85jsvnTjwjgjdwzEMnGB9rlFbd1yWX\/1inf+YMD8sl3PCW3XPm43Pepg7jMoihKjj3LMVb444vFBfHHMnh\/ClhrArDjpzK8FOgASEr4K6kO7usoqy7kakMPIScRNqUku+rou5bL5cTFFw5RhiiHhN7IMtCIDBhgNyDr\/rPRSc3zbHSSvlLdtS9YU3YVwEwf7Sq70owjy+T+Mnrficn8XelRFAlL5jOuBezEyIQ8sGv6LnIH1g+2yzkxqROz56GxCTk4MCrfvqVP\/vX9hScy3OkcRcUBO5eb3sXnMz7tTyM5qzKc6HH5BCr3EsrEofLez87rZMPxAXw+WKkdHTYlZLWpDq56ytjTOH7YlJDx9wmd2uG+rVplvw3KxKWtkNBD+GCjbGQZqEcGpo9m9WjJ2shngINvXqhxgWduy2nCB+vje8fcUvTjdxxzvJz6J5fRRfoGp984xrI7y+VJ9XldqP4wB+\/6Xv\/jNjk1JnwB6onJKRmPJ+g8Y31saEIOHB+VH9x1XP79E4VL5L\/86rMSX6JCnCiaPlmgrbVLO6t+0xtt1IPYX+Z6CWX4x\/eU1cXxw7sT\/QAkJQAqyQm76vFRUl2jOP3w+1aqH5X4lopldstALTJggF2LrJaImQZiWq2UXf3K4Tyq5YNxUh1mn7xIA6Bm6fmz1+2QL\/\/qLvnmln2O31JkSdqPx7I5S+jdK09117MBbLUDmgAzs2r4+MSUmqSjX\/IzawfWsSnG67ydgr65bOcXxuRX\/ukJVI4Y3+XnrMq\/RMUp4w\/ajtra5ejgmOw7Niz37jgkv\/XFx+Vdn3lYkm56i6s07R8z68HBwhMV7SxgvqfIJZT2laera1Ee+gF2RSskGKkD6CkluNRNpX2Zb4PECcmPiQ1ZOWUjy0CtMmCAXavMFomr13zTXErZ0+ql6XleOWmmDVCj541X02B9KL5WfCgxzH2fOiRf\/pVdibZiSoD62NC47Dk64mbJh06MOb6vf1SYRVN36dDJ3RCgVnDGphRjuBbl6e+fEG5UUwXju\/lVZ7qTBL2pbirKyfGhMZmYmBAe88KXkwFkQI7r5tz0hr7ZaT6XUHjmvdT4uOu\/HL+0OM0GVvSHk4a0\/qLHjh\/lYoRfSOqvemTKcIi4vozOyDJQjQycPFJWI5rFKCsD4TVfrcQjSPw61tGjR93jXnqdEoBhlsW1S0j1Wq8czkwUYAbcmE3DkdFTn+VviHIa7fnhYAzoyTd\/+XW4toysYA1gI4cEOAPay4fbnAlQRueEWR9T7rlq1N0Dkr9RDRliHIyHcTG+S09fLIs7RJZ2zd7FAW5e5sJjXj7wE6cZie0\/n37x+tdi9Rdd\/pZZZgAH4PEJHY7wcvT4lkNp8fy6oY9vSyr7\/Uuym84y0IoZmH00a8VRtGCf\/Wu+2n0Au9N7NpoD9f79++Whhx6q6OcxNV7ImVGzPA6gwtV+PL5mzQxa5WK8XD8PQukxAAAQAElEQVRm7ix\/Q0nxct69YnlAB7GTnGNdLr4eHTP3N7R42hHAdYqZDx0fY7vvmWMz2mRGrrEw04Y3ByX3otQlklJ2Xv+aBNrMrNFjT2oZkPTJ9ylHj4\/W8cvokmR0EHYlX6bsk\/qE3PehHNpVxgawI1OGK4Wy6pO470s8X07yN51lYK4ZMMCea+aqUE+v+XLdd\/ny5Yl3U\/M+bmbdQ0Oz3wUOoBe7flluFwHscn3x21Pk2Wjs0BtfsEa4Vs3yNrNmOHqf2nKRQI+eNiL8m4ZhSoXkYbUMLZ6UI6dMOoe056r1hSrOqYyPEPjLqFJXl1KXSErZ6SygzBvqeDsdIA1HRo99oVK1wbXa8RbqdrFxJ2fAADs5L3XXpl2nZOmWzgDa8JBYPg91lcrH941VVKWUP0B66\/37ZWR8UiZjpGbZm+XxsYkpd92an7xc1tMuG1Z1S1f79C64\/cLR1D60x8CuxsPrpu9AR2ZGDQ+J9qPIm8KHDoGMf6BqKjHtEgqdZHaNnXIpYkbNtWpAGl7KP7SbbBmwDDQ2A9NHy8b2wVqPM8BsOWaz\/nTpdpahgYqlp8QXh1PaB\/w+cfdz8td3TT8mxAy6vS0SQJdyLgZSOIBNiHW9nUL5iYvH5Nj66Zkz+ij+yMUfHXHduOj+hpdMyUMvm56NA9YsfTtDwkcUxZUT9KrKzTyfjUwseDNTeAkFoGaF5ryUt88181iaqW8sYVezP9WOV82+WazWz0BmAZsvjlIrbCYOwEn9VGBRHvqk1Qv9isnPu2ZZMXOBben6Djn1xYsKdL7wlYf63PPOvg7oBD8jYdF7Kl4qn5DDAyPuDm78AOw\/uu48+a+fOUcu\/oUVDtwB+TYQO3YYioH6qUvG5e7rpsE6VkkxsOYafXt7e+rz2dTHDgesi8XCp1kIgObyCQRQI1fSt8nhfTK6999k+OlPO16qrn5\/lJfyL2Unju8Tyr5Ny2k+s\/VaY5pjh6al5E\/s813CJgakLRDPl1Vv3DJQjQxkErD5wvDFUUKuRrJqGSPtOqQCi\/KwD2n1Qr9S8mXvXFXKxdlPfdEiYTUg6a51Ztd6E9firjbnrx\/cma1l+PGRSQfYxAI0AVmA8x2\/dZYM\/bcuue91o\/LIy8cc\/3YM1DteOE41R6cu6xLuBHdCygc3vbV3dAjPY\/suyP6NfbTp27NaBqSPf+dGGXr0D2UkBmz4sW9c7cA7acx8Z\/T7oxxdkm85OuoSR31DWfXV4Bqb9ihXI2ZSDGLTBkQ5ycd0loFqZiBzgM0Xhy9QNZNUj1hch\/Rf76lt9vT0uOeL4apTzuyaeirPh1\/2ztUCGBeLwez6Fb++Snbv3i27du2SY8eOOTp8+LCTv\/\/IUwXVl8XXqVGEYI0OGo2vaWO7cG0HYp7+9JeeL9dfv172nDsheoMZRp6nftsLlsoXfulixKLEY16AsQI0IA0h0ybPYy\/rGJef3Tgsc3lMrmjjTWYErAHppG6hx55kC3Wt+L0Kx6ByLY8T5In42hbcyDJQjQzkqhHEYlQnA2nXKS+99FLxlz8BamSWRavT8nSUN\/3lGZI00wao0d9020bhMbODBw8Kd69P1xLhOjvyU3uPiN4khw3A7mpP38V47eiaxTn5fzaxaE6NkwTg+s9V83w1QP32S3pPOpUoUYeZtu8GWK\/ompKfeV6nfPyaFc7ELJ8VA4DbKTL0wTI4oFxsSNjx831KgQ6ApOTXUx1c9VpO4\/hhU0JOIrXDk+yqo+9aLpdrTDik9SiHpLa5tKN1jVsG5pKB9KPpXKLVqU74BfLl8EuELdT53WS2qATYNJpWrFgh559\/vqOzzz5bkOkTPEmPrZr0wl9YLm\/7pzPlmj9dL6\/8jdWOI6OnnUOHDrklcT+HWp6KL1HjAygqrV3aIUs6ZwNyW07k5y7qkT99\/TIH+NQLac3iNrnk1EXy+gtWOB7ay5F\/8WWnyG3vvkj+4m3nyf983ZnykdeulD98TZf85OljbnWgv79feO2nnnQ8++yz7qSjnNjN5qPbweeTQ\/t8MbU8fuTBWTa+N3x\/lNQBGZsSstpUB1c9ZexpHD9sSsj4+4RO7XDfllTGHyrHV+urP3Uoo6ccEnol\/CB8VNd6PLs9TvqOtvJo48Nm63WfL0ca+aMp54t04403ylVXXeVoy5YtbmmX5d5WJk5A9u3bN+exHB3fJxNrDsmii\/sd93Nx\/Phxd+056Yvw0nWT7m1koY03jq1eFMmK7kh6u6b581fm5E0bpxxYMjv320grz3VcE\/0HZG10TC7qPSErJw4Jj9BpH5ld84w7j8cB3PPJW1q\/y9HPdWx+bPru7\/+Ux4\/OBmL0IYUzbLX73zO+T6r3OT4q46OkukZw+gTRl3Lbx79cX\/WjDlRJO1rXeO0zsHfv3oLjIN8zTtJr33JtWmhJwC4nFXyB+CKV8t26dats27bN0ebNm2X9+vUtT+vWrXNL6LUYS3t7u7uRi2vBSfSm89rdC2DUpv7tuUi62iNZ1DHNL1zXKT3x9Xlo7dq1ZeV8vuOiL8z8tW8+z+VyEkWR61Mt8lYq5nzHRvzly5fP2t1z3afM0iUpQj++P0l+xXTU4TunVMy3ljb6Ua34xApJY6PXsvHaZWA+kbl0yHdDie9Z0r1C82mjnnVz9WysXm3xReKgUU57l19+uVxxxRWOuIbc3d0trU6AYFdXV03Gwc4eRZEDtyiazbnGfNlZywQAhKIoEq65t+Vy+Tprl7TJey7vdcBPrs8444yy+lrOuABhVgHY\/hAzUGTaYTatfYqi2X1n1o1fI6icsZXTr3Cf71z\/ulA1Swasy\/GbVXFGwfdtptgyjH2jnH7jF1KpQRKXOqX8zF77DITfGb5nnLjXvuXatJCrTdjGRbUvS21zv3r1ajeDTmoFMMSedLMXj1idvnKRXLepx93sBYhz9lvNG+cA5GK\/G40dQE\/qu+qq9ZicxmsG3nX2LxTtRkcCqAM4fJd8QkcgeDl6fMuhtHh+3dDHt4Vl35dyaK+WTGzNA+VqxbU4rZSB+vY1c4BN+vRL5HP0RvPPAI+RAbTM4DUaQI28cuVKwY4+6S7vf33vpfLbP3uZzPXFH8QtRtzpzXXoJB\/Aenh4WADkNNBmDNr\/pBitquuOATsJtJlZo8eeNDZAyCffpxw9PlrHL6NLktFB2JV8mbJP6pPE1S\/Jpjp8OEYgU4YrhbLqQ44fpHri+bLqjVsGqpGBzAE2X5YkqkayLMZ0Brh0wDL2smXLBAKokcPZMi9E4VlofSnKdO3afXIzWbHoXL\/GvmTJEgGcKUNRFDn5lFPKu95LnVYjQHnplduk54JfF0Aajoy+1cZSzf5yrGjmeNXsm8Vq\/QzkKhyCuVsGXAaYZTNThgBqZGeowQezY2bPPCcN5yALD5vCL9T5MtevuAaPjmtbnGxAvb29snTp0vzqgGT0HzNqrlUD0vCMDtOGZRnIbAYMsDO7abMxMEA4vC7NL5cB2AC4P0qui\/tyWMbO6oB\/coEOmZOO0D9rMj+j+vgdx+S+Tx0UeNbGN5fxsIQ9l3ppdaodL60d0y\/MDGQLsBfmNsz0qAHmYtel9+zZkx8\/16fzQkJB7QA0KwMQQI2c4J4pFSD92et2yDe37IsB+5Djt1z5eFw+mDpOwMenVMcyDcTyXUPZt2k5zSdNr\/XgpXyws1qD71yJGJDWJ54vq964ZaAaGTDArkYWLUbNMlDqujQvPNHGuWFMl7xVp5yZNHaVFxIHrO\/71KHEIaO\/L55xh0ZAB\/DxCV3oV65MXWKpfyirvlqc+NWKlRaHNhgTRDnNz\/SWgWplwAC7WpksHcc85pABlsTDalEUhaq8vJCXvPNJ8Aosg9+XAtbqhh0\/ldM4wJRmazU9AFur8RCX+K2WE+tv82fAALv5t9GC7iEz42IJSLKzxM1yN9RsS96cgLDMv337doG4Do9cbIzzsZUDxMTf88NBWJ5KgQ6ApJSvFBdUB49F96flNI4TNiXkJFI7PMk+H53GhEMai3JIaiNHWjZuGahHBgyw65HlVmijSfuo153TulfKnlavEXrAOryBDh2AvXPnzpp0KQTitEaSgB1A8sFK66LDpoSsNtXBVU8ZexrHD5sSMv4+oVM73LeFZfUN9aVkrUd8yvhTDgm9En4QPqoz3jwZ4IQY4jvWPL2ae08MsOeeO6tZhwxw3Tkr16U5aBS7gY5XqFY7pfw0ajkx0\/wAIiWAKSkWdtXjo6S6VuH+OMrtM3UgxlxuHfOrbwb0pBjgrm\/L1W\/NALv6ObWIVc7Ahg0bhGVuDcsyODLL3aprBV7qBrrh4eGqD+N51ywrGROwDv3mAkDUAbyUSjZcQwf6QnjllOdC1A9J46DXsvHmzwDAzQpX8\/c0vYcG2Om5MUsTZUABGs6BEt5E3SurKxwwynKsstNl71xVNOLzruktai9lZHuU8qmn3T9hoJzUNvpy+o1fSEnxfB1xqePrrNwcGUhb4WqO3pXuhQF26RyZh2WgeAbKtLIyUMw17R3nxeqUY7vsnaslCbSZWaPHHsYBcAAen9DhBy9Hj285lBbPrxv6+LZGlf0+UW5UP6zdhZMBA+yFs61tpA3OQKkb5EoB+ny6DyjfdNtGec1vneLAG46MPi0uIOST71eOHh+t45fRJcnoIOxKvkzZJ\/VJ4\/im2dBj58RDy3AlbFouxvGD1Id4vqx6482RgVqdFNdrdLl6NWTtWAYWegaK3UDHgYT3mdcgR\/mQzKifF1\/TBqThecMCLlQbXKsdbwFvmpoM3f\/Rn5o0UOOgBtg1TnCWwnMNljudeX4Y4q5L5CyNsdZjSXuxCzOzWrdt8WdnoNp5r3a82T02zVwzwArWaaedNtfqTVHPALspNkPzdwKw5g5LH6DRIQPczT+C5ukhN8zxUheIO92R69G7vqEDctdz35Rbf\/xPjpdqE\/DxqZR\/KTuxfB8n+4qEcppPmp4Q2HxCl0T4zHdGTAxI4xPPl1VvvHEZAKj5jvFda1wvqtOyAXZ18pj5KABz2h2WALf\/IxyZT0YLDhCQft9dN8stP\/pzuS0GbPgNX32rA++k4QA6gI9P6JJ8y9FRl1jqG8qqrxanLaVqxQzj6Bhoh3JoN7nxGQCkIQC78b2Zfw8MsOefwwURodQzxP6PcCyIhLTQIAFrQDqpy+ixJ9lCHcAU6lpVBmDLGM+chkdc4s+pslWyDBTJgAF2keSY6WQGmEWflKzUKhlgGRxQLtZf7Pj5PqVAB0BS8uupDq56Ladx\/LApISeR2uFJdl+HD+TripXVFw6pL+WQ1EaOtGzcMlCPDGQSsNO+YPVIaFbb4DpQsbGVshera7baZSAE4rSWth9+ZJYJQPK\/S+qADpsSstpUB1c9ZexpHD9sSsj4+4RO7XDfllTGB6Jekj1Jhy91IMr4UA4JvRJ+ED6qqxu3hhZcBjIH2Prl4QukhG7BbdkqD7jUM8Sl7FXujoUrMwNJQJxUNQ3Y9TsET\/seYdOY27B24wAADVFJREFU+Ciprt7c708lbc+lHnUgxlxJW+ZrGZhLBjIH2HNJgtUpnYFizxAzu8ZeOop51DsDa3rWltVk6DcXAKIO4KVUVsM1cKIf1QpLrJA0NnotG5+VAVPUIAOZA2wOFjXIk4WMM5D2DDF3YcZm+2vCDLzqtNeU7BVgXY5fWqBWBC6OE+X0G7+Q0vKgeuJSR2XjloFqZaAlAZsvRBppYnx7sS\/P7t27RWl8fFyMiudgxYoVcv755zs6++yzBdlyVjxnafkZGRmR\/fv3y8MPPyxPPPGEHDx40FGafym97vshv+7ct4WqAvmqBFDnO+N\/hyijoyIcWQk5SY+uHKK+xoIjh\/XQYVMK7b7s+1L2bdUsE1v7Q7masS1WdTKQ9J1xkVv0I9eK\/ebLkUY6Ht\/Ol0r1Ib\/xxhvlqquucrRlyxbZtWtXyxMnIPv27Wv5cYTbIkvj2rlzp\/C2uGeeeUZ4vp3H5iDkBx98cE7bjm0e7t\/I18eAnQTazKzRY8cvJP87RNm3Iyul6bGrzS+jS5LRQdiVfJmyT+qTxNUvyaY6fPTYQFn18FBGl0T4QWojni+r3nhjMrB3796C7xLHkP7+\/sZ0pgqttiRgV2Hc+RBbt26Vbdu2Odq8ebOsX7++5WndunXu96OzMBZ\/DFkaV3t7u0A9PT2ixHuOKXd2dkoURRXvh8uXL8\/v12EBUP74q26Rmy9+rwDScGT0oe9CkqsNrtWOt5C2RS3GygtTwmPIokWLatFUNWOmxsocYHOGmzraBMPll18uV1xxhSOu0XZ3d0urEwd9Dv6tPo6w\/1kaF8+184MfacSsOxx\/OXLCLp5XMaPmWjUgDc8brGAZyGgGwu8MxxBOlFt1uJkD7FbdENbvhZUBALveIz4wMinf6BuTz+0ecbze7Tdje5We4JcaQ7XjlWrP7AsrA00B2NVMOUtSfGl8QlfNNiyWZWC+GeBRuGIxStmL1U2yAdLvemBA\/mzHkPzjcyOOv\/mefgfeSf7o\/O8QZXTzoTBGKCfFTvNJ02sM7JDKSRz7fI8NxIA0PvF8WfXGLQPVyEDmAJuk8KXxCZ2RZaCZMpD2opmpqSnXzTS7M1b4AVgD0knV0GMPbYCO\/x2ijC70K1emLjHUP5RVXw2usWmPcjViJsUgNm1AlJN8TGcZqGYGMgnY1UyQiEWzDFQ\/A7xoJu3mF2bX2KvRKsvggHKxWNjxK+aDDWCCtxKl9RmATbPNd3zEJf5841h9y0CYAQPsMCMmWwbqlAFucuQuVm2OG9CQq\/kimnKAmPYf7p+A5akU6ABISvlKcUF18Fh0f1pO4zhhU0JOIrXDk+y+Dh\/I1xUrqy8cUl\/KIamNHGnZuGWgHhkwwK5HlmvYhoVu7QwA0Js2bRJAeuXKlbJq1aqqDuhHARCnBd8\/MjnLBCD5YKUO6LApIatNdXDVU8aexvHDpoSMv0\/o1A73bUllfCDqJdmTdPhSB6KMD+WQ0CvhB+GjOuOWgVplwAC7Vpm1uJaBJsjAuq7yvuJpfgCREsCUNCTsqsdHSXWtwv1xlNtn6kCMudw65mcZmGsGyvs2zzW61VvgGbDhNzoDV6\/pKNmFtTGoh35zASDqAF5KJRtuAQfGFJJ2G72WjVsG6pEBA+x6ZNnasAw0MANvP62raOtXry4N6sUCtCJwcVJRTr\/xC6lYLrARlzqUjSwD1cyAAXY1s2mxWioDC6WzN5zeJUmgzcwaPfYwFwAOwOMTOvzg5ejxLYfS4vl1Qx\/fFpZ9X8qhvVoysTUPlKsV1+JYBtIyYICdlhnTWwYylAFA+ZMvXCLv39jjwBuOjD5tmICQT75fOXp8tI5fRpcko4OwK\/kyZZ\/UJ4mrX5JNdfgAuMiU4UqhrPqQ4wepnni+rHrjloFqZMAAuxpZtBiWgapnoPoBmVFzrRqQhle\/hdaLWG1wrXa81suo9biWGTDArmV2LbZloAEZ4CcEjXaL5WDh5qABX7u6NGmAXZc0WyOWgdpn4PTTTxd+fc7\/jXf9rfdqc4t3lVgOmjcHfAf4LvCdqP03r34tGGDXL9fWkmWgphng4LR161bZtm1b09Df\/d3fycc+9jH5zGc+0zR9qlZ+sjq2rIyL70JNv3ANCG6A3YCkW5OWgVplANDW33dvFn7JJZe435uvX3+uqFt7WR1bFsbFd6FW37NGxTXAblTmrV3LgGXAMmAZsAxUkAED7AqSZa6WAcuAZWC+GbD6loG5ZsAAe66Zs3qWAcuAZcAyYBmoYwYMsOuYbGvKMmAZsAw0dwasd82cAQPsZt461jfLgGXAMmAZsAzMZMAAeyYRxiwDlgHLgGWguTOw0HuXacDmvb7QQt\/INn7LgGXAMmAZaP0MZBqwW3\/zzG0E+\/btk09\/+tMCn1uE5qzFeLI4LrKd1bFldVy2zchA61Ft98fa5yOzgM3MeqG+iJ+dkjdL1X73qW8LWR0XWczq2LI6LttmZKD1qNX3x8wCdrm7UhZ\/IEDHnrWxZXVcbKesji2r47Jt1po\/LKL7Y6vy+QB2w8bM7DmN6BS2UrNrXlvHy+F5SXzWXuLPmMgDPEtjYzxZHBfbKKtjy+q4bJs17w9\/sG3SiP2R4z7Hf44lrUYtCdiAcRqVA9ZsJDYYL4ev1g8BWJzm+cEJ2xa2LWwfsH0gbR\/guA8GtCK1JGCXSjSgvXHjRoHjq5yyT4B2Fn+QwMZUvx9\/sFxbrm0faK19gOO+jwOtVM4cYIczbzYGOriRZcAyYBmwDFgGWjUDmQPsFtkQ1k3LgGXAMmAZsAxUlAED7IrSZc6WAcuAZcAyYBloTAYyD9i2HD6HHcuqWAYsA5YBy0DTZSDzgN10GbcOWQYsA5YBy4BlYA4ZMMD2ksbd5JCnavki41Fq+cHEA9i4caO7+58xxWJm\/hiPUmYG5Q0ki2PTMcG9obZ8kfH41MoDYhxp\/cemlObTbHoD7GbbIlXsDzsjlwSUkKsYvu6h6L+OBY5c907UoEHGwXiUkGvQjIWsYgbYRrq94MhVDN+wUIyD8fiErmEdmkfDxfqNrRXHaIA9s0PoBpwRW54thPHwhWOcTbWxKuwM\/WccFVZrKfesjTFpPFnfhi21w8WdZRvFLPEPW7i9kNEnVmgipQF2E20M64plwDLQOhngAK\/UOr1eGD0FgKGsjXZBALZ+qZI4GxR9K25c+p1G4XjwC3WM3aixGQi3SY23U90Hm7XxaAJ1XGw\/CFltrcx1LIxHCV0rjylLfV8QgM0Ol0bslNhacaPS7zTyx9PKY\/THkfVy1rZT1sbj739873w5K2XdZoxPCV1Wxtfq41gQgF1qI7FDKuFLGZ4FYix88bIwliyPIavbiXEpsf0owxPJlJYBy0DRDCx4wAbMfCJbyPBWJw6OWRlLq2+LYv3P6nZi3\/OJHCDDjSwDloHKM7DgAbvylLVGjayBAAd6xuRnHxm9r2u1chbG0Go5n2N\/89XY59hueYUVWioDSduP7Ym+2QdigN3sW2ge\/WMnDGke4RpelS+UPx7khneqCh3wx6TlKoS1EDXMAPuebis4cg2bq1toxsF4fEJXtw7UqSHG1IpjNMAOdhA2ZKBqSZFxJFFLDsbrtD8mT92yRX88frllB1Sk44yviLnlTIxHqeGdr2IHdEzKqxi67qEYQ1qj2JTSfJpNb4DdbFvE+mMZsAxYBiwDloGEDBhgJyTFVJYBy4BlwDJQtQxYoCplwAC7Som0MJaBZs8A1+yatY\/N3LdmzZn1a+FlwAB74W1zG\/ECzACAyPW6Zh06faOPzdo\/61eGM9BCQzPAbqGNZV1tvQwAQkmUNpLQN80PPb7wuRB1k0hjJdnQqT2JY4fSbL4+zc\/3sbJlwDJQmAED7MJ8mGQZqHoGmD2GlARY6Mrxo4P4wsshfIkb+qILyfcJbci+3S9rG\/hQTrKpHo6f70MZHTbKRpYBy4DLQMGHAXZBOkywDNQnAyE4AVTowtbRYfP1oezbGlGmP\/RT26aMTmXjlgHLQHUyYIBdnTxaFMvAnDMAuAFy5QbAFyrXP82Pdn0K\/Xwb5dBusmXAMlDfDDQdYNd3+NaaZaD5M1ANcE4aJXF9CkHZt1EO7RoTm5ZLcWJU4l8qntktAwspAwbYC2lr21ibJgONBq5SoFnKXiyR4diIFeqQi8Uwm2XAMjA7AwbYs3NSRGMmy0DlGQCcQgLEKo\/U\/DUYZ9LY0KnN580\/IuuhZaB5MmCA3TzbwnqS0QwAViFVMlQArhL\/RvnST8bZqPatXctA1jNggJ2hLWxDac0MAHKAXa16nxS\/VHul7GFf8aedUF+JXI0YlbRnvpaBVsuAAXarbTHrbyYzANgBWOHg0GEL9c0kl9PHcnyaaUzWF8tAM2bAALsZt0om+2SDKpUBgBlg8wldqXrl2IlDXPVVGZ0SunLt+FEPDlEOCX0S0Q6+cLWHsuqNWwYsAyczYIB9MhdWsgxUPQM+KJUTHH+fitXBr5g9tOEPMKoe2SfVK\/dtlFWvXHXwJFI\/OHa4ki\/TJ19WH+OWActAYQYMsAvzYdICzcBCGXYzAmMz9mmh7A82ztbKwP8PAAD\/\/53EjBkAAAAGSURBVAMA2yiamXMUC94AAAAASUVORK5CYII=","height":237,"width":394}}
+%---
+%[output:3abf78a1]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  --- A07 | Section 5: Scaffold Diversity Summary  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:219d179c]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  === Scaffold Diversity Summary ===\n","truncated":false}}
+%---
+%[output:701cc69c]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Total number of analyzed molecules: 200\n","truncated":false}}
+%---
+%[output:282ab323]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Unique scaffolds                 : 135\n","truncated":false}}
+%---
+%[output:6b12e6dc]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Scaffold Diversity Index         : 0.675\n","truncated":false}}
+%---
+%[output:6bcdf182]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Singleton scaffolds              : 116 (86%)\n","truncated":false}}
+%---
+%[output:8f38f37a]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Average family size              : 1.48 molecules \/ scaffold\n","truncated":false}}
+%---
+%[output:14a64389]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Largest scaffold family          : 34 molecules (c1ccccc1)\n","truncated":false}}
+%---
+%[output:696559bf]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Acyclic molecules                : 10 (no ring system)\n","truncated":false}}
+%---
+%[output:7fa10436]
+%   data: {"dataType":"text","outputData":{"text":"[21:17:34][INFO]  Scaffold heavy atom count        : Mean=15.1, Std Dev=8.5, Range=[5,49]\n","truncated":false}}
+%---
+%[output:42aa7dbe]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAEoCAYAAACaU8LCAAAQAElEQVR4AeycXWhmyZnfa1pqfVlexz2tkQVDkHUz4Mu9kWBBF4GQi7CBgCGxCLYMHUjYBV0svjZDBIEoyU1Ylk0UJvaFgoMTdp2QQIgxOAnBNt6QZW1PG9NjW5oZ9ce4u2dG3dPTain6vd3PuPr0Oec936fqvP9h\/lNVTz311FO\/Ou95+lV3z6Vz\/SMCIiACIiACIhA8gUtO\/4iACIiACIiACARPIOyCHTw+JSgCIiACIiAC3RBQwe6Gs3YRAREQAREQgVoEVLCr49NKERABERABEeiMgAp2Z6i1kQiIgAiIgAhUJ6CCXZ1d2CuVnQiIgAiIwKAIqGAP6jp1GBEQAREQgaESUMEe6s2GfS5lJwKfEFhbW\/ukr87wCOh+m7tTFezmWCqSCIhASQK8zG\/cuFFyldxjIsD9cs8x5RxqrirYPd8MD3JSaSnhk2ava\/Pj+v26cf31bcX19yjSJw9Tnv\/axTc+86PN860zR2yTxbExrdmy2jyfvLlkPHx9pc0nbW2OyaVI\/KJ+RWKl+bQVn7i+0vZuwpa2R5otay98q8xlrZG9PgEV7PoMa0fgV6C+8j4otTeb0AAw9RlnYUj6sQZbln9VOzGJbSJOmg17m0ruST7Y2tzTYrMP+9nYb5nzx8n+uPmkfyhj8ubMvrA1nR8x\/T2In2bD3oXIhf272GvIe6hgB3i7aQ83tqKplvlglIlbZP+0vZveo0geVXzIPS1XbMxVidnCmsZCcibOlgyIjTmzM7a+2uoEYJrGEhtz1SNr5aQQUMEO9Kb1IQ7rYriPsDJqN5u+z8v+WUUMO\/PtEug2+tDO0y29ydlNBTuSu+YlZanS95W0M7Z5+ogxLaKPrE\/rizlT0u6P6eNnbVrf5mhN+JnMZi12+rQmxuNkvrS+L2OEjRbRTxMvTeZR2rxvw8dX2Tn8\/fX0fRt9hN3EOEvmQ5vlk7QXPa\/FpE2TH3fN+\/1\/395mn5yS8X1bsp82xoaScfxxcp6xyffL6hflzXqLay02k9msNTutb7O+tcl5f4wP4ywxb0rzsTlr03xkq09ABbs+w04j8IHgg+8LG0mYLdlnjPBDvh92X\/48foz9+aw+voh5WkQ\/KeIxZ2JcxcdfQwyLR8vY5hkjxrSIfpaYR8QwJX2x4+MLG360vp0+NuYQY+T3GSPfRp912E2MsSeF3XxoGSd9ssb4I9aYxvnij\/Czlj7rGZsYYw9B5IIsN3Lyx2bHxlxS2PExu42xIcY2l9fii\/A3Jf2x4+MLG360vp0+NuYQY+T3GSPfRp912E2MsSeF3XxoGfs+jLH7wub7qN8MARXsZjj2GoUPSpEE8EN5vuPm89aOm+NDnIzPGLu\/Fps\/zuuzNunPGHveunFzxDD5sehjT643m7XJ+bLjtH2IjX1cLPzG+STnWWMqsgc++Fuc5Bg789jpV1HaeuJhLxuPNTdu3PhkWVYc\/D5xetZJ+ibHuLEOO\/0iwt\/kr6OPPRnDbNYm58uO0\/YhNvZxsfBrwmdcDM2\/SEAF+0UmQVv4sPCh8hV0whElB9O0dI152lyajTi+0nxCsJFjWh7jzss6fJJrsSeV9IltzHk4K23d3LNilI1PHF9186q73vIPKae6Zwp1vQp2oDfDw88HIS097L7wTfOTrXsC3IV\/N\/S7z6K9He18aTtw1jSl+WLDl3j0s+T74Ms4y7cNe6f7FTiAMSAvU4FlrbtYLtaSp78pY+Z8m\/rlCahgl2fW+oq8h5u5NhMoE7+MLznzgU2uYYyd+SpiLTH8tYyx+7YifdawNumLjTnstIzp+0qzMZ9lZy5PafsQC3veOubwox0nYqX5YmMuuT7Ljh\/+zNP3lWbz59voF9mzbL6+v9+3\/NkTu43TWubxS85hYw47LWP6vtJszGfZmctT2j7Ewp63jjn8aE3JsdnVNk8g+oLNw4IMDf002XyIbTLfvA8Nc+P8fZ+y5\/XXsg9ji0Efm4mxzVmLzebN5rf+PH6M\/fkqfWIQy8S4ShzWsNbiWIuNORNjm7MWG\/O0ZqNljL2KWEsME+O0ONjNh5Zxml+aDV\/W+MKW5ovN97M+dsQ6s1mLjbksMY9v1jx286FlnBR2YpgYJ33SxvjZGmuxpfliYw4\/v88YMYd9nPDD3xc2fx1jf54+NnxoGZsYY68i1locWsZpcbCvra05fBBj348xdl\/YzAe7Pza72vIEoi\/YaUfm4UgqzS8EWzJPxml5+Xb6vrL88bE5v282Wt9ufVoTPr7MTovdWvombMgfW5+WORNjX9j9Mf00G3Zf+Jh8u\/WZs\/64Fl9faf7+PH3fh7EJO31aX2Vs+CJ\/PX3fRt+UnGOcJ1tnbdIXOzbaNDFnSs6bPa9lDS9182FsfWvH2Zg3sYY+LfL7jH0x5ys554\/p40uL6JsYF5WtsTZtnc1Z6\/uYjRa7tfRNZWz4IltrrW+jb2KePq2JsS+zc6\/Ybay2HoGoC7YehnqXr9UiEAoBvdRDuYlm8+jsXptNO9hoURfsLKoUclOWj+wiIAIiIAIiEBOBaAs2BTnrV2\/YTfhlXcjR0ZGTxEDPgJ4BPQOT8wxk1YMW7Y2FjrJgU4QpyGkUknbG+Cd9+YB+7Wtfc5ubm1IgDP7u7\/2e++e\/+7uOVvei51LPgJ6BNp6BL33pS6MvasmaEMM4yoINWIqwyca0RUXB\/sEPfuD29vbcwcFBK9rZ2Rml0+YeVXIPNa9\/8od\/6P7OyUmrd1KWV6islFfxz6xYFWfF5yNEXk3lRBze+6MXc4T\/aaVgt82Bb82+2I8xLUWctqjW19fdxsZGKyI2edC2tUeVuOQTZF4X90BeGy3eSVlewbK6YAQr8it7pjb9ySe0vELMiTtQXsXfu02xsjg8ozEqyoJdBjQF3Ip5mXVN+H7uc59zX\/7ylx1tE\/GaikE+IeY1OzvrXn31VUfb1FnrxgmVlfIqfrNiVZwVniHyCjEnWHWtwRVsijNF2sT4eajdjXjIvvKVr3S3YcGdQs2LQk3BLniMTtxCZaW8il+\/WBVnhWeIvELMCVZdaxAFO1mUGZu6Blp2v+\/+\/KH7s788qaS375+W3U7+IiACIiACkRIYRMGOlP0o7Q8+OnMUXlOZlrWjIAP5z+PXXnM39\/fdk6tXB3IiHUMEREAEmiOggt0cS0USAREQAREQgdYIqGC3hnaIgXs600svOVdETv+IgAiIwHAJqGAP926Hc7Lz89+ehX6WfuulngiIgAgMjoAK9uCudKAHokiPOZqmRUAERGDIBFSwh3y7QzubivbQblTnEQERKEFABbsELLkGTIDf4w44PeeUnAiIgAjUI6CCXY+fVjdI4PL162752jU3dedO+aj69l2emVaIgAhERUAFO6rrUrIi0A4BRRUBEQifgAp2+HekDEVABERABETAqWDrIQifQNrvT2MzhX8CZViLgBaLgAhAQAUbClJcBCjU\/J61iXFcJ1C2IiACIlCagAp2aWRa0CsBijOF2k+CMXbfpr4IdERA24hAVwRUsLsirX1EQAREQAREoAYBFewa8LRUBERABMImoOyGRCD6gr22tuZQ8lKwmZJzGkdIgB95I1K31vqM+bE4Y0kEREAEBkog+oKddi8U6hs3bjgT4zQ\/2SIhQDFOylI3u43VioAIRENAiZYjEHXBphBTlP0jp9nwwe77qS8CIiACIiACMRGIumDHBFq5ioAIiIAIxEQgvFyjLdh8Y+abc12kR0dHznR6euq61tn5mTs7q6auc217v\/OLH2+jtvdR\/O6fczEX876eAXu\/09atF32vj7JgN1Wsgb+1teU2NzdH2t3ddYeHh42JB+T4+Dg33r2799zJyUkl3bp9Ozd21lmK5JW1tk37L+bm3F+8\/rr75cOHlc7VRm6hslJexT+nYlWcFZ+hEHnVyWl\/f3\/0fuc9z\/ue936s8gt2VGegaJtInD5tWe3t7bmDg4ORtre33crKSmNaXl52S0tLufEWFxfdwsKCm5+fLyXWXH35am7srLMUyStrbZv2rLw+v7bmiqiN3LJyamOvMjGVV\/HPqVgVZ8UzGCKvOjnxXrd3\/M7OTtkSEZR\/lAWbH4X7gihj2rJaX193GxsbI62urrq5i295TYkiPDs7mxtzZmbGTU1Nuenp6VJizczM5dzYWecoklfW2jbtWXm5ix+Vf3Kv9DPURm5ZObWxV5mYymuu8LMvVsVZ8QyGyKtOTrzX7R3P+\/6Td0mEnXgKdkG4FO7kt23G2AuGkFuIBCjSIealnERABESgIwKDK9hwozhTpE2MsUuRE1DRjvwClb4IiEAdAoMo2GkFGZupDqCCa+XWBQH+j2b+PsmxP6e+CIiACAyMwCAK9sDuRMcRAREQAREQgRcIqGC\/gGSABh1JBERABEQgegIq2NFf4XAOcPn6dbd87ZqbunNnOIfSSURABESgIQIq2A2BVJjKBLRQBERABESgAAEV7AKQ5CICIiACIiACfRNQwe77BrR\/2ASUnQiIgAgEQkAFO5CLUBoFCCT\/HnZyXCCEXERABEQgVgIq2LHe3CTnzd+\/TtPkMdGJRUAEJoiACvYEXfYgjkqh5pt1mgZxQB1CBERABNIJqGCnc5FVBESgLgGtFwERaJSACnajOBVMBERABERABNohoILdDldFbYsAPwrnx+JtxVfcSSGgc4pAdARUsKO7sglP2Io1bVITjkbHFwERGDYBFexh3+\/wTsc37CwN77Q60aQS0LlFIIWACnYKFJlEQAREQAREIDQC0RbstbU158vA+ja\/b\/NqB0Ag+aNwGw\/gaDqCCERAQCn2RCDKgk0hvnHjhvOFzRj6duvbnNpwCTx+7TV3c3\/fPbl6NTtJirP9SBwv+n5LXxIBERCBARKIsmAP8B50pDoEKNoU8joxtFYERGAYBAZ8iigLNt+a8+6Eb9umPD\/NiYAIiIAIiEAsBKIs2AbXijKtX8Tpm5gz\/7T26OjImU5PT13XOjs\/c2dn1dR1riHsxx1aHll9m1fb\/fMs5mIe2jNg73da3hk9q9b2URdsK8q0Vpjp+0QY25xvt\/7W1pbb3NwcaXd31x0eHjYmHpDj4+PcePfu3nMnJyeVdOv27dzYWWcpklfW2jbtRfJ668YNN3358ujc1mdMv43ciuTUxr7jYiqv4p9TsSrOiucuRF51ctrf3x+933nP8763d3+MbdQFuwnge3t77uDgYKTt7W23srLSmJaXl93S0lJuvMXFRbewsODm5+dLiTVXX76aGzvrLEXyylrbpr1oXh89fPjJuemjtvIqmlNb+2fFVV7FP6diVZwVz1uIvOrkxHvd3vE7OztNlI3eYrResNs4Wd435ry5tFzW19fdxsbGSKurq25ubq4xUYRnZ2dz483MzLipqSk3PT1dSqyZmbmcGzvrLEXyylrbpj3EvELMiTtQXsU\/p2JVnFWoz1adO+S9bu943vdpdSAWW5QFuwxcCjg\/Fi+zRr79ELh8\/bpbvnbNTd25k58AfyLcRl7w4QAAEABJREFUhCd9WkkEREAEBkwgyoJNAaYQ+8LGPdGm2Zl7UbJER4DizF\/jQpY8few2VisCIiACAyQQZcHmHijMvrCZsuw2r1YEREAEREAEYiMQbcGODXSVfLVGBERABERABIyACraRUCsCIiACIiACARNQwQ74csJOrafs7Per7fesaRH2nlLStiIgAiLQBQEV7C4oa49mCVCck2p2B0UTAREQgeAIqGAHdyVK6AUCfIMuIm+huiIgAiIwNAJBFGz+GpaBpY9srFYEHN+mDQP9LJmPWhEQAREYIIHeCzbFmb+GBVvrM6aPTRKBEQEr0v437dFEjP9RziIgAiJQnkDvBbt8ylox0QSscNOqeE\/0o6DDi8CkEVDBnrQbH9J5KdomiveQztbjWbS1CIhAmARUsMO8F2VVhABF2kThLrJGPiIgAiIQKYHeC7b9fjW\/Z00fjn6fsTQZBB6\/9pq7ub\/vnly9mn1gK9C0FGlT9grNDIqADiMCk0ug94JtxdmKNVdhfeYYSyLgKNDICjStsIiACIjABBHovWDDmsJsYowYU7hpGUsTTIBCbcennyXzUSsCPRHQtiLQJoEgCjaF2aQC3eZ1Rxqbb9NFFOnxlLYIiIAIFCEQRMEukqh8REAEREAE6hDQ2tgJqGDHfoPKXwREQAREYCII9F6w+VE4PwY32XgcffO3NulvdtrknMYiIAIiIAJhEVA24wn0XrBJkSJt8scUW+zYfJmdORM286FvdlrGNqdWBERABERABGIkEETBzgJHsc2ay7JTnJPrGGPPWiN7GAQuX7\/ulq9dc1N37oSRkLIQAREQgRGBMP7Te8GmkGYpCxEFOGuurP3o6MiZTk9PXdc6Oz9zZ2fV1HWube93fn7uUNv7KH73z7mYi3lfz4C932nL1ofQ\/Hsv2BTfpICEjTZPfqEv4p8Wa2try21ubo60u7vrDg8PGxMPyPHxcW68e3fvuZOTk0q6dft2buyssxTJK2ttm\/Z333nHPXr0yL1z0ba5T5nYobJSXsU\/p2JVnBWfjRB51clpf39\/9H7nPc\/7Pq0OxGLLKti95k\/xpRiPSwI\/UxH\/tHh7e3vu4OBgpO3tbbeystKYlpeX3dLSUm68xcVFt7Cw4Obn50uJNVdfvpobO+ssRfLKWtum\/cqVK25mZsYtvfJKpXO1kVuorJRX8c+pWBVnxWcoRF51cuK9bu\/4nZ2dtDIQjS3Igt0lvfX1dbexsTHS6uqqm5uba0wU4dnZ2dx4FKipqSk3PT1dSqyZmbmcGzvrLEXyylrbqv3iFy2XLl1y8w3eQd18Q2WlvIp\/TsWqOCs+LyHyqpMT73V7x\/O+77K+NL1XlAV7bW2taQ6KJwIiIAIiIAJBE+i9YPOj7DTxo+4q5FhHPH8tY+y+TX0REAEREAERiIlA7wWbQpqmPIj4U4R9YbM19LPmzKfFVqFFQAREQAREoHECvRdsCmuVU1GUfSVj5M0lfTUWAREQAREQgdAJ9F6wQwc0uPx0IBEQAREQgSgJ9F6w+SZc9Vt2lMSVtAiIgAiIgAhUINB7wa6Qs5YMl4BOJgIiIAIikEGg94Jt365pk8rIWWYREAEREAERmDgCvRdsfiSepYm7DR04bALKTgREQAR6JNB7we7x7No6MAKPX3vN3dzfd0+uXg0sM6UjAiIgAv0T6LVgJ38Ezrh\/JMpABKIkoKRFQAQGTqC3gk1xTvtROPaBM9fxREAEREAERKA0gV4KNkWZYp2WLXbm0+ZkEwERiJSA0hYBEahNoPOCTTGmKOdlzjx+eT6aEwEREAEREIFJItB5wZ4kuDqrCIhAFASUpAhEQUAFO4prUpIiIAIiIAKTTkAFe9KfgIDOf\/n6dbd87ZqbunMnoKyUigj0TEDbi8AzAr0UbH5\/epye5adGBERABERABETggkDnBZs\/UFZUF\/npXxEQAREQgXAJKLMOCXResJs8m\/8t3eL6Nr9v82pFQAREQAREIEYC0RZsirH\/TZ2xXYBvt77NqRUBERABEZgQAgM7ZpQFm+JMIR7YXeg4IiACIiACIpBJIMqCnXmaZxMUdNMzU2ZzdHTkTKenp65rnZ2fubOzauo617b3Oz8\/d6jtfRS\/++dczMW8r2fA3u+0mYWgn4nSu3ZesCmkpbNMLEh+uyamb6NvYi6x\/Lnh1taW29zcHGl3d9cdHh42Jh6Q4+Pj3Hj37t5zJycnlXTr9u3c2FlnKZJX1to27e++84579OiRe+eibXOfMrFDZaW8in9Oxao4Kz4bIfKqk9P+\/v7o\/c57nvf9cwUgskHnBTvJZ1xBTfonx6ynOJvd72NjjA\/9NO3t7bmDg4ORtre33crKSmNaXl52S0tLufEWFxfdwsKCm5+fLyXWXH35am7srLMUyStrbZv2K1euuJmZGbf0yiuVztVGbqGyUl7FP6diVZwVn6EQedXJife6veN3dnbSykA0tk4LdtNUKMQU5Dpx19fX3cbGxkirq6tubm6uMVGEZ2dnc+NRoKamptz09HQpsWZm5nJu7KyzFMkra22r9otftFy6dMnNN3gHdfMNlZXyKv45FavirPi8hMirTk681+0dz\/u+Tr3oe23nBZsCS6E1AcD6yZa5LOFLrOQ89qRNYxEQAREQARGInUDnBRtgFFpTcmx2WubSRFHOm\/fXFPf1V6kvAiIgAiIgAmER6KVgN4GAQpwUcSnkvp0xdkkEREAEREAEYibQe8GuUlBZkya7CH\/ObLG3k5D\/49deczf3992Tq1cn4bg6owiIgAiUItB7wbZs\/W\/FZlMrAiIgAiIgAiLwlEAQBZti7X8rZvw0Pf03DgLKUgREQAREoG0CvRdsijPF2j8oY+y+TX0REAEREAERmGQCvRfsSYavs3dDQLuIgAiIwBAIqGAP4RYjOsObNz923\/35w1R9\/63H7ofvTLnv\/eJR6jxrIzqqUhUBERCBRgn0XrDTfvzNj8OxN3pSBQuCwPsfnTkKb7oeu7fuX8qcf\/v+kyDO0GwSiiYCIiACxQj0XrBJk+JMkTYxxi6JgAiIgAiIgAg8JRBEwSYVirSJsTR5BJZ++ab74utfdZ+6d2fyDh\/oiZWWCIhAOASCKdjhIFEmfRF4cvb0R97n5+d9paB9RUAERCBYAirYwV6NEhMBEcgnoFkRmCwCKtiTdd86rQiIgAiIQKQEVLAjvTilLQIiEDYBZScCTRPovWDzJ8ObPpTiiYAIiIAIiMDQCPResIcGVOcRAREQgfAJKMMYCfResPmrXPqWHeOjo5xFQAREQAS6JNB7wa5zWAq9KRnH7LTJOY1FQAREQATCJaDM0gn0XrCtoNImlZ7yUyu+fDs3MX464xx9s9Mytjm1IiACIiACIhAjgd4LNgU1S1lAKcCsSZtPm8MXe5q\/bCIgAiIgAiJQnEB\/nr0X7P6Orp1FQAREQAREIB4CwRRsvgEj0FlLP018Y\/bt+Cdt\/nxe\/+joyJlOT09d1zo7P3NnZ9XUda5N7Mf\/djTrvI7\/I+n5eSaP09PHnd9PE2dWjO4\/V2Iu5vYM2PudNq8WxDBXpGC3fo5kwaX4YiuyMX74F\/FN89na2nKbm5sj7e7uusPDw8bEA3J8fJwb797de+7k5KSSbt2+nRs76yxF8spaW9d+69atzLP+6pW\/7r7xtT92t2cWUn1gVXX\/H18\/cn\/yvXdLa\/9\/vef+x\/UHlThXzbXIuj7vMC+\/EPMKMScYKq\/i79o6rPb390fvd97zvO\/T6kAstt4Ldp2CW2etXdDe3p47ODgYaXt7262srDSm5eVlt7S0lBtvcXHRLSwsuPn5+VJizdWXr+bGzjpLkbyy1ta1X7lyJfe8c3NzqfOc93c+85lK5yXn+d9ZcueXP1VaZ9Pzbnq++r7s3Yb6vMO884SYV4g5wVB5FX\/X1mHFe93e8Ts7O\/bqj7LtvWBXpfZJsa4a4Nm69fV1t7GxMdLq6qqjYDQlivDs7GxuzJmZGTc1NeWmp6dLiTUzM5dzY2edo0heWWvr2i9fvpx5Xs5kSvLADquq+8OKGGVFHqypum9b6\/q8w7wzhZhXiDnBUHnNFX5\/1WHFe93e8bzvn736o2yiLNh5xZofjzPv3wZj7L5NfREQAREQARGIiUDvBZtCSkH1oTHG7tuSfXySMh\/W+nOMba7jVtuJgAiIgAiIQCMEei\/YnIKCSoGlT8uYfpaYT5Pv78\/7dvXjJfD2\/VP33Z8\/rKQ3bz6O9+DKXAREQAQuCARRsC\/ycCqwUOhYkW33wUdn7s2bH1cSxT6y4ypdERABEXiOQBAFm2\/VST2XpQYTQeDlt37qvvj6V93C3dsTcV4dUgREQATKEOi9YFOo\/W\/X1sde5iDyHRwBHUgEREAERMAj0HvB9nJRVwREQAREQAREIIOACnYGGJlFIJeAJkVABESgYwK9F2x+BJ788Tdj7B2z0HYiIAIiIAIiECyBzgs2xTgp6Pg2G9NKIiACpQlogQiIwAAJdF6w+eZcVAPkrSOJgAiIgAiIQCUCnRfsSllqkQiIwHAI6CQiIAKVCKhgV8KmRSIgAiIgAiLQLYEgCrb\/+9d+v1sU2k0EREAEnBCIQLAEei\/YFOis39MOlpoSEwEREAEREIGOCfResDs+r7YTAREQgXgJKPOJJtB7webbNd+yJ\/oWdHgREAEREAERGEOg94Jt+VG0k7I5tSIgAiIgAsETUIItE+i9YFOk+ZadpnFnZ23SB1uakn4ah0fgvc9\/wX3762+4B59dCi85ZSQCIiACPRPovWBXPT9FOWttleKfFUt2ERABERCBARAYwBF6L9gU17zim8a4rH9aDNlEQAREQAREICYCvRdsK760SWWBpMijrHk\/TpaP7CIgAiIgAiIQCIFCafResCm8WSp0ghQnPx7FO8XlE9PR0ZEznZ6euq51dn7mzs6qqetcm9jv\/Pw887x5c1UZNbHu9En3z0UTrBVD96Zn4PST9zvv+U9e\/JF2ei\/YTXOjWPsxGecV7a2tLbe5uTnS7u6uOzw8bEw8IMfHx7nx7t29505OTirp1u3bubGzzlIkr6y1de23bt3KPevDhw9z56uyqrPuww8\/rMS5Lqu89X3eYWx5iVW5d1qIvOrktL+\/P3q\/857nfe\/Xh9j6vRVsA0UxzZL5tNnu7e25g4ODkba3t93KykpjWl5edktLS7nxFhcX3cLCgpufny8l1lx9+Wpu7KyzFMkra21d+5UrV3LPOzc3lztfllMT\/p9e\/HQlznVZ5a3v8w5jy0usyr3TQuRVJyfe6\/aO39nZabOctB6794LNN+CkODU22rKi+JdZs76+7jY2NkZaXV11FIymRLGYnZ3NjTkzM+Ompqbc9PR0KbFmZuZybuyscxTJK2ttXfvly5czz\/vKr6+7v7d7zX36\/d+UYlGWXVl\/WNc9d9Pr+7zDvLOEmFeIOcFQec0Vfn\/VYcV73d7xvO\/L1IfQfHsv2GlAKNZlC29aHGzEIR794pKnCIiACMFjZZ0AABAASURBVIiACIRFIMiCXQcRxZkibWJcJ57WioAIiIAIiEAIBKIu2FnFGLspBMhN56B43RI4eezcmzc\/rqS37592m6x2EwERGCyB3gu2fRNOthTcwVLXwaIhwF81O3n8kvveLx657\/78YWn96FePojmrEhUBEQibQO8Fm8KcprCxKbtsApoRAREQARFog0DvBbuNQymmCIiACIiACAyNQOcFO\/mj77zx0GDrPP0TUAYiIAIiECuBzgt22o+\/kzZgYqOVwiPwwUdnrqrCO40yEgEREIE4CHResPOw2LdtFes8Sv3P\/ezmx+6bP\/qgkn70a\/0hrOwb1IwIiIAIZBMIpmBTrCnUKDtdzYiACIiACIjAZBLovWBTqJEK9WQ+gDp1PASUqQiIQL8EeivYFGlEoUb9YtDuIiACIiACIhA2gV4Ktgp12A+FshOB+AgoYxEYPoHOCzbFGqy044SflE3gh79+VOkPfv37\/\/uRe+t+51effZBnM+99\/gvu219\/wz347NIzixoREAEREAEj0Plbmx9\/F5UlqTadQNW\/WvXBo7P0gLKKgAi0QkBBRaAJAp0X7CaSVox6BPj\/Y9eLoNUiIAIiIAJdE1DB7pq49hMBERCBoAgomVgIqGDHclPKUwREQAREYKIJqGBP9PXr8CIgAiIQNgFl91sCURds\/pT5b4\/yfI850\/MzGomACIiACIhAfASiLdgU4yzczPl\/Ep1xlq\/s4RB4+a2fui++\/lW3cPd2OEkpExEQARHIJNDtRJQFO68AM0ex9jEyxu7b1BcBERABERCBmAhEWbApwKgJ0EdHR850enrqutbZ+Zk7O+tW\/LWuJzXOyvo2cnbnFzd6ft45j7yz1D1r18+T9uv+MyzmYTO39zvtxRsm6n\/LFuyoD5uW\/NbWltvc3Bxpd3fXHR4eNiYekOPj49x49+7ecycnJ53rF8cfuv\/+\/47df\/uLt0vrJ7+800q+Dx4+dE\/OnrgHDx60Er8q54cXeVVd++5775fma3fy\/b96O\/PZKfJsNfksF40VYl4h5gRP5VX8XVuH1f7+\/uj9znue931aHYjFNvEFe29vzx0cHIy0vb3tVlZWGtPy8rJbWlrKjbe4uOgWFhbc\/Px8KbEGlV1n\/r85\/2vuxsmie+vBp0vrQ\/epUrnanuPaudlZd+nSVCuxx+2dNz83N1fpjoh5fvlTpfnanfzq4Wcyn50iz1aTz3LRWCHmFWJO8FRexd+1dVjxXrd3\/M7OTiy1OTXPYRXs1CPmG9fX193GxsZIq6urjpdzU+KFPXtRhPLizczMuKmpKTc9PV1KrEFl1+HPuroiTtO6NHXJvfTSS5V4NJ2LxfM5ma1M668v3Z+eynweizxbec9dW3Mh5hViTvBXXnOZzzd8fNVhxXvd3vG8713E\/1yKOHelLgIiIAIiIAITQ2BwBZs\/jJb8E+GMsfd8q9peBERABERABCoTGFzBhgTFmSJtYoxdEgEREAEREIFYCURdsPMKMXOmWC+n07y1mQiIgAiIQNAEoi7YQZNVciIgAiIgAiLQIAEV7AZhKlRrBBRYBERABCaegAr2xD8CAiACIiACIhADARXsGG5JOYZNQNmJgAiIQAcEVLA7gKwtihF47\/NfcN\/++hvuwWeXii2QlwiIgAhMEAEV7Am6bB11Igno0CIgAgMhoII9kIvUMURABERABIZNQAV72Per04lA2ASUnQiIQGECKtiFUclRBERABERABPojoILdH3vtLAIiEDYBZScCQRFQwQ7qOpSMCIiACIiACKQTUMFO5yJrDwRefuun7ouvf9Ut3L3dw+7aUgQiI6B0J46ACvbEXbkOLAIiIAIiECMBFewYb005i4AIiEDYBJRdCwRUsFuAqpAiIAIiIAIi0DSBwRXstbU1l6amwSmeCIiACIhApAQiTXtwBZt7uHHjhksKuyQCIiACIiACsRIYZMGO9TKUtwiIgAiIwMQTyAQwyILt\/0g88+TPJo6Ojpzp9PTUda2z8zN3dtatzs\/PO9+zyBnd+cWlBJZbn6xOH3f\/PHb9\/Gs\/3XHbz4C932kv3jBR\/zvIgu3\/OJzinXdDW1tbbnNzc6Td3V13eHjYmHhAjo+Pc+Pdu3vPnZycdK6HDx92vue4cz64yOnJ2RP34MGDoHLrj9WHmc9OkWeryWe5aKwQ8woxJ3gqr+Lv2jqs9vf3R+933vO87\/PqQehzQRTsJiFRrP14jPOK9t7enjs4OBhpe3vbraysNKbl5WW3tLSUG29xcdEtLCy4+fn5UmINKrvO\/Ofm5irta+vbaOdmZ92lS1OlOLSRRzJmH6y428XFT2c+O0WerSaf5aKxQswrxJzgqbyKv2vrsOK9bu\/4nZ0dvzxE1x9cwS57A+vr625jY2Ok1dVVx8u5KfHin70oQnnxZmZm3NTUlJueni4l1qCy6\/BnnYlxKLo0dcm99NJLlXi0dQbjRNvWHmlx2W9qeirzeSzybOU9d23NhZhXiDnBX3nNZT7f8PFVhxXvdXvH8753Ef9zKeLcU1PP+zadumCsUQ4iIAIiIAIi0D+BwRXsJFIKOD8WT9o1FgEREAEREIGYCAyuYFOcKdImxjFdSNlc5S8CIiACIjAZBAZXsLk2irSJcdv6s788cX\/8P++\/oD\/9PyfuWz+77P7kf3\/wwpz5v33\/tO30oon\/3ue\/4L799Tfcg88uRZNzm4l+8NFZ5nNT5NlqM7e82P\/lF9O5z7w9+2ktZ86LrTkRmGQCgyzYk3yhYZ1d2YiACIiACDRFQAW7KZKKIwIiIAIiIAItElDBbhGuQodNQNmJgAiIQEwEVLBjui3lKgIiIAIiMLEEVLAn9up18LAJ1M+OPwxZVfV3VwQREIGmCahgN01U8UQgEAL8DYSqCuQISkMERMAjoILtwVC3XwIvv\/VT98XXv+oW7t7uNxHtPpaAHERABLonoILdPXPtKAIiIAIiIAKlCahgl0amBSIgAmETUHYiMEwCKtjDvFedSgRqEfjhrz5yVfTjo8fu5PFLlff+2c2PK+1Lrn39X9L4cwLsX1awuvWgOqvKkGsuhHPZs5r\/mxf3W3P7iV6ugj3R16\/Di0A6gR\/9+pGrIopQesRi1ip72pr3H50V26RhrzdvPi7FyvKFVZ1f3DR8jMLh+AWKnaFsC6vCG8nxBQIq2C8gkUEERKAqgfPz86pLJ26dWE3cldc+sAp2bYQKIAIiIAJDIaBzhExABTvk21FuIiACIiACIvCMgAr2MxBqREAERKBrAicfO8fvCVcRf\/ir63zr7sefM6hy1nc\/OBv9Yca6+8e+frAFe21tzZlivyTlLwIiMEwCP7kz5b7zVw9dlf+FLH+iPjYq\/CKjyln\/808+cj98Zyq24zae7yALNoX6xo0bzsS4cXIFAr5\/51334\/\/6hnv\/zjsFvLtzef9ZXh\/+5ri7TQvsdPrxI3f\/1qF7\/PFHBby7cTFW7wd6h8pr\/HNwfHzsvvGNbzja8d7debz\/7HP4fmDPFpxC4\/XBe++67\/\/5G8Hd4fNPS\/ujwRVsijOF2kfHGLtv66L\/\/nvvjAp2F3uV2SPUvE4vCvX9i4Jd5ixt+4bKSnkVv3kK0De\/+c3iCzryDPUOQ+T1wcWXi+\/\/+b\/r6GbC3WZwBbss6qOjI1dX9y9+hXzv1pFLyv7axr3bb78wl\/QtO+ZX5ajsOvwtr6y88elD9jeC7rfAq+p5jFUbd1g1J9Ypr+c\/b3wWsj7H9k7Imq9rZ2\/upKzq3CF7vv3227XfXWlnH8erj\/fGuJzSzpFmszixtnUKdqxnHuX96quvuvX1dbe1teU2Nzdr6fVrf8v926\/9\/gv6T3v\/eLTXf\/xn\/+iFuTT\/MrZ\/80d\/26Eya8zX8voP\/\/QfNp6X7VGl\/df\/8g\/cdz71Kfen\/+IPgsnLWLVxh1UY2Rrl9fznjc\/Cl37\/b6R+jvmM80GkrftZT1v\/R\/\/gb1Z6XuvcIedl37R86trglMcLzvYcdtXyrsrLqeiZORvvfd7\/xItNE12w9\/b23MHBgRQIg3\/1rW+5v\/+d7+g+ArkPfTb0bhjiM8B7P7ZCbfkOt2DbCXNafpW1sbHhJDHQM6BnQM\/AZDwDvPdzykLQUxNdsIO+GSUnAiIgAiIgAh6BwRXstD8Rzp8Qx+6du++u9hcBERABERCBUgQGV7A5PcWZIm1ijF0SAREQAREQgVgJDLJgcxkUaRNjqQQBuYqACIiACARHYLAFOzjSSkgEREAEREAEahBQwa4BL2+p\/Tg+2eataWuOHLJiM2fK8mnLzr7J2NjS5Pm13vX3T26WN5f0bXKctq9v8\/tN7psXy9+TftIXmyk51+bY9rTW9rJxsrX5LlrbO7mX2WmTc12M2RfZXvTTZPNttmn7YvP3ZGzy7UPvq2C3eMP2I3m\/bXG71NA81KkTF0bm\/NwYX5g7+TdvLz8n63eS1MUm5GV70jK+MI\/+pY\/NxHg00fJ\/2Mf2pGVsWzJOyubabMkhuS8225O+P8\/Y5tps2cfflz4225NxUjbXV0t+fk6M+8rF39fPyfr+fJt9289vbT\/4+HbGNjf0VgV7wDec9yAzx0PvH58xdt\/WRr+LParkTV4wSFubNocv9uf8Gx4Qn30aDttquLScOQP2VjcOPDjnh4OfZpoNH+y+X5t99mLPNvdoKnZaruSOvak9Qo6jgt3i7fAQmVrcJjM0DzLKdOhpgpxQ1vbGjDbLR\/anBGBkemrp5r9599dNBum7jMvLWNGmR5DVCMDIZLauWtuXtqs9Y9hHBbvFW+LlYdKDVxy0MaPtkhv7+Vmyd9Lmz3fRT+6fzIl5E3Njcmp8mj1N5NH4BhUDWk60fl70TcxVDF96GXuxb+mFLS\/Iy4t8Tfi1nMpz4W1f2q73fi6RwAYq2C1dCA+aH5qxHjyfSHofTv4M4z64sSd7+7n03U\/mlMyPMT5d5smepq73zjun5URredH31zC2Od\/edJ892KvpuHXj5eWVzJcx\/nX3LLKevXw\/xl3t7e8bYl8FO8RbUU69EuDlwEui1yQSm4eYUyLF+sMBR+D+TByTPm3fIg8TudCnlcIkoILd0r3owa8Gtm9u7B9LsSbXapTrr+pz77zs8\/LKm8uLWXeO58kX8RjT9ily8EUujGn7YtX33uwfslSwO7odPgD2Yehoy9xtyIWcfCfG2H1b3\/0uc8rbCy7M+zwYY\/dtTffL7FHGt+k8\/XgwIRffxhi7b+u7XzKnVtKFCXn4wRlj92199\/vMyd8bLox9Hoyx+7ah9lWwW7pZHiAeJBPjlraqHJacLD9axpWDNbSQHMjFxLih0IXC2L5+awvJxbcztrk2W39P67Mf+9uYljH2LsRe7OkLm+1NP2vOfNpok\/uSAzb2omVsYoy9b5GH5UTLeJJz4vxwMDH2eTC2OVrG\/vyQ+yrYLd4uD5KpxW3GhiaHLCfmTFk+bdnZNy02dlPafFs22zPZ+vv5c769rb6\/n9+3\/dJsNtd26+9NP7nuKdVhAAAEKUlEQVQfNlNyrs2x7Wmtv5fZaH17l\/20vbGZKuXSwCL298MwNvn2Lvq2L23afthNafNDtalgD\/VmdS4REAEREIFBEVDBHtR16jAiIAIiEBwBJdQQARXshkAqjAiIgAiIgAi0SUAFu026ii0CIiACIhA2gYiyU8GO6LKGnip\/4tNXW+dN2yPNlrU\/vlXmbE3d9Ran75ZzoL7zyNqf3Hxl+ckuArEQUMGO5aYGnicvVvtTn9Zia\/rYxLT4tMRPs2GX4iWQvFPuGlu8J1LmE0rguWOrYD+HQ4M+CPAi5YWa3Bsbc0m7xv0T4F64H0Q\/LaMse5pvkzb2Ja9kTGzMJe1tj\/vYs+0zKX4\/BFSw++GuXQsS4CVb0FVuIuAojnpm9CAMlUBwBXuooHWubAK8YHnRomyvpzP4+Hpqffpf307\/qfXpfxkjRrS+fBt9lJzHlqaifmlri9jy4vtz9P14ybHNmd1as1ubZbf5Ii0xEL60iL6Jscls1mKnT4voI\/qIfh3xrCXXE9eUNpdnYx3ztCbGyB\/7feYkEahCQAW7CjWtaZwAL1JkLzba5CbY8PGFDT9a304fG3OIMfL7jJFvo8867CbG2JPCbj60jJM+WWN80+T7M09cE2Obp292a7HZPDZ\/jJ0xdvq0jOmbGGO3cVab9GMNNvNnjBjTIvoIP8Ymxth9YfPnk2Pft27fj82ejMvGZA1rTYyJYeNkn7EkAlUIqGCXoibntgnYS47WXnzsSR8bfV9ms9afq9JP24fY2MfFw2+cj83jmyabZz\/mbUzLGLv1aWMSuXMGP2fG2JO2vLE\/V6fPvuzvx2CM3beN67NmnI\/mRaAJAirYTVBUjFoEsl6QvAiz5tI2xNdXmk9MNv8s1vfzN5u1\/lxbffYiNq0vs9GGLHIOOT\/lJgJ5BFSw8+hENjfJ6fIipsD7ip2Hfxa\/z7mKnJc1+Pn+9E3j5s0v2bIuTUm\/PsbkZWfuY3\/tKQJtElDBbpOuYhcikPWS5cXLHEFoGdP3lWZjPsvOXJ7S9iEW9rx1zOFH24TYLy1emo39suzMhaK0M5E39iZzJB5xkzGxMWd2+thsTMsYO\/00MZ9ml00EuiCggt0FZe3hnMuHwEuSl6EvbP4qxv48fWz40DI2McZeRay1OLSM0+JgZ97EOM2vqo14FttabMSjNRstY+xJYa8z78fLi4Of7UUf2Zh1jJFvw84Ye9MiLvF9YUvugy3PZ9x8Ml7a2I+RNi+bCBQloIJdlJT8WifAi81X2ob+PH3fh7EJO31aX2Vs+CJ\/PX3fRt+UnGOcJvzT7NiSc4x94WNK2hnbnN9m2X2fIv0icZI+jJEfn7HJt9PHTmsaNza\/tJa1vtJ8sI3zSc4zZh3y+4xRli3Njr8kAkUJqGAXJSW\/QROYxMPZN0sVkkm8fZ05RgL\/HwAA\/\/9B01rmAAAABklEQVQDAKTGb2an\/bzLAAAAAElFTkSuQmCC","height":237,"width":394}}
 %---

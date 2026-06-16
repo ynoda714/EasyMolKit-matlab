@@ -11,6 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-06-16
+
+### Added
+
+**Tutorial content**
+- **Layer 4: Research (R01–R10)** — 10 research-level tutorials (Japanese & English, 30–90 min each).
+  - **R01** Large-scale Similarity Screening (GPU) — GPU-accelerated batch Tanimoto; requires Parallel Computing Toolbox (GPU); CPU fallback on MATLAB Online
+  - **R02** PK/PD Simulation — pharmacokinetic/pharmacodynamic modeling; requires SimBiology
+  - **R03** Forensic Chemometrics — mixture deconvolution and classification; requires Statistics and ML Toolbox + Parallel Computing Toolbox
+  - **R04** Protein-Ligand Analysis † — PDB parsing and binding-site analysis; requires Bioinformatics Toolbox
+  - **R05** Molecular Language Model: SMILES Generation — character-level RNN generative model; requires Deep Learning Toolbox
+  - **R06** REINFORCE Molecular Design — policy-gradient de novo design; requires Deep Learning Toolbox + Reinforcement Learning Toolbox
+  - **R07** Metabolomics † — untargeted metabolomics workflow; requires Bioinformatics Toolbox + SimBiology
+  - **R08** Protein-Ligand Docking Simulation ‡ — automated docking via AutoDock Vina; MATLAB Online only (Track 1: meeko + vina + pdbfixer)
+  - **R09** GNN Molecular Property Prediction § — message-passing GNN for property regression; requires Deep Learning Toolbox + PyTorch stack
+  - **R10** ChemBERTa Transfer Learning § — HuggingFace transformer fine-tuning for SMILES; requires Deep Learning Toolbox + PyTorch stack
+
+  > **†** Requires `emk.setup.installExtra("biopython")` before first run (Track 1 add-on).
+  > **‡** MATLAB Online only (Windows Desktop unsupported: no Windows PyPI wheel for vina; pdbfixer's openmm blocked by Smart App Control). Setup: set `cfg.optionalLibraries.meeko/vina/pdbfixer = true` in `main_rdkit.m`, then run `installOnline(Config=cfg)`.
+  > **§** Requires PyTorch + HuggingFace stack. Install in order: `torch` → `torch_geometric` → `transformers` → `datasets`. R10 requires R09's torch environment.
+
+**README**
+- Added "Open in MATLAB Online" badge to both English and Japanese READMEs — opens the full repository in MATLAB Online with one click
+
+### Changed
+
+- **Analytics (A01–A10) English** — Applied Step 2 English cultural adaptation (idiomatic phrasing, contextual rewrites throughout); fixed `logInfo` argument order
+
+### Removed
+
+- Answer scripts for Analytics modules (`examples/*/analytics/answers/`) — removed from distribution
+
+---
+
 ## [1.2.0] - 2026-06-09
 
 ### Added
@@ -134,4 +168,4 @@ and the complete `emk.*` API for RDKit-based Chemoinformatics from MATLAB.
 - Requires MATLAB R2025b or later
 - Windows Desktop and MATLAB Online supported; macOS / Linux Desktop untested
 - Layer 2 (Stories) was released in v1.1.0; Layer 3 (Analytics) in v1.2.0
-- Layer 4 (Research) tutorials are planned for v1.3.0
+- Layer 4 (Research) tutorials were released in v1.3.0

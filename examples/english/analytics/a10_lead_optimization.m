@@ -1,120 +1,86 @@
-%[text] # A10: Lead Optimization — Multi-objective Property Optimization
-%[text] EasyMolKit Analytics — Layer 3
-%[text]
-%[text] **Story**
-%[text] A drug discovery chemist has selected Aspirin as a structural lead for developing a new anti-inflammatory analgesic. Aspirin is effective, but its molecular weight (180 g/mol) is low for a modern drug candidate, leaving room to add substituents to enhance specificity.
-%[text] Challenge: Adding functional groups to improve target binding can simultaneously alter multiple physicochemical properties.
-%[text] - Adding lipophilic groups increases LogP (the logarithm of the octanol/water partition coefficient), improving membrane permeability, but also increases molecular weight (MW) and decreases water solubility.
-%[text] - Adding polar groups to improve solubility increases the topological polar surface area (TPSA), potentially reducing oral absorption.
+%[text] # A10: Lead Optimization -- Multi-objective Property Optimization
+%[text] EasyMolKit Analytics -- Layer 3
+%[text] A drug discovery chemist has selected Aspirin as a structural lead for a new anti-inflammatory analgesic.
+%[text] Aspirin is effective, but its molecular weight (180 g/mol) is low for a modern drug candidate, leaving room to add substituents to enhance specificity.
+%[text] Adding functional groups to improve target binding can simultaneously alter multiple physicochemical properties.
+%[text] For example, adding lipophilic groups increases LogP (the logarithm of the octanol/water partition coefficient), enhancing membrane permeability, but also increases molecular weight (MW) and decreases solubility.
+%[text] Conversely, adding polar groups to improve solubility can increase the topological polar surface area (TPSA), potentially reducing oral absorption.
 %[text] These trade-offs define the "multi-objective" nature of lead optimization.
-%[text] Since it is difficult for a single molecule to simultaneously optimize all desirable properties, chemists need to find the "least bad" compromise.
-%[text] In this exercise, you will:
-%[text]
-%[text] 1. Evaluate Aspirin against three oral drug design targets:
-%[text] LogP = 2.0, TPSA = 70 Å², MW = 350 g/mol.
+%[text] Since it is difficult for a single molecule to optimize all desirable properties simultaneously, chemists need to find the "least bad" compromise.
+%[text] In this exercise, we will:
+%[text] 1. Evaluate Aspirin against three oral drug design targets: LogP\* = 2.0, TPSA\* = 70 A^2, MW\* = 350 g/mol.
 %[text] 2. Load a library of 200 FDA-approved drugs as an analog reference and explore their 3D property space.
 %[text] 3. Convert raw properties into dimensionless desirability scores using the Derringer-Suich method.
-%[text] 4. Formulate and solve a goal attainment problem with fgoalattain (Optimization Toolbox) to find the best blend of property space that meets all targets simultaneously.
-%[text] 5. Track the Pareto front of LogP and TPSA trade-offs using the epsilon constraint method (linprog).
-%[text] 6. Select and visualize top lead optimization candidates.
-%[text]
-%[text] **Learning Objectives**
-%[text] - Understand why lead optimization is inherently multi-objective
-%[text] - Encode pharmacological intuition as Derringer-Suich desirability
-%[text] - Minimize maximum slack across all property goals with fgoalattain (Optimization Toolbox)
-%[text] - Interpret the achievement factor gamma as a progress indicator
-%[text] - Apply the epsilon constraint method and linprog to track the Pareto front
-%[text] - Distinguish between Pareto-optimal and suboptimal candidates
-%[text]
-%[text] **Prerequisites**
-%[text] - Completion of S02 (Drug Filter) — Context of Lipinski's Ro5
-%[text] - Recommended: A03 (QSAR Regression) — Context of QSAR modeling
-%[text] - Optimization Toolbox (fgoalattain, linprog) — If unavailable, Sections 4-5 use manual fallback, so all concepts are learnable.
-%[text]
-%[text] **Operating Environment**
-%[text] Compatibility Summary:
-%[text] Student License / Campus-wide — Full Optimization Toolbox
-%[text] MATLAB Online Free Version — Optimization Toolbox not supported
-%[text] MATLAB Online (Individual / Campus) — Optimization Toolbox available
-%[text] Without the toolbox, Sections 4-5 switch to manual alternatives via exhaustive search.
-%[text]
-%[text] Estimated Time Required: 45-90 minutes
-%[text]
-%[text] **Data:**
-%[text] data/list/fda_drugs.csv — 200 FDA-approved drugs (ChEMBL, CC-BY-SA 3.0)
-%[text]
-%[text] **References**
-%[text] Derringer G (1980) Simultaneous optimization of several response variables. J Quality Technology 12:214-219. doi:10.1080/00224065.1980.11980968
-%[text] Veber DF et al. (2002) Molecular properties that influence the oral bioavailability of drug candidates. J Med Chem 45:2615-2623. doi:10.1021/jm020017n
-%[text] Lipinski CA et al. (2001) Experimental and computational approaches to estimate solubility and permeability in drug discovery and development. Adv Drug Deliv Rev 46:3-26. doi:10.1016/S0169-409X(00)00129-0
-%[text] Cohon JL & Marks DH (1975) A review and evaluation of multiobjective programming techniques. Water Resour Res 11:208-220. doi:10.1029/WR011i002p00208 (epsilon constraint method)
-%[text] Charnes A & Cooper WW (1977) Goal programming and multiple objective optimization. Eur J Oper Res 1:39-54. doi:10.1016/S0377-2217(77)81007-2 (foundation of goal attainment)
-%[text]
-%[text] Execution: Run sections one by one with Ctrl+Enter
+%[text] 4. Formulate and solve a goal attainment problem with `fgoalattain` (Optimization Toolbox) to find the best blend of property space that satisfies all targets simultaneously.
+%[text] 5. Track the Pareto front using the epsilon constraint method.
+%[text] 6. Select and visualize top lead optimization candidates. \
+%[text] ### Learning Objectives
+%[text] - Understand why lead optimization is inherently multi-objective.
+%[text] - Encode pharmacological intuition as Derringer-Suich desirability.
+%[text] - Minimize maximum slack across all property goals with `fgoalattain`.
+%[text] - Interpret the attainment factor $\\gamma$ as a progress indicator.
+%[text] - Apply the epsilon constraint method and `linprog` to track the Pareto front.
+%[text] - Distinguish Pareto-optimal candidates from inferior ones. \
+%[text] ### Prerequisites
+%[text] - Completion of S02 (Drug Filter) -- Context of Lipinski's Ro5.
+%[text] - Recommended: A03 (QSAR Regression) -- Context of QSAR modeling.
+%[text] - Optimization Toolbox (`fgoalattain`, `linprog`) -- If unavailable, sections 4-5 use manual fallback, so all concepts are learnable. \
+%[text] ### Operating Environment
+%[text] - Without the toolbox, sections 4-5 switch to a manual alternative via exhaustive search.
+%[text] - Estimated time required: 45-90 minutes | Execution method: Run sections one by one with Ctrl+Enter \
+%[text] ### Data: 
+%[text] - `data/list/fda_drugs.csv` -- 200 FDA-approved drugs (ChEMBL, CC-BY-SA 3.0) \
+%[text] ### References
+%[text] - Derringer G (1980) Simultaneous optimization of several response variables. J Quality Technology 12:214-219. doi:10.1080/00224065.1980.11980968
+%[text] - Veber DF et al. (2002) Molecular properties that influence the oral bioavailability of drug candidates. J Med Chem 45:2615-2623. doi:10.1021/jm020017n
+%[text] - Lipinski CA et al. (2001) Experimental and computational approaches to estimate solubility and permeability in drug discovery and development. Adv Drug Deliv Rev 46:3-26. doi:10.1016/S0169-409X(00)00129-0
+%[text] - Cohon JL & Marks DH (1975) A review and evaluation of multiobjective programming techniques. Water Resour Res 11:208-220. doi:10.1029/WR011i002p00208
+%[text] - Charnes A & Cooper WW (1977) Goal programming and multiple objective optimization. Eur J Oper Res 1:39-54. doi:10.1016/S0377-2217(77)81007-2 \
 %%
 %[text] ## Section 0: Setup
-
 % Resolve project root (works for Desktop, MCP, and MATLAB Online)
 sDir = fileparts(mfilename('fullpath'));
 if strlength(sDir) > 0
     addpath(genpath(fullfile(sDir, '..', '..', '..', 'src')));
+elseif isfolder(fullfile(pwd, 'src'))
+    addpath(genpath(fullfile(pwd, 'src')));
 elseif ~isempty(which("logInfo"))
     addpath(genpath(fileparts(fileparts(which("logInfo")))));
 end
 projectRoot = resolveProjectRoot();
 addpath(genpath(fullfile(projectRoot, 'src')));
-emk.setup.initPython();
-
-%[text] Warm up the Python/RDKit process before main execution
+emk.setup.initPython(); %[output:923c1caf]
+%[text] Warm up the Python/RDKit process before main execution.
 mol_warmup = emk.mol.fromSmiles("C");   % Methane -- lightweight
 clear mol_warmup;
-
-%[text] Check if the Optimization Toolbox is available
+%[text] Check if the Optimization Toolbox is available.
 hasOptTbx = license("test", "optimization_toolbox");
-if hasOptTbx
-    logInfo("A10: Optimization Toolbox detected -- full optimization enabled.");
+if hasOptTbx %[output:group:3be59736]
+    logInfo("A10: Optimization Toolbox detected -- full optimization enabled."); %[output:18bf123d]
 else
     logWarn("A10: Optimization Toolbox not detected.");
     logWarn("     Sections 4-5 will use manual grid search fallback.");
     logWarn("     Install Optimization Toolbox for fgoalattain / linprog.");
-end
+end %[output:group:3be59736]
 
-logSection("A10", "Section 0: Setup", "Analytics L3");
-logInfo("A10: Setup complete.");
+logSection("A10", "Section 0: Setup", "Analytics L3"); %[output:188a8ca8]
+logInfo("A10: Setup complete."); %[output:0ccae4e8]
 %%
-%[text] ## Section 1: Lead Compounds and the Multi-Objective Dilemma
-%[text]
-%[text] Setup is complete. First, let's calculate the properties of the lead compound, Aspirin, and see how far it deviates from the targets.
-%[text] Understand the structure of the multi-objective trade-off on three axes: LogP (logarithm of lipophilicity), TPSA (topological polar surface area), and MW (molecular weight).
-%[text]
-%[text] ### Concept: The Three Pillars of Oral Drug-Likeness
-%[text]
-%[text] In modern oral drug discovery, molecules are evaluated based on three major physicochemical thresholds (based on Veber 2002 and Lipinski 2001).
-%[text]
-%[text] (1)  LogP (logarithm of lipophilicity)
-%[text] Range: 1.0 <= LogP <= 3.5 (optimal balance of membrane permeability and solubility)
-%[text] Too low: Low membrane permeability
-%[text] Too high: Low solubility, risk of CYP metabolism
-%[text]
-%[text] (2)  TPSA (topological polar surface area, Å²)
-%[text] Target: <= 90 Å² (Veber rule for good oral absorption)
-%[text] Target: <= 60 Å² (CNS penetration -- blood-brain barrier)
-%[text] Too high: TPSA > 130 Å² -> generally low passive absorption
-%[text]
-%[text] (3)  MW (molecular weight, g/mol)
-%[text] Target: <= 400 g/mol (stricter "beyond-Ro5" guideline)
-%[text] Lipinski: <= 500 g/mol
-%[text] Too high: Reduced absorption, may be recognized by efflux transporters
-%[text]
-%[text] Target achievement goals (used in Sections 3-5):
-%[text] LogP* = 2.0, TPSA* = 70.0 Å², MW* = 350.0 g/mol
-%[text]
-%[text] Lead Compound
-logSection("A10", "Section 1: Lead Compounds and the Multi-Objective Dilemma", "Analytics L3");
+%[text] ## Section 1: Lead Compounds and the Multi-objective Dilemma
+%[text] We begin by calculating the properties of the lead compound Aspirin and measuring how far it deviates from the targets -- setting the stage for the multi-objective trade-off across LogP, TPSA, and MW.
+%[text] ### The Three Pillars of Oral Drug-likeness
+%[text] In modern oral drug discovery, molecules are evaluated based on three key physicochemical indicators (Veber 2002, Lipinski 2001).
+%[text] **LogP (logarithm of the octanol/water partition coefficient)** -- An indicator of a molecule's lipophilicity (ease of dissolving in oil).
+%[text] The optimal range is 1.0 $\\leq$ LogP $\\leq$ 3.5; too low makes it difficult to pass through membranes, too high makes it hard to dissolve in water.
+%[text] **TPSA (topological polar surface area, unit: A^2)** -- The area occupied by polar atoms like nitrogen and oxygen on the molecular surface, affecting intestinal absorption.
+%[text] According to the Veber rule, TPSA $\\leq$ 90 A^2 is a guideline for oral absorption, and $\\leq$ 60 A^2 is required to cross the blood-brain barrier.
+%[text] **MW (molecular weight, unit: g/mol)** -- The weight of the molecule.
+%[text] The strict "beyond-Ro5" guidelines suggest MW $\\leq$ 400 g/mol, while Lipinski's Rule of 5 sets an upper limit of $\\leq$ 500 g/mol.
+%[text] The target values used in this exercise are LogP\* = 2.0, TPSA\* = 70.0 A^2, MW\* = 350.0 g/mol.
+logSection("A10", "Section 1: Lead Compounds and the Multi-objective Dilemma", "Analytics L3"); %[output:204acb91]
 LEAD_SMILES = "CC(=O)Oc1ccccc1C(=O)O";   % Aspirin
 LEAD_NAME   = "Aspirin";
-
-%[text] Property Targets
+%[text] Set property targets.
 TARGET_LOGP = 2.0;    % Optimal lipophilicity
 TARGET_TPSA = 70.0;   % A^2, balanced polar surface area
 TARGET_MW   = 350.0;  % g/mol, strict drug-likeness
@@ -122,47 +88,26 @@ TARGET_MW   = 350.0;  % g/mol, strict drug-likeness
 mol_lead  = emk.mol.fromSmiles(LEAD_SMILES);
 d_lead    = emk.descriptor.calculate(mol_lead);
 
-logInfo("Lead Compound: %s", LEAD_NAME);
-logInfo("  LogP = %+.2f   Target = %.1f  Deviation = %+.2f", ...
-    d_lead.LogP, TARGET_LOGP, d_lead.LogP - TARGET_LOGP);
-logInfo("  TPSA = %5.1f A^2   Target = %.1f  Deviation = %+.1f", ...
-    d_lead.TPSA, TARGET_TPSA, d_lead.TPSA - TARGET_TPSA);
-logInfo("  MW   = %5.1f g/mol  Target = %.1f  Deviation = %+.1f", ...
-    d_lead.MolWt, TARGET_MW, d_lead.MolWt - TARGET_MW);
-
-%[text] **💡 Observation Point 1**
-%[text] Aspirin's MW (180 g/mol) is significantly below the target of 350 g/mol.
-%[text] What does this imply for medicinal chemists developing analogs?
-%[text] (Hint: A lead with low molecular weight has more "room" for adding substituents.)
-%[text] Let's calculate the properties of Ibuprofen and compare it with Aspirin:
-%[text] mol_ibu = emk.mol.fromSmiles("CC(C)Cc1ccc(cc1)C(C)C(=O)O");
-%[text] d_ibu   = emk.descriptor.calculate(mol_ibu);
-%[text] Determine which molecule is closer to all three targets simultaneously.
-%[text] The targets here are for a hypothetical CNS drug.
-%[text] How should TARGET_TPSA be adjusted for a peripheral anti-inflammatory drug?
-%[text] (Hint: CNS drugs require TPSA < 60, but peripheral drugs can allow < 90.)
-% ... (Try writing code here)
+logInfo("Lead compound: %s", LEAD_NAME); %[output:226852aa]
+logInfo("  LogP = %+.2f   Target = %.1f  Deviation = %+.2f", ... %[output:group:67a84880] %[output:31fb27f9]
+    d_lead.LogP, TARGET_LOGP, d_lead.LogP - TARGET_LOGP); %[output:group:67a84880] %[output:31fb27f9]
+logInfo("  TPSA = %5.1f A^2   Target = %.1f  Deviation = %+.1f", ... %[output:group:440f2f6a] %[output:5b87cea5]
+    d_lead.TPSA, TARGET_TPSA, d_lead.TPSA - TARGET_TPSA); %[output:group:440f2f6a] %[output:5b87cea5]
+logInfo("  MW   = %5.1f g/mol  Target = %.1f  Deviation = %+.1f", ... %[output:group:0774042c] %[output:0dc79c24]
+    d_lead.MolWt, TARGET_MW, d_lead.MolWt - TARGET_MW); %[output:group:0774042c] %[output:0dc79c24]
 %%
 %[text] ## Section 2: Building Reference Library and Calculating Properties
-%[text]
-%[text] We have checked the properties of the lead compound. Next, we will load 200 FDA-approved drugs as a reference library and explore the chemical space.
-%[text] Let's see how actual drugs are distributed in the property space.
-%[text]
-%[text] ### Concept: Using FDA Drugs as "Reference Chemical Space"
-%[text]
-%[text] In lead optimization, the reference library serves two purposes:
-%[text] (a) To define a realistically accessible chemical space --
-%[text] If similar drugs already exist and have passed clinical trials, nearby analogs are more likely to succeed.
-%[text] (b) To provide a "target distribution" for property optimization:
-%[text] The library shows the LogP (logarithm of partition coefficient) / TPSA (topological polar surface area) / MW (molecular weight) values achieved by actual drugs.
-%[text]
+%[text] With the lead compound profiled, we now load 200 FDA-approved drugs as a reference library to visualize how real drugs distribute in LogP-TPSA-MW space.
+%[text] ### Why Use FDA Drugs as a "Reference Chemical Space"
+%[text] In lead optimization, the reference library serves two purposes.
+%[text] (a) To define a realistically accessible chemical space -- if similar drugs already exist and have passed clinical trials, nearby analogs are more likely to succeed.
+%[text] (b) To provide a "target distribution" for property optimization -- the library shows the distribution of LogP / TPSA / MW values achieved by actual drugs.
 %[text] Here, we use 200 FDA-approved drugs from ChEMBL as a reference.
-%[text] In actual projects, commercially available building block libraries or computationally generated sets of analogs are used.
-logSection("A10", "Section 2: Building Reference Library and Calculating Properties", "Analytics L3");
+logSection("A10", "Section 2: Building Reference Library and Calculating Properties", "Analytics L3"); %[output:2fe54ebf]
 DATA_FILE = "data/list/fda_drugs.csv";
-logInfo("Loaded %d entries from %s", height(rawTbl), DATA_FILE);
-
-%[text] Parsing molecules.
+rawTbl = readtable(DATA_FILE, TextType="string");
+logInfo("Loaded %d entries from %s", height(rawTbl), DATA_FILE); %[output:4e8e639d]
+%[text] Parse the molecules.
 nLib  = height(rawTbl);
 mols  = cell(1, nLib);
 valid = false(1, nLib);
@@ -181,100 +126,64 @@ mols     = mols(validIdx);
 libNames = rawTbl.Name(validIdx);
 libSmiles = rawTbl.SMILES(validIdx);
 nValid   = numel(mols);
-logInfo("Parsed %d / %d molecules.", nValid, nLib);
-
-%[text] Calculating descriptors: LogP, TPSA, MW
+logInfo("Parsed %d / %d molecules.", nValid, nLib); %[output:94a0ef57]
+%[text] Calculate descriptors: LogP, TPSA, MW.
 DESCS   = ["LogP", "TPSA", "MolWt"];
 descTbl = emk.descriptor.batchCalculate(mols, DESCS);
 
 logp_vec = descTbl.LogP;    % N x 1 double
 tpsa_vec = descTbl.TPSA;    % N x 1 double
 mw_vec   = descTbl.MolWt;   % N x 1 double
-
-%[text] Property matrix: N x 3  [LogP, TPSA, MW]
+%[text] Construct the property matrix: N x 3 \[LogP, TPSA, MW\].
 propMat = [logp_vec, tpsa_vec, mw_vec];
 
-logInfo("Library property range:");
-logInfo("  LogP : [%.2f, %.2f]  Mean = %.2f", ...
-    min(logp_vec), max(logp_vec), mean(logp_vec));
-logInfo("  TPSA : [%.1f, %.1f] A^2  Mean = %.1f", ...
-    min(tpsa_vec), max(tpsa_vec), mean(tpsa_vec));
-logInfo("  MW   : [%.1f, %.1f] g/mol  Mean = %.1f", ...
-    min(mw_vec), max(mw_vec), mean(mw_vec));
-
-%[text] --- 3D Property Space Plot ---
-figure("Name", "A10 Sec2: FDA Drug Property Space (LogP vs TPSA vs MW)");
-scatter3(logp_vec, tpsa_vec, mw_vec, 30, mw_vec, "filled", ...
-    MarkerFaceAlpha=0.6);
-hold on;
+logInfo("Library property range:"); %[output:040dab52]
+logInfo("  LogP : [%.2f, %.2f]  Mean = %.2f", ... %[output:group:7dfd5c46] %[output:2e8589fe]
+    min(logp_vec), max(logp_vec), mean(logp_vec)); %[output:group:7dfd5c46] %[output:2e8589fe]
+logInfo("  TPSA : [%.1f, %.1f] A^2  Mean = %.1f", ... %[output:group:8031f360] %[output:5b6f9aab]
+    min(tpsa_vec), max(tpsa_vec), mean(tpsa_vec)); %[output:group:8031f360] %[output:5b6f9aab]
+logInfo("  MW   : [%.1f, %.1f] g/mol  Mean = %.1f", ... %[output:group:0c67d964] %[output:8915359a]
+    min(mw_vec), max(mw_vec), mean(mw_vec)); %[output:group:0c67d964] %[output:8915359a]
+%[text] Create a 3D property space plot.
+figure("Name", "A10 Sec2: FDA Drug Property Space (LogP vs TPSA vs MW)"); %[output:038ae136]
+scatter3(logp_vec, tpsa_vec, mw_vec, 30, mw_vec, "filled", ... %[output:038ae136]
+    MarkerFaceAlpha=0.6); %[output:038ae136]
+hold on; %[output:038ae136]
 %[text] Mark the lead compound.
-scatter3(d_lead.LogP, d_lead.TPSA, d_lead.MolWt, 120, "r", ...
-    "^", "filled", DisplayName=LEAD_NAME);
+scatter3(d_lead.LogP, d_lead.TPSA, d_lead.MolWt, 120, "r", ... %[output:038ae136]
+    "^", "filled", DisplayName=LEAD_NAME); %[output:038ae136]
 %[text] Mark the target point.
-scatter3(TARGET_LOGP, TARGET_TPSA, TARGET_MW, 150, "k", ...
-    "pentagram", LineWidth=2, DisplayName="Target");
-xlabel("LogP");
-ylabel("TPSA (A^2)");
-zlabel("MW (g/mol)");
-title("FDA Drug Property Space");
-cb = colorbar();
-cb.Label.String = "MW (g/mol)";
-legend(Location="best");
-grid on;
-
-%[text] **💡 Observation Point 2**
-%[text] Rotate the 3D scatter plot to see if there is a visible correlation between LogP and TPSA.
-%[text] Is there a visible correlation between LogP and TPSA?
-%[text] (Hint: Lipophilic compounds tend to have fewer polar groups.)
-%[text] Let's calculate the Pearson correlation: corr(logp_vec, tpsa_vec)
-%[text] Check how many library molecules already meet all three targets:
-%[text] Count the number of molecules satisfying 1.0 <= LogP <= 3.5 AND TPSA <= 90 AND MW <= 400.
-%[text] Count: sum((logp_vec >= 1.0 & logp_vec <= 3.5) & ...
-%[text] tpsa_vec <= 90 & mw_vec <= 400)
-%[text] Try adding Lipinski's Ro5 boundaries as a transparent box in the 3D plot:
-%[text] Consider the conditions [LogP <= 5, TPSA (not an Ro5 criterion), MW <= 500].
-%[text] See how it compares with the Veber/strict "350 g/mol" guideline.
-% ... (Try writing the code here)
+scatter3(TARGET_LOGP, TARGET_TPSA, TARGET_MW, 150, "k", ... %[output:038ae136]
+    "pentagram", LineWidth=2, DisplayName="Target"); %[output:038ae136]
+xlabel("LogP"); %[output:038ae136]
+ylabel("TPSA (A^2)"); %[output:038ae136]
+zlabel("MW (g/mol)"); %[output:038ae136]
+title("FDA Drug Property Space"); %[output:038ae136]
+cb = colorbar(); %[output:038ae136]
+cb.Label.String = "MW (g/mol)"; %[output:038ae136]
+legend(Location="best"); %[output:038ae136]
+grid on; %[output:038ae136]
 %%
 %[text] ## Section 3: Desirability Function -- From Properties to Scores
-%[text]
-%[text] The property space of the reference library has been revealed. Next, we will convert each property to a score in [0,1] using the Derringer-Suich desirability function.
-%[text] Learn how to optimize multiple properties simultaneously and express them with a single metric.
-%[text]
-%[text] ### Concept: Derringer-Suich Desirability (1980)
-%[text]
-%[text] The desirability function maps raw property values to a dimensionless score d_i in [0, 1].
-%[text] d_i = 1.0  --  when the property perfectly matches the ideal target
-%[text] d_i = 0.0  --  when the property is outside the acceptable range (below lower limit or above upper limit)
-%[text]
-%[text] The standard form for a "two-sided" (target value) goal is as follows:
-%[text]
-%[text] d_i(p) = 0                                when p < L_i
-%[text] = ((p - L_i) / (T_i - L_i))^s     when L_i <= p <= T_i
-%[text] = ((U_i - p) / (U_i - T_i))^t     when T_i < p <= U_i
-%[text] = 0                                when p > U_i
-%[text]
-%[text] Here, L_i is the lower limit, T_i is the ideal target, U_i is the upper limit, and s and t control the curvature.
-%[text]
-%[text] The composite desirability D is calculated by combining all individual d_i.
-%[text]
-%[text] D = (d_1 * d_2 * ... * d_k)^(1/k)    (geometric mean)
-%[text]
-%[text] When D = 1, all properties are ideal simultaneously.
-%[text] When D = 0, at least one property is unacceptable.
-%[text] The geometric mean imposes a stronger penalty than the arithmetic mean for a single very low score.
-%[text]
-%[text] Definition of property desirability (this exercise):
-%[text]
-%[text] LogP:   L = 0.5, T = 2.0, U = 4.0   (s=t=1, linear ramp)
-%[text] TPSA:   One-sided upper limit (lower limit always acceptable):
-%[text] d_TPSA = 1              when TPSA <= 60
-%[text] = (90 - TPSA)/30 when 60 < TPSA <= 90
-%[text] = 0              when TPSA > 90
-%[text] MW:     L = 150, T = 350, U = 500   (s=1, t=1)
-%[text]
-logSection("A10", "Section 3: Desirability Function — From Properties to Scores", "Analytics L3");
-%[text] --- Individual Desirability Functions (Vectorized) ---
+%[text] With the reference library's property space mapped, we now convert each property into a score in $\[0, 1\]$ using the Derringer-Suich desirability function -- a single composite metric for multi-objective optimization.
+%[text] ### Derringer-Suich Desirability Function (Derringer 1980)
+%[text] A desirability function is a method to convert raw property values into a dimensionless score $d$ between $\[0, 1\]$.
+%[text] $d = 1$ means the property perfectly matches the ideal value, while $d = 0$ means it is outside the acceptable range.
+%[text] The two-sided desirability function takes a lower limit $L$, ideal target $T$, upper limit $U$, and curvature exponents $s$ and $t$:
+%[text] For a property value $p$:
+%[text] \-- When $p \< L$, $d = 0$ (fails below the acceptable range).
+%[text] \-- When $L \\leq p \\leq T$, $d = \\left(\\frac{p - L}{T - L}\\right)^s$ (linear increase from lower limit to target when $s = 1$).
+%[text] \-- When $T \< p \\leq U$, $d = \\left(\\frac{U - p}{U - T}\\right)^t$ (linear decrease from target to upper limit when $t = 1$).
+%[text] \-- When $p \> U$, $d = 0$ (fails above the acceptable range).
+%[text] To combine individual scores $d(1), d(2), \\ldots, d(k)$ of multiple properties into a single composite desirability $D$, use the geometric mean.
+%[text] $D = \\left(d(1) \\times d(2) \\times \\cdots \\times d(k)\\right)^{1/k}$
+%[text] The geometric mean imposes a strict penalty on situations where "any one is unacceptable" because the overall $D$ drops significantly if any score is close to 0 (more conservative than arithmetic mean).
+%[text] The property settings for this exercise are as follows.
+%[text] **LogP**: $L = 0.5$, $T = 2.0$, $U = 4.0$ ($s = t = 1$, linear ramp).
+%[text] **TPSA**: One-sided upper limit type, where TPSA $\\leq$ 60 gives $d = 1$, $60 \<$ TPSA $\\leq$ 90 gives $d = (90 -$ TPSA$)/30$, and TPSA $\> 90$ gives $d = 0$.
+%[text] **MW**: $L = 150$, $T = 350$, $U = 500$ ($s = t = 1$).
+logSection("A10", "Section 3: Desirability Function -- From Properties to Scores", "Analytics L3"); %[output:1d8cf9a6]
+%[text] Define individual desirability functions (vectorized).
 d_logp = @(p) max(0, min(1, ...
     (p >= 0.5 & p <= 2.0) .* ((p - 0.5) ./ 1.5) + ...
     (p >  2.0 & p <= 4.0) .* ((4.0 - p) ./ 2.0) + ...
@@ -295,163 +204,111 @@ d_mw   = @(p) ...
     ((p >= 350) & (p <= 500)) .* ((500 - p) ./ 150) + ...
     (p == 350);
 
-%[text] Composite Desirability (Geometric Mean of 3 Components)
+%[text] Define composite desirability (geometric mean of 3 components).
 D_composite = @(logp, tpsa, mw) ...
     (d_logp(logp) .* d_tpsa(tpsa) .* d_mw(mw)) .^ (1/3);
-
-%[text] Calculate the library scores.
+%[text] Calculate scores for each molecule in the library.
 d1 = d_logp(logp_vec);
 d2 = d_tpsa(tpsa_vec);
 d3 = d_mw(mw_vec);
 D  = (d1 .* d2 .* d3) .^ (1/3);
-
-%[text] Calculate the lead compound score.
+%[text] Calculate the score for the lead compound.
 D_lead = D_composite(d_lead.LogP, d_lead.TPSA, d_lead.MolWt);
-logInfo("Lead (%s) Desirability: D=%.3f (d_LogP=%.2f, d_TPSA=%.2f, d_MW=%.2f)", ...
-    LEAD_NAME, D_lead, d_logp(d_lead.LogP), d_tpsa(d_lead.TPSA), d_mw(d_lead.MolWt));
-
+logInfo("Lead (%s) desirability: D=%.3f (d_LogP=%.2f, d_TPSA=%.2f, d_MW=%.2f)", ... %[output:group:8f76532e] %[output:9386c9ff]
+    LEAD_NAME, D_lead, d_logp(d_lead.LogP), d_tpsa(d_lead.TPSA), d_mw(d_lead.MolWt)); %[output:group:8f76532e] %[output:9386c9ff]
 %[text] Display library statistics.
-logInfo("Library Desirability: Mean=%.3f, Max=%.3f, Median=%.3f", ...
-    mean(D), max(D), median(D));
-
-%[text] Display the top 10 library molecules by desirability.
+logInfo("Library desirability: Mean=%.3f, Max=%.3f, Median=%.3f", ... %[output:group:633e2b0e] %[output:8755a3cd]
+    mean(D), max(D), median(D)); %[output:group:633e2b0e] %[output:8755a3cd]
+%[text] Display top 10 library molecules by composite desirability.
 [D_sorted, D_rank] = sort(D, "descend");
 topN_des = min(10, nValid);
-logInfo("Top %d Library Molecules by Composite Desirability:", topN_des);
-for k = 1:topN_des
+logInfo("Top %d library molecules by composite desirability:", topN_des); %[output:79b40db0]
+for k = 1:topN_des %[output:group:5a841d2c]
     idx = D_rank(k);
-    logInfo("  %2d. D=%.3f  LogP=%5.2f  TPSA=%5.1f  MW=%5.1f  %s", ...
-        k, D_sorted(k), logp_vec(idx), tpsa_vec(idx), mw_vec(idx), libNames(idx));
-end
-
-%[text] --- Desirability Function Plot ---
+    logInfo("  %2d. D=%.3f  LogP=%5.2f  TPSA=%5.1f  MW=%5.1f  %s", ... %[output:773432c8]
+        k, D_sorted(k), logp_vec(idx), tpsa_vec(idx), mw_vec(idx), libNames(idx)); %[output:773432c8]
+end %[output:group:5a841d2c]
+%[text] Plot desirability functions.
 p_range_logp = linspace(-1, 6, 300);
 p_range_tpsa = linspace(0, 150, 300);
 p_range_mw   = linspace(100, 700, 300);
 
-figure("Name", "A10 Sec3: Desirability Function");
-subplot(1, 3, 1);
-plot(p_range_logp, d_logp(p_range_logp), "b-", LineWidth=2);
-xline(TARGET_LOGP, "k--", Label="Target", LabelVerticalAlignment="bottom");
-xline(d_lead.LogP, "r:", LineWidth=1.5, Label=LEAD_NAME);
-xlabel("LogP");  ylabel("d_{LogP}");
-title("LogP Desirability");  ylim([0, 1.1]);  grid on;
+figure("Name", "A10 Sec3: Desirability Functions"); %[output:1a63afb1]
+subplot(1, 3, 1); %[output:1a63afb1]
+plot(p_range_logp, d_logp(p_range_logp), "b-", LineWidth=2); %[output:1a63afb1]
+xline(TARGET_LOGP, "k--", Label="Target", LabelVerticalAlignment="bottom"); %[output:1a63afb1]
+xline(d_lead.LogP, "r:", LineWidth=1.5, Label=LEAD_NAME); %[output:1a63afb1]
+xlabel("LogP");  ylabel("d_{LogP}"); %[output:1a63afb1]
+title("LogP Desirability");  ylim([0, 1.1]);  grid on; %[output:1a63afb1]
 
-subplot(1, 3, 2);
-plot(p_range_tpsa, d_tpsa(p_range_tpsa), "g-", LineWidth=2);
-xline(TARGET_TPSA, "k--", Label="Target", LabelVerticalAlignment="bottom");
-xline(d_lead.TPSA, "r:", LineWidth=1.5, Label=LEAD_NAME);
-xlabel("TPSA (A^2)");  ylabel("d_{TPSA}");
-title("TPSA Desirability");  ylim([0, 1.1]);  grid on;
+subplot(1, 3, 2); %[output:1a63afb1]
+plot(p_range_tpsa, d_tpsa(p_range_tpsa), "g-", LineWidth=2); %[output:1a63afb1]
+xline(TARGET_TPSA, "k--", Label="Target", LabelVerticalAlignment="bottom"); %[output:1a63afb1]
+xline(d_lead.TPSA, "r:", LineWidth=1.5, Label=LEAD_NAME); %[output:1a63afb1]
+xlabel("TPSA (A^2)");  ylabel("d_{TPSA}"); %[output:1a63afb1]
+title("TPSA Desirability");  ylim([0, 1.1]);  grid on; %[output:1a63afb1]
 
-subplot(1, 3, 3);
-plot(p_range_mw, d_mw(p_range_mw), "m-", LineWidth=2);
-xline(TARGET_MW, "k--", Label="Target", LabelVerticalAlignment="bottom");
-xline(d_lead.MolWt, "r:", LineWidth=1.5, Label=LEAD_NAME);
-xlabel("MW (g/mol)");  ylabel("d_{MW}");
-title("MW Desirability");  ylim([0, 1.1]);  grid on;
+subplot(1, 3, 3); %[output:1a63afb1]
+plot(p_range_mw, d_mw(p_range_mw), "m-", LineWidth=2); %[output:1a63afb1]
+xline(TARGET_MW, "k--", Label="Target", LabelVerticalAlignment="bottom"); %[output:1a63afb1]
+xline(d_lead.MolWt, "r:", LineWidth=1.5, Label=LEAD_NAME); %[output:1a63afb1]
+xlabel("MW (g/mol)");  ylabel("d_{MW}"); %[output:1a63afb1]
+title("MW Desirability");  ylim([0, 1.1]);  grid on; %[output:1a63afb1]
 
-sgtitle("Derringer-Suich Desirability Function");
-
-%[text] **💡 Observation Point 3**
-%[text] The geometric mean D = (d1*d2*d3)^(1/3) penalizes a single poor score.
-%[text] Replace with the arithmetic mean and observe the results.
-%[text] D_arith = (d1 + d2 + d3) / 3;
-%[text] Check how the top 10 ranking changes and consider which formulation is more conservative for compounds with low properties.
-%[text] If you want to favor CNS drugs by changing LogP desirability (TPSA < 60, LogP 1-3):
-%[text] Adjust the target of d_tpsa to 45 and the upper limit to 60.
-%[text] Check how many library molecules remain under this condition.
-%[text] Find the molecule with the highest d_LogP score and the lowest d_TPSA score.
-%[text] Consider the chemical features explaining the low TPSA score.
-% ... (Try writing code here)
+sgtitle("Derringer-Suich Desirability Functions"); %[output:1a63afb1]
 %%
 %[text] ## Section 4: Goal Attainment Optimization (fgoalattain)
-%[text]
-%[text] Candidates were ranked by desirability score. Next, we use fgoalattain to find the optimal blend that simultaneously meets three property goals.
-%[text] Let's understand the role of the attainment factor gamma.
-%[text]
-%[text] ### Concept: Goal Attainment and Attainment Factor
-%[text]
-%[text] The goal attainment method (Charnes & Cooper 1977) solves the following problem:
-%[text]
-%[text] min  gamma
-%[text] s.t. f_j(x) - gamma * w_j <= goal_j    for all j = 1..m
-%[text] x in feasible set X
-%[text]
-%[text] Where:
-%[text] x = decision variables
-%[text] f_j(x) = j-th objective function
-%[text] goal_j = desired target for the j-th objective
-%[text] w_j = weight (positive, scales slack)
-%[text] gamma = attainment factor (optimization variable)
-%[text]
-%[text] Interpretation of gamma:
-%[text] gamma <= 0  =>  All goals are simultaneously achieved
-%[text] gamma >  0  =>  Some goals are overachieved, the "least" goal is gamma * w units unmet
-%[text]
-%[text] Problem formulation (this exercise):
-%[text]
-%[text] Represent a "virtual compound" as a convex mixture of library molecules.
-%[text] Decision variables x in R^N (N = library size) satisfy:
-%[text]
-%[text] x >= 0, sum(x) = 1    (mixture constraint)
-%[text]
-%[text] The blended properties are:
-%[text]
-%[text] f(x) = [sum_i x_i * LogP_i, sum_i x_i * TPSA_i, sum_i x_i * MW_i]
-%[text] = PropMat' * x     (3 x 1 vector)
-%[text]
-%[text] Where PropMat is an N x 3 property matrix.
-%[text]
-%[text] fgoalattain finds x* such that PropMat'*x* is closest to the goal vector [TARGET_LOGP, TARGET_TPSA, TARGET_MW] in a minimax sense.
-%[text]
-%[text] Real molecule closest to the optimal blend point:
-%[text] After computing the optimal blend point p* = PropMat' * x*, find the library molecule with the smallest Euclidean distance to p* in the normalized property space (zero mean, unit variance).
-%[text]
-%[text] Note: The convex hull of the library may not contain the target point.
-%[text] The attainment factor gamma quantifies how far the target is outside the convex hull.
-logSection("A10", "Section 4: Goal Attainment Optimization (fgoalattain)", "Analytics L3");
+%[text] With candidates ranked by desirability, we now use `fgoalattain` to find the optimal blend satisfying all three property goals simultaneously -- and understand what the attainment factor $\\gamma$ tells us.
+%[text] ### Goal Attainment Method (Charnes & Cooper 1977)
+%[text] The "goal attainment method" is an optimization technique that seeks a solution that best satisfies multiple goals simultaneously.
+%[text] Specifically, it minimizes the attainment factor $\\gamma$: finding the smallest $\\gamma$ such that for all goals $j$, $f(j)(x) \\leq g(j) + \\gamma \\cdot w(j)$ is satisfied.
+%[text] where $g(j)$ denotes the goal value and $w(j)$ the weight.
+%[text] When $\\gamma \\leq 0$, all goals are achieved simultaneously; when $\\gamma \> 0$, some goals are unmet.
+%[text] In this exercise, we represent a "virtual compound" as a convex mixture of $N$ molecules from the library.
+%[text] If the mixture weights are $x(i) \\geq 0$, $\\sum x(i) = 1$, the blended LogP becomes a weighted average: $\\text{LogP}(x) = \\sum x(i) \\cdot \\text{LogP}(i)$.
+%[text] In matrix form, this is $f(x) = F^T x$ ($F$ is the $N \\times 3$ property matrix, $x$ is the mixture weight vector).
+%[text] MATLAB's `fgoalattain` function automatically finds $x^\*$ that best approaches the target \[LogP\*, TPSA\*, MW\*\] with $F^T x$.
+%[text] After finding the optimal blend point \\$p^ *= F^T x^*\\$, select the real molecule closest to it in the normalized property space (zero mean, unit variance).
+logSection("A10", "Section 4: Goal Attainment Optimization (fgoalattain)", "Analytics L3"); %[output:70890537]
 n = nValid;
 propGoal   = [TARGET_LOGP; TARGET_TPSA; TARGET_MW];
 propWeight = [1.0; 1.0; 1.0];   % Equal weight for all objectives
-
-%[text] Mixture constraint: sum(x) = 1, x >= 0
+%[text] Set up mixture constraints: sum(x) = 1, x \>= 0.
 Aeq_mix = ones(1, n);
 beq_mix = 1;
 lb_mix  = zeros(n, 1);
 ub_mix  = ones(n, 1);
-
-%[text] Objective function: Blended property vector (linear in x)
+%[text] Define the objective function: blended property vector (linear in x).
 fun_blend = @(x) propMat' * x(:);   % returns 3 x 1
 
-if hasOptTbx
+if hasOptTbx %[output:group:798b7217]
     % --- OPTIMIZATION TOOLBOX path ---
     x0_mix   = ones(n, 1) / n;   % Start from uniform mixture
     opts_ga  = optimoptions("fgoalattain", ...
         Display="off", MaxFunctionEvaluations=n*50, ...
         OptimalityTolerance=1e-6, ConstraintTolerance=1e-6);
 
-    logInfo("Running fgoalattain (%d variables, 3 objectives)...", n);
+    logInfo("Running fgoalattain (%d variables, 3 objectives)...", n); %[output:40f4392f]
     tic;
     [x_opt, fval_blend, attainfactor, exitflag] = fgoalattain( ...
         fun_blend, x0_mix, propGoal, propWeight, ...
         [], [], Aeq_mix, beq_mix, lb_mix, ub_mix, [], opts_ga);
     t_opt = toc;
 
-    logInfo("fgoalattain completed in %.2f seconds (exitflag=%d).", t_opt, exitflag);
-    logInfo("Attainment factor gamma = %.4f", attainfactor);
+    logInfo("fgoalattain completed in %.2f seconds (exitflag=%d).", t_opt, exitflag); %[output:62dcf164]
+    logInfo("Attainment factor gamma = %.4f", attainfactor); %[output:8a543336]
     if attainfactor <= 0
-        logInfo("  => All property goals achieved within the convex hull.");
+        logInfo("  => All property goals achieved within the convex hull."); %[output:670b2109]
     else
-        logInfo("  => Goals partially unmet -- target is outside the convex hull.");
+        logInfo("  => Goals partially unmet -- targets are outside the convex hull.");
         logInfo("     Nearest blend point: LogP=%.2f, TPSA=%.1f, MW=%.1f", ...
             fval_blend(1), fval_blend(2), fval_blend(3));
     end
 
 else
-    % --- Manual fallback: Nearest molecule by weighted Euclidean distance ---
+    % --- Manual fallback: nearest molecule by weighted Euclidean distance ---
     logWarn("fgoalattain unavailable -- using weighted nearest neighbor fallback.");
-    propSigma = std(propMat);           % normalisation scale
+    propSigma = std(propMat);           % normalization scale
     propGoalN = propGoal(:)' ./ propSigma;
     propMatN  = propMat ./ propSigma;
     dist_all  = sqrt(sum((propMatN - propGoalN).^2, 2));
@@ -459,46 +316,41 @@ else
     fval_blend = propMat(nn_idx, :)';  % 3 x 1
     attainfactor = max((fval_blend - propGoal) ./ propWeight);
     logInfo("Nearest: %s  (D_composite=%.3f)", libNames(nn_idx), D(nn_idx));
-end
-
-%[text] --- Find the real molecule closest to the optimal blend point ---
-%[text] Normalize by library standard deviation (unit variance distance)
+end %[output:group:798b7217]
+%[text] Find the real molecule closest to the optimal blend point.
+%[text] Normalize by library standard deviation (unit variance distance) to align units of LogP, TPSA, MW.
 propSigma = std(propMat);
-propMatN  = propMat ./ propSigma;       % N x 3 normalised
+propMatN  = propMat ./ propSigma;       % N x 3 normalized
 fvalN     = fval_blend(:)' ./ propSigma;  % 1 x 3
 
 dist_to_blend = sqrt(sum((propMatN - fvalN).^2, 2));
 [~, nearestRank] = sort(dist_to_blend);
-
-%[text] Display top 5 nearest real molecules
+%[text] Display the top 5 nearest real molecules.
 TOP_GA = 5;
-logInfo("Top %d real molecules nearest to the optimal blend point:", TOP_GA);
-logInfo("  (Optimal blend: LogP=%.2f, TPSA=%.1f, MW=%.1f)", ...
-    fval_blend(1), fval_blend(2), fval_blend(3));
-for k = 1:min(TOP_GA, nValid)
+logInfo("Top %d real molecules closest to the optimal blend point:", TOP_GA); %[output:385f653a]
+logInfo("  (Optimal blend: LogP=%.2f, TPSA=%.1f, MW=%.1f)", ... %[output:group:48de3188] %[output:4281a14b]
+    fval_blend(1), fval_blend(2), fval_blend(3)); %[output:group:48de3188] %[output:4281a14b]
+for k = 1:min(TOP_GA, nValid) %[output:group:036dc0d8]
     idx = nearestRank(k);
-    logInfo("  %d. Distance=%.3f  D=%.3f  LogP=%5.2f  TPSA=%5.1f  MW=%5.1f  %s", ...
-        k, dist_to_blend(idx), D(idx), logp_vec(idx), tpsa_vec(idx), ...
-        mw_vec(idx), libNames(idx));
-end
-
-%[text] --- Radar (Spider) Chart: Lead vs Top Desirability Candidates ---
-%[text] Note: When gamma << 0, the fgoalattain blend nearest neighbor (nearestRank(1)) reaches LogP~-3.5 (as fgoalattain minimizes the maximum gap of unmet goals).
-%[text] For meaningful comparison, use the top desirability molecule instead.
+    logInfo("  %d. Distance=%.3f  D=%.3f  LogP=%5.2f  TPSA=%5.1f  MW=%5.1f  %s", ... %[output:6c39698c]
+        k, dist_to_blend(idx), D(idx), logp_vec(idx), tpsa_vec(idx), ... %[output:6c39698c]
+        mw_vec(idx), libNames(idx)); %[output:6c39698c]
+end %[output:group:036dc0d8]
+%[text] Compare properties of lead vs top desirability candidates using a radar (spider) chart.
+%[text] Note: When $\\gamma \\ll 0$, the fgoalattain blend nearest neighbor may significantly deviate from the LogP target. Use top desirability molecules for meaningful comparison.
 [~, topGaIdx]  = max(D);
 radarProps = ["LogP", "TPSA", "MW"];
 radarLead  = [d_lead.LogP, d_lead.TPSA, d_lead.MolWt];
 radarCand  = [logp_vec(topGaIdx), tpsa_vec(topGaIdx), mw_vec(topGaIdx)];
 radarGoal  = [TARGET_LOGP, TARGET_TPSA, TARGET_MW];
-
-%[text] Normalize to [0,1] using fixed drug-like space boundaries.
-%[text] Using library min/max stretches the chart due to extreme outliers (MW=924, TPSA=319). Fixed boundaries keep the chart in a human-readable region for comparing 3 compounds.
+%[text] Normalize to $\[0, 1\]$ using fixed drug-like space boundaries.
+%[text] Using library min/max stretches the range due to extreme outliers (MW=924, TPSA=319), compressing the chart, so fixed boundaries are used.
 radarMin   = [-1,   0, 100];   % [LogP_lo, TPSA_lo, MW_lo]
 radarMax   = [ 5, 120, 500];   % [LogP_hi, TPSA_hi, MW_hi]
 radarNorm  = @(v) (v - radarMin) ./ (radarMax - radarMin);
 radarNorm  = @(v) max(0, min(1, (v - radarMin) ./ (radarMax - radarMin)));  % clip to [0,1]
 
-figure("Name", "A10 Sec4: Property Profile -- Lead vs Candidate vs Goal");
+figure("Name", "A10 Sec4: Property Profile -- Lead vs Candidate vs Goal"); %[output:353a2e8e]
 theta    = linspace(0, 2*pi, numel(radarProps) + 1);
 nLead    = radarNorm(radarLead);   % 1x3
 nCand    = radarNorm(radarCand);   % 1x3
@@ -507,73 +359,28 @@ rLead    = [nLead, nLead(1)];      % 1x4  (close the polygon)
 rCand    = [nCand, nCand(1)];      % 1x4
 rGoal    = [nGoal, nGoal(1)];      % 1x4
 
-polarplot(theta, rLead, "r-o", LineWidth=2, DisplayName=LEAD_NAME);
-hold on;
-polarplot(theta, rCand, "b-s", LineWidth=2, DisplayName=libNames(topGaIdx));
-polarplot(theta, rGoal, "k--^", LineWidth=1.5, DisplayName="Goal");
-legend(Location="southoutside");
-title(sprintf("Property Profile (Normalized)\n%s vs %s vs Goal", ...
-    LEAD_NAME, libNames(topGaIdx)));
+polarplot(theta, rLead, "r-o", LineWidth=2, DisplayName=LEAD_NAME); %[output:353a2e8e]
+hold on; %[output:353a2e8e]
+polarplot(theta, rCand, "b-s", LineWidth=2, DisplayName=libNames(topGaIdx)); %[output:353a2e8e]
+polarplot(theta, rGoal, "k--^", LineWidth=1.5, DisplayName="Goal"); %[output:353a2e8e]
+legend(Location="southoutside"); %[output:353a2e8e]
+title(sprintf("Property Profile (Normalized)\n%s vs %s vs Goal", ... %[output:353a2e8e]
+    LEAD_NAME, libNames(topGaIdx))); %[output:353a2e8e]
 pax = gca;
-pax.ThetaTick      = [0, 120, 240];
-pax.ThetaTickLabel = {"LogP", "TPSA (A^2)", "MW (g/mol)"};
-
-%[text] **💡 Observation Point 4**
-%[text] Let's confirm what the attainment factor gamma is.
-%[text] If gamma <= 0, all goals are achievable; if gamma > 0, some are unmet.
-%[text] Change TARGET_MW from 350 to 250 and rerun to observe changes in gamma.
-%[text] Observe how gamma changes and which goal becomes the hardest to achieve.
-%[text] Note: When gamma << 0 (e.g., -5.5), fgoalattain drives the blend to fall below all goals simultaneously. This means the "optimal blend" point may be far from the goals (e.g., LogP = 2.0 instead of -3.5). The top 5 nearest molecules to that blend point often have D = 0 (outside the desirability zone).
-%[text] To find the nearest feasible compound, use the top D ranking (BETAXOLOL) instead of the fgoalattain blend nearest neighbor.
-%[text] Check what happens when you prioritize LogP over TPSA by changing weights:
-%[text] propWeight = [0.5; 2.0; 1.0];  % Double weight for TPSA
-%[text] This tells fgoalattain that "missing the TPSA goal costs twice as much."
-%[text] See which molecule moves to the top rank.
-%[text] Consider what the interpretation of "mixture" physically means.
-%[text] x_opt assigns weights to each library molecule. If x_opt has three non-zero entries with weights [0.3, 0.4, 0.3], it means the "ideal analog" combines structural features of all three molecules.
-%[text] In actual lead optimization, it guides which substituents to merge.
-% ... (Try writing code here)
+pax.ThetaTick      = [0, 120, 240]; %[output:353a2e8e]
+pax.ThetaTickLabel = {"LogP", "TPSA (A^2)", "MW (g/mol)"}; %[output:353a2e8e]
 %%
 %[text] ## Section 5: Pareto Front -- LogP vs TPSA Trade-off
-%[text]
-%[text] The results of the goal achievement optimization have been obtained. Next, let's plot the Pareto front of LogP (logarithm of the partition coefficient) and TPSA (topological polar surface area) to understand the overall trade-off.
-%[text] Determine which compounds are Pareto optimal and which are dominated.
-%[text]
-%[text] ### Concept: Pareto Optimality and Epsilon Constraint Method
-%[text]
-%[text] A solution x is Pareto optimal (non-dominated) if there is no other feasible solution that is better in all objectives simultaneously.
-%[text]
-%[text] In a 2-objective context (minimizing |LogP - 2.0| and TPSA):
-%[text] Molecule A dominates molecule B if:
-%[text] A is lower than B in both |LogP - target| and TPSA.
-%[text]
-%[text] The Pareto front is the set of all non-dominated solutions.
-%[text] It represents the true trade-off between the two objectives.
-%[text]
-%[text] EPSILON Constraint Method (Cohon & Marks 1975):
-%[text] Instead of combining objectives into one (weighted sum), optimize one objective while constraining the other:
-%[text]
-%[text] min  TPSA(x) = tpsa' * x
-%[text] s.t. LogP(x) = logp' * x >= epsilon      (LogP lower bound)
-%[text] sum(x) = 1, x >= 0
-%[text]
-%[text] Sweep epsilon from LogP_min to LogP_max of the library to trace the complete Pareto front. Solve the linear program (LP) at each epsilon value using linprog (Optimization Toolbox).
-%[text]
-%[text] Fallback (without Optimization Toolbox):
-%[text] Verify non-dominance and extract the empirical Pareto front directly from the library:
-%[text] Molecule i is non-dominated if there is no molecule j such that TPSA_j < TPSA_i and |LogP_j - 2| < |LogP_i - 2|.
-%[text]
-%[text] Definition of objective functions concerning mixed variable x
-%[text] obj1 = |LogP(x) - TARGET_LOGP|  (one-sided use: LogP(x) >= eps)
-%[text] obj2 = TPSA(x)                  (minimize TPSA)
-%[text]
-%[text] Note on linprog mixed approach:
-%[text] The epsilon constraint method of linprog for 200 molecule mixtures is mathematically valid but may misleadingly present a Pareto front in practice.
-%[text] Convex combinations always assign ~100% weight to the lowest TPSA molecule (TPSA=3.2), making the optimal TPSA trivially near zero for any LogP. The front shrinks to a flat line at the plot's bottom, diverging from actual drugs.
-%[text] Instead, use the empirical Pareto front (non-dominated real molecules).
-%[text]
-%[text] --- Empirical Pareto Front: Non-dominated Set from Library ---
-logSection("A10", "Section 5: Pareto Front — LogP vs TPSA Trade-off", "Analytics L3");
+%[text] With the goal attainment result in hand, we now plot the Pareto front of LogP vs TPSA to map the underlying trade-off.
+%[text] ### Pareto Optimality and Epsilon Constraint Method (Cohon & Marks 1975)
+%[text] "Pareto optimal" (non-dominated) refers to a solution for which no other solution is better in all objectives.
+%[text] In a two-objective problem (minimizing $|$LogP $- 2.0|$ and TPSA), molecule A "dominates" molecule B if both values of A are smaller than those of B.
+%[text] The set of solutions not dominated by any other is the "Pareto front," representing the true trade-off between the two objectives.
+%[text] In the **epsilon constraint method**, the Pareto front is systematically obtained by minimizing one objective while imposing constraints on the other.
+%[text] Specifically, we repeatedly solve a linear programming problem (LP) minimizing TPSA$(x) = \\text{tpsa}^T x$ while LogP$(x) = \\text{logp}^T x \\geq \\epsilon$, $\\sum x(i) = 1$, $x(i) \\geq 0$, changing $\\epsilon$.
+%[text] However, applying linprog to a mixture of 200 molecules concentrates weight on the molecule with the lowest TPSA, causing the front to deviate significantly from the realistic drug-like space.
+%[text] Therefore, we use an "empirical Pareto front" directly extracted from non-dominated molecules in the actual library.
+logSection("A10", "Section 5: Pareto Front -- LogP vs TPSA Trade-off", "Analytics L3"); %[output:411f81fd]
 obj1 = abs(logp_vec - TARGET_LOGP);   % minimise deviation from target LogP
 obj2 = tpsa_vec;                        % minimise TPSA
 
@@ -592,7 +399,7 @@ pIdx        = find(nondominatedMask);
 pIdx        = pIdx(sortP);
 pareto_logp = logp_vec(pIdx);
 pareto_tpsa = tpsa_vec(pIdx);
-logInfo("Empirical Pareto Front: %d non-dominated molecules.", numel(pIdx));
+logInfo("Empirical Pareto front: %d non-dominated molecules.", numel(pIdx)); %[output:522dccc9]
 
 if hasOptTbx
     % linprog concept demo (NOT used for the plot -- see NOTE above).
@@ -606,78 +413,45 @@ if hasOptTbx
     %       if fk==1, fprintf("eps=%.2f TPSA_mix=%.1f\n",eps_sw(k),tv); end
     %   end
 end
+%[text] Plotting the Pareto front graph.
+figure("Name", "A10 Sec5: LogP vs TPSA Pareto Front"); %[output:79addf7c]
+%[text] Plotting the library background with color (compound desirability D).
+scatter(logp_vec, tpsa_vec, 25, D, "filled", ... %[output:79addf7c]
+    MarkerFaceAlpha=0.5, DisplayName="Library (colour = D)"); %[output:79addf7c]
+colormap("cool"); %[output:79addf7c]
+cb2 = colorbar(); %[output:79addf7c]
+cb2.Label.String = "Compound Desirability D"; %[output:79addf7c]
+hold on; %[output:79addf7c]
+%[text] Plotting the Pareto front curve.
+plot(pareto_logp, pareto_tpsa, "k-o", LineWidth=2, ... %[output:79addf7c]
+    MarkerFaceColor="k", MarkerSize=5, DisplayName="Pareto front"); %[output:79addf7c]
+%[text] Plotting the ideal (target) point.
+plot(TARGET_LOGP, TARGET_TPSA, "rp", MarkerSize=18, ... %[output:79addf7c]
+    LineWidth=2, DisplayName="Ideal target"); %[output:79addf7c]
+%[text] Plotting the lead compound.
+plot(d_lead.LogP, d_lead.TPSA, "rv", MarkerSize=12, ... %[output:79addf7c]
+    MarkerFaceColor="r", DisplayName=LEAD_NAME); %[output:79addf7c]
+%[text] Adding Veber TPSA threshold lines.
+yline(90, "g--", LineWidth=1.5, Label="Veber TPSA=90", DisplayName="Veber TPSA=90"); %[output:79addf7c]
+yline(60, "b--", LineWidth=1.5, Label="CNS TPSA=60",  DisplayName="CNS TPSA=60"); %[output:79addf7c]
 
-%[text] --- Pareto Front Plot ---
-figure("Name", "A10 Sec5: LogP vs TPSA Pareto Front");
-
-%[text] Library Background
-scatter(logp_vec, tpsa_vec, 25, D, "filled", ...
-    MarkerFaceAlpha=0.5, DisplayName="Library (colour = D)");
-colormap("cool");
-cb2 = colorbar();
-cb2.Label.String = "Composite Desirability D";
-hold on;
-
-%[text] Pareto Front Curve
-plot(pareto_logp, pareto_tpsa, "k-o", LineWidth=2, ...
-    MarkerFaceColor="k", MarkerSize=5, DisplayName="Pareto front");
-
-%[text] Ideal (Target) Point
-plot(TARGET_LOGP, TARGET_TPSA, "rp", MarkerSize=18, ...
-    LineWidth=2, DisplayName="Ideal target");
-
-%[text] Lead Compound
-plot(d_lead.LogP, d_lead.TPSA, "rv", MarkerSize=12, ...
-    MarkerFaceColor="r", DisplayName=LEAD_NAME);
-
-%[text] Veber TPSA Threshold
-yline(90, "g--", LineWidth=1.5, Label="Veber TPSA=90", DisplayName="Veber TPSA=90");
-yline(60, "b--", LineWidth=1.5, Label="CNS TPSA=60",  DisplayName="CNS TPSA=60");
-
-xlabel("LogP");
-ylabel("TPSA (A^2)");
-title("LogP vs TPSA: Pareto Front (epsilon constraint)");
-legend(Location="northeast");
-grid on;
-
-%[text] **💡 Observation Point 5**
-%[text] Observe the Pareto front curve and see how TPSA changes as you move from left to right (increasing LogP). Is the trade-off monotonic?
-%[text] What does this indicate about the diversity of the library?
-%[text] The ideal point [LogP=2, TPSA=70] is marked with a star.
-%[text] Check if this point is on the Pareto front, and if not, whether it is above or below.
-%[text] (Points below the front are infeasible, indicating that the library molecules or mixtures cannot achieve that combination.)
-%[text] Try changing the Pareto sweep to use MW (molecular weight) as the second objective.
-%[text] Replace tpsa_vec with mw_vec and TARGET_TPSA with TARGET_MW.
-%[text] Rerun linprog and see if the LogP-MW trade-off is stronger or weaker than the LogP-TPSA trade-off. (Hint: Check the Pearson correlation first.)
-%[text] The epsilon constraint method samples the Pareto front uniformly in LogP space.
-%[text] Points in the "flat" region of the front indicate little gain from accepting higher LogP.
-%[text] See if you can identify the "knee point" -- the Pareto point where increasing LogP results in the maximum TPSA reduction.
-% ... (Try writing code here)
+xlabel("LogP"); %[output:79addf7c]
+ylabel("TPSA (A^2)"); %[output:79addf7c]
+title("LogP vs TPSA: Pareto Front (epsilon constraint)"); %[output:79addf7c]
+legend(Location="northeast"); %[output:79addf7c]
+grid on; %[output:79addf7c]
 %%
 %[text] ## Section 6: Lead Optimization Summary and Candidate Visualization
-%[text]
-%[text] The Pareto front has been obtained. We select top candidates by combining desirability, goal distance, and Pareto optimality.
-%[text] Display the final candidate table and structures to complete the exercise.
-%[text]
-%[text] ### Concept: Candidate Selection — Combining Desirability and Proximity
-%[text]
-%[text] The final selection combines the following three criteria:
-%[text] (a)  Composite desirability D (see Section 3)
-%[text] (b)  Proximity to optimal goal values (see Section 4)
-%[text] (c)  Pareto non-dominance of LogP vs TPSA (see Section 5)
-%[text]
-%[text] In actual projects, the following additional filters are applied:
-%[text] - Synthetic Accessibility Score (SAS)
-%[text] - hERG cardiotoxicity prediction
-%[text] - PAINS / structural alert filters (see S03)
-%[text] - ADMET modeling (Absorption, Distribution, Metabolism, Excretion, Toxicity)
-%[text] Example: pkCSM or SwissADME web servers
-%[text]
-%[text] --- Construct Final Candidate Table ---
-logSection("A10", "Section 6: Lead Optimization Summary and Candidate Visualization", "Analytics L3");
+%[text] With the Pareto front mapped, we now select top candidates by combining desirability, goal distance, and Pareto non-dominance, then display the final candidate table and structures.
+%[text] ### Final Candidate Selection -- Combination of Three Criteria
+%[text] Final candidates are narrowed down based on the following three criteria:
+%[text] (a) Composite desirability $D$ calculated in Section 3 (higher values indicate all properties are closer to the target).
+%[text] (b) Normalized distance to the optimal goal value (blend point $p^\*$) from Section 4 (closer is better).
+%[text] (c) Non-dominance on the Pareto front from Section 5 (only non-dominated solutions remain).
+%[text] In actual projects, additional considerations include synthetic accessibility score (SAS), hERG cardiotoxicity prediction, PAINS structural alert filter (see S03), and ADMET modeling (absorption, distribution, metabolism, excretion, toxicity).
+logSection("A10", "Section 6: Lead Optimization Summary and Candidate Visualization", "Analytics L3"); %[output:3269dc81]
 TOP_FINAL = 10;
-
-%[text] Ranking based on composite desirability
+%[text] Rank based on composite desirability.
 [D_sorted_f, rank_by_D] = sort(D, "descend");
 
 candidateTbl = table( ...
@@ -691,24 +465,22 @@ candidateTbl = table( ...
     VariableNames=["Rank", "Name", "LogP", "TPSA_A2", "MW_gmol", ...
                    "Desirability", "Dist2Goal"]);
 
-logInfo("--- Top %d Candidates by Composite Desirability ---", TOP_FINAL);
-disp(candidateTbl);
-
-%[text] --- Comparison of Lead vs Top Candidate ---
+logInfo("--- Top %d Candidates by Composite Desirability ---", TOP_FINAL); %[output:89e23aa8]
+disp(candidateTbl); %[output:74a53dcf]
+%[text] Compare lead vs best candidate.
 bestIdx = rank_by_D(1);
 
-logInfo("--- Lead vs Best Candidate ---");
-logInfo("               %-25s  %-25s  Target", LEAD_NAME, libNames(bestIdx));
-logInfo("  LogP       : %8.2f                      %8.2f          %.1f", ...
-    d_lead.LogP, logp_vec(bestIdx), TARGET_LOGP);
-logInfo("  TPSA (A^2) : %8.1f                      %8.1f          %.1f", ...
-    d_lead.TPSA, tpsa_vec(bestIdx), TARGET_TPSA);
-logInfo("  MW (g/mol) : %8.1f                      %8.1f          %.1f", ...
-    d_lead.MolWt, mw_vec(bestIdx), TARGET_MW);
-logInfo("  Desirability: %7.3f                      %7.3f          1.000", ...
-    D_lead, D(bestIdx));
-
-%[text] --- Visualize Top 5 Candidates ---
+logInfo("--- Lead vs Best Candidate ---"); %[output:7d0232f9]
+logInfo("               %-25s  %-25s  Target", LEAD_NAME, libNames(bestIdx)); %[output:2c6e8196]
+logInfo("  LogP       : %8.2f                      %8.2f          %.1f", ... %[output:group:849fd6ac] %[output:678f2fe9]
+    d_lead.LogP, logp_vec(bestIdx), TARGET_LOGP); %[output:group:849fd6ac] %[output:678f2fe9]
+logInfo("  TPSA (A^2) : %8.1f                      %8.1f          %.1f", ... %[output:group:87ec6e55] %[output:42d514bb]
+    d_lead.TPSA, tpsa_vec(bestIdx), TARGET_TPSA); %[output:group:87ec6e55] %[output:42d514bb]
+logInfo("  MW (g/mol) : %8.1f                      %8.1f          %.1f", ... %[output:group:92d9b364] %[output:2f7500eb]
+    d_lead.MolWt, mw_vec(bestIdx), TARGET_MW); %[output:group:92d9b364] %[output:2f7500eb]
+logInfo("  Desirability: %7.3f                      %7.3f          1.000", ... %[output:group:3b7e37e1] %[output:7d14db59]
+    D_lead, D(bestIdx)); %[output:group:3b7e37e1] %[output:7d14db59]
+%[text] Visualize structures of the top 5 candidates.
 TOP_VIZ = 5;
 vizMols  = cell(1, TOP_VIZ);
 vizNames = strings(1, TOP_VIZ);
@@ -719,71 +491,208 @@ for k = 1:TOP_VIZ
         libNames(idx), D(idx), logp_vec(idx), mw_vec(idx));
 end
 
-logInfo("Rendering Top %d Candidates...", TOP_VIZ);
-for k = 1:TOP_VIZ
+logInfo("Rendering top %d candidates...", TOP_VIZ); %[output:1500e64e]
+for k = 1:TOP_VIZ %[output:group:65f18d14]
     try
-        figure();  % create a fresh figure so draw2d does not reuse the Pareto axes
-        fig = emk.viz.draw2d(vizMols{k}, Title=vizNames(k));
+        figure();  % create a fresh figure so draw2d does not reuse the Pareto axes %[output:17819ea7] %[output:9d41b5b3] %[output:5081f75a] %[output:0b591199] %[output:515b35f3]
+        fig = emk.viz.draw2d(vizMols{k}, Title=vizNames(k)); %[output:17819ea7] %[output:9d41b5b3] %[output:5081f75a] %[output:0b591199] %[output:515b35f3]
         set(fig, "Name", sprintf("A10 Sec6: Candidate %d -- %s", ...
             k, libNames(rank_by_D(k))));
     catch ME
-        logWarn("draw2d failed for Candidate %d: %s", k, ME.message);
+        logWarn("draw2d failed for candidate %d: %s", k, ME.message);
     end
-end
-
-%[text] --- Summary Bar Graph: Desirability Breakdown ---
+end %[output:group:65f18d14]
+%[text] Visualize desirability breakdown with a summary bar graph.
 barData = [d_logp(d_lead.LogP),  d_tpsa(d_lead.TPSA),  d_mw(d_lead.MolWt);   ...
            d_logp(logp_vec(rank_by_D(1:TOP_VIZ-1))), ...
            d_tpsa(tpsa_vec(rank_by_D(1:TOP_VIZ-1))), ...
            d_mw(mw_vec(rank_by_D(1:TOP_VIZ-1)))];
 
 barLabels = [LEAD_NAME; libNames(rank_by_D(1:TOP_VIZ-1))];
-%[text] Shorten long names for display
+%[text] Shorten long names for display.
 for k = 1:numel(barLabels)
     if strlength(barLabels(k)) > 18
         barLabels(k) = extractBefore(barLabels(k), 18) + "...";
     end
 end
 
-figure("Name", "A10 Sec6: Desirability Breakdown -- Lead vs Top Candidates");
-b = bar(barData, "grouped");
-b(1).FaceColor = [0.2 0.6 0.9];   % d_LogP
-b(2).FaceColor = [0.3 0.8 0.4];   % d_TPSA
-b(3).FaceColor = [0.9 0.5 0.2];   % d_MW
-legend(["d_{LogP}", "d_{TPSA}", "d_{MW}"], Location="northeast");
-xticklabels(barLabels);
-xtickangle(20);
-ylabel("Individual Desirability Score");
-title("Desirability Breakdown: Lead vs Top Candidates");
-ylim([0, 1.05]);
-yline(1.0, "k--", HandleVisibility="off");
-grid on;
-
-%[text] **💡 Observation Point 6**
-%[text] Check the molecules with the highest d_TPSA score and the highest d_LogP score. Are they the same molecule?
-%[text] What does this indicate about the challenges of multi-objective selection?
-%[text] Try adding the PAINS filter from S03 to the candidate list:
-%[text] pains_smarts = emk.filter.loadPainsSmarts();  % (if available)
-%[text] hasPains = cellfun(@(m) emk.mol.hasSubstruct(m, pains_smarts), mols);
-%[text] Remove PAINS-positive candidates from the top 10 list.
-%[text] How many remain?
-%[text] In actual lead optimization, synthetic accessibility is also considered.
-%[text] Try manually ranking top candidates based on synthetic complexity.
-%[text] Does high desirability correlate with easy synthesis?
-%[text] Choose your lead compound and property target set.
-%[text] Re-run the full pipeline from Section 1.
-%[text] Recommended Leads:
-%[text] Caffeine: "Cn1cnc2c1c(=O)n(C)c(=O)n2C"   — CNS Stimulant
-%[text] Ibuprofen: "CC(C)Cc1ccc(cc1)C(C)C(=O)O"   — NSAID
-%[text] Metformin: "CN(C)C(=N)NC(=N)N"              — Antidiabetic
-%[text]
-%[text] **Summary**
-%[text] We applied the Derringer-Suich desirability function to convert pharmacological intuition into dimensionless scores and used fgoalattain for goal attainment optimization to simultaneously minimize all property goals.
-%[text] Tracked the Pareto front of LogP vs TPSA using the epsilon constraint method, excluding inferior candidates.
-logInfo("A10: Completed.");
+figure("Name", "A10 Sec6: Desirability Breakdown -- Lead vs Top Candidates"); %[output:8d14c52f]
+b = bar(barData, "grouped"); %[output:8d14c52f]
+b(1).FaceColor = [0.2 0.6 0.9];   % d_LogP %[output:8d14c52f]
+b(2).FaceColor = [0.3 0.8 0.4];   % d_TPSA %[output:8d14c52f]
+b(3).FaceColor = [0.9 0.5 0.2];   % d_MW %[output:8d14c52f]
+legend(["d_{LogP}", "d_{TPSA}", "d_{MW}"], Location="northeast"); %[output:8d14c52f]
+xticklabels(barLabels); %[output:8d14c52f]
+xtickangle(20); %[output:8d14c52f]
+ylabel("Individual Desirability Score"); %[output:8d14c52f]
+title("Desirability Breakdown: Lead vs Top Candidates"); %[output:8d14c52f]
+ylim([0, 1.05]); %[output:8d14c52f]
+yline(1.0, "k--", HandleVisibility="off"); %[output:8d14c52f]
+grid on; %[output:8d14c52f]
+%[text] ## Summary
+%[text] - Compared Aspirin to the target on three axes: LogP, TPSA, and MW, confirming that the lead with lower molecular weight has more room for structural optimization.
+%[text] - Used 200 FDA-approved drugs as a reference chemical space and visualized the property space where actual drugs are distributed in a 3D scatter plot.
+%[text] - Converted each property to a score $d$ in $\[0, 1\]$ using the Derringer-Suich desirability function and calculated composite desirability $D = (d(1) \\times d(2) \\times d(3))^{1/3}$ using the geometric mean.
+%[text] - Minimized the attainment factor $\\gamma$ with `fgoalattain` to find the blend point $p^\*$ that best satisfies all property goals simultaneously.
+%[text] - Systematically tracked the Pareto front using the epsilon constraint method and visualized the trade-off structure between LogP and TPSA as an empirical non-dominated set.
+%[text] - Narrowed down top candidates based on three criteria: composite desirability $D$, distance to blend point, and Pareto non-dominance, and visualized structures and desirability breakdown. \
+%[text] 
 
 %[appendix]{"version":"1.0"}
 %---
 %[metadata:view]
-%   data: {"layout":"inline","rightPanelPercent":40}
+%   data: {"layout":"inline"}
+%---
+%[output:923c1caf]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:30][INFO]  initPython: Python 3.10 already active (Status: Loaded) -- skipping.\n","truncated":false}}
+%---
+%[output:18bf123d]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:30][INFO]  A10: Optimization Toolbox detected -- full optimization enabled.\n","truncated":false}}
+%---
+%[output:188a8ca8]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:30][INFO]  --- A10 | Section 0: Setup  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:0ccae4e8]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:30][INFO]  A10: Setup complete.\n","truncated":false}}
+%---
+%[output:204acb91]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:30][INFO]  --- A10 | Section 1: Lead Compounds and the Multi-objective Dilemma  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:226852aa]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]  Lead compound: Aspirin\n","truncated":false}}
+%---
+%[output:31fb27f9]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]    LogP = +1.31   Target = 2.0  Deviation = -0.69\n","truncated":false}}
+%---
+%[output:5b87cea5]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]    TPSA =  63.6 A^2   Target = 70.0  Deviation = -6.4\n","truncated":false}}
+%---
+%[output:0dc79c24]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]    MW   = 180.2 g\/mol  Target = 350.0  Deviation = -169.8\n","truncated":false}}
+%---
+%[output:2fe54ebf]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]  --- A10 | Section 2: Building Reference Library and Calculating Properties  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:4e8e639d]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:31][INFO]  Loaded 200 entries from data\/list\/fda_drugs.csv\n","truncated":false}}
+%---
+%[output:94a0ef57]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:44][INFO]  Parsed 200 \/ 200 molecules.\n","truncated":false}}
+%---
+%[output:040dab52]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:52][INFO]  Library property range:\n","truncated":false}}
+%---
+%[output:2e8589fe]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:52][INFO]    LogP : [-6.55, 6.45]  Mean = 2.19\n","truncated":false}}
+%---
+%[output:5b6f9aab]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:52][INFO]    TPSA : [3.2, 319.6] A^2  Mean = 73.9\n","truncated":false}}
+%---
+%[output:8915359a]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:52][INFO]    MW   : [46.1, 924.1] g\/mol  Mean = 315.0\n","truncated":false}}
+%---
+%[output:038ae136]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4AeydCZhcV3Xnz3tV1YvUklryJiEby8bYGMuYsTAW2LENwziBYRyGJDMsEwLEWQgZQxKzJcQxhJAhTpiEhMngCSBwPidfMl9IJpkvJGyCwCTG8cJiYxuwZFuysLVLrV5qnfN7rdO6\/fptVV3Vtb12\/evee8655y7v3b\/Ova+q7Dfyv3wG8hnIZ6DLM+BL\/pfPQD4D+Qx0eQZyIuryBcibz2cgnwGRnIjyu6DjM5A3kM9A2gzkRJQ2Q7k+n4F8Bjo+AzkRdXyK8wbyGchnIG0GciJKm6Fcn89APgMdn4FlE1HHe5g3kM9APgMDPwM5EQ38Jc4HmM9A789ATkS9f43yHuYzMPAzkBPRwF\/iARhgPoSBn4G+IKLzzz9f4sAVStKhDwP7sCyqjF0UomzbLYtqF1m72+mWP8YSRrf6krfb\/RnoCyJimh599FGJAjoQpeNGR+cCGbakrjwuj20YWevG+cwqD7dLeaXaTuvjcvpBXcYSBvK0dnP9YM5A3xBRK9PPjd6Jm7tTflsZY14nn4FBmIHuE1Gfz6IRHSlgOJaSN7gy8mGYXTMpPrAnBW6eMkBmsDKpwdWZjNTkpFYmNZicsuVJwzB9WB5VhuBNbvVIDa7OZKQmtxSZizS56fO0ezPQN0Tk3liWb3baqGc3OynlZn1E2eMHfyBK78pcW7O31LXLmnf9uXl8AmSuL8rIDZSBlS1FllQPndlaPq4OehfUw9bg6tw8emwNlIGVLUVm9cib3FJkwMqWIrN6edrdGegbIrKbx027O3WnWqdPp0rty7FQwgi3FS6ntd6svflrtZ7VD6f4M9gYo2yyyMI24TLthGV5ubdmoG+IaLnTxs2OD1KDlUl7ESygMDrVT5sTSzvVTpRfGyNtR+nDMuxchPVLy\/MStw75eWn+3gszMDRExGTbDe+myFcStM0iMFBeyfbj2qIfYcTZxsmpz7jQk1ImHwa6sCxrmbr4dZFWlzrYuHUsjzxH92dgoImIG5Abrt3T3Kxf7K0P5OmTweQrldJ+lray2mXx1apNlj5ksYlrfzl143zm8tZmYGCIiJsqDBY704Lc8pRdIEfvytw8ujCo49qE8+jdOpRdG1dH3tUtJ087+HOBzPVJOawPy9Ajc+uF8+ixA67O5KSu3M2jo14YyJPs0AO3HuWkOthiA8i7QObWzfPdm4G+IKLkG0YiP+jo1nHzUVMdp0ceBdcHerdseeQGZORZBKRhIMfGBTZuOSofZYPMRVw9szG9lS01OSky0jCQg7A8S5l6YUTVc21MH5ZRNh0pZRfIgCsjjyxHb8xAXxBRb0zV8nvBzQ\/phIF8+d6778HGNSjj6f6MDk8PciJa4WvNIg1jpbpAu51sC\/+gHW20y087+pL76PwM5ETU+TnOW+j\/GVjWCPbs2SNZsayG+rhyTkR9fPGydL1arcrhw4fliSeeCBbDvn37BFmWurnN8mcAArr55qvkmmuuyYTXvObc4Dotv+X+8pATUX9dr0y9hWggH0gHApqampKxsTGZmJgISAgZ+kzOcqNlzQBE9PWvF+SDH6zKp3ZUEvHWt1YF22U12KeVcyLq0wsX7jbkc+TIEXn44Ydl165dAvkUi0XZtGmTnHPOOXLGGWfI5ORkkCfFNiek8Cx2rnzFNpEs6FwPettzTkQivX2FEnoH+UA4Fvns378\/IKDTTz89IBzIh0go7GL9+vWBngjJCAlfYbu83L4ZaNR8adQKiZB6oX0N9pmnnIj67IJBGJAPpONGNJAOkc+GDRtkzZo1qaMiWjJCwtj1RTlHe2egERARZJSAutfeRvvIW05EfXCxwuQDCc3OzgbbLciH7RfRTStDgZDwkW\/XWpm9JurUdakpGUkiciJqYkZz05WaAcgG0iFaIaUMYUAcoFXyieq\/RUf4tO0a7UXZ5rLmZ0BqSjKJJKREBVm14HoQqujoB2EYgzMGoh+eaEE+nP1ABpAPUQ\/kA2EQxXRixPjFP+2Qp30IsBNtDZ3Pqi61SgqqSlZDNzHzA9aZmc8MwzuPUnsVDz30kNx\/\/\/1y9913C\/mjR49KrVYTz\/PkxIkTcuDAgeDzJeH+d+K6QUIQH+dOnEfxFA5y7ERbw+LT04goFfkZ0eDfDizgd7zjHZk+VJb1w2fttHvFK14hr371q+X1r399gBtuuEGuv\/761P6+9rWvDQiqE1eQbdp5550XPPbPt2vLm2FPt2VpkHxrtrxJ7ofaENFdd90lt912m9x5551tRbf8ve1tbxPG1On5D2\/X2LKxhex0u4PkP4iGdOvlJaE2SCNubixDtTVjaq688krZvn37QICxMKaVgG3X2LLNzc3JAw88EGwXV6LtQWgjIKK0qCiPiAbhUi9vDMemRB78fkP+5RuNIF2et8GtzQckN27cGAyQcyMO1UkDQf4WOwO+nv\/4ek6UBMgq1sGAK4YuIoq6npDPJ\/6qLv\/4tXkiIv39T9cDUoqyd2X8Bo9bDufT9NhnscGuF1CtvEOk8R555jl\/LOec\/T9kw\/rbxM6P8u1a\/BVKOx8K9EpWsR5OKrhXwMniQoLMsCDUjMlItdizr6EnIkgIRF0h5CBK1y5Zr98g7jgDEnIEvu\/L6OiobH7GHwXSPDoKpiH6TaMhIp5EpBAR9wq\/0wTIW0PkkRkooyM1GSll5L2IoSYitmNpRIMeu\/DF46ICV04ZmMzyliInD8gDbhDSXkeYhNz+QkibNn5k0dO1fLvmzpCIVy2IV0kBnzWS4fwbciJqZLrqe55abAeRQCDAHLgy8shNbyly8oA8NoMEe7rGY3\/brvGBzEEaY8tj0YNqqRUkCf\/yQPJjM7tvuHfIt9yXHqy44kTEJEbNA3LQTl2UL1e25ym3FJ+PiojC1twY9B+EdVaOtTGDAUh5umaERJ5H\/fmns\/XC8kQsICNdcjHp2acV1TD+xb3FPQTIx1v2n0ZnZWU6zcSBqNaQM7mAvGtDGTkgn1Xn2sXl107EaRbLs9jRN\/oIFtc+Vcpic8q6v3OQEI\/6809nn7yOEFEKzt6QTEQnPQ1ksmJExAIF4Vm0xWlybJBRJqVMHpBHRp6UMnlAHhn5rHjus7xUU0gobGdtue1FyXBucjfv1kO+Uqjsv1XC6HTbbNPyT2frLOthtcREQgtyiEpN4152L3H\/kDc78sgMlNGRmoyUMvJexIoRUS8Onj5tvyyZjMIkRB3ARTVQBlYmpWxwy+QNUXqTtTuFgKJ8xsnDtsXSbWHRonKaPrxdY8s2TI\/76w1PavpULA2LJjWiEL53zMTkpCYjpTyPRyn2LHIiUiKKIiMiIeSgZ69exo6lkU2a3poxsvG8xeRtcrOLS227xpYNEhqmx\/3VRkPSUJPFD0Xi5nEQ5QNNRISjXDRu+qSnN5DNm1\/ty\/VXeUKelDJ56uc4NQOQTkM+KEeOvkv8woeE8iltthyfzuanRiYnJ8Werg364\/6KVKSc8l9VbbLN4OBZDTQREZJCRsePHw9u+KTLRwTENgzyIU2y7SddY9cHRY7ftxg9MgDbrnGOZITEPxo90r22dqMq0ExFqSYeVam1tc1+ctYUEbGo49DqoI0srD7+kVEmpUwekEdGnpQyeUAeGXkXyLZt2yb2\/ShXtyS\/e7fIm960RNz7gugeBiQUpYKYouRdkLFdM0Ki+UHdrlW9qqShlhMRt0A8WOSARR0H9CDeS7wGn9QF5F1LysgB+aw61y5zfudOkR07RG69NXOVXjWMJSHrcAYyanz\/tyUMq97uFEIa5O1a1atLxasloqr6ds9rv\/hLjYiMAMIkEB4geoB9WOeWsXHLlkcOrOymyIErszxyYOWW0927T0VD73ufyO7dmVyljTfOSVy9OHmcnyzyondlolnpjFuX6CGgJUIVxMlV1ZaXRUfudi3pfK8tja6Ak4ooEaWglh9Wx1+JZhd5s\/bxLa+wBvJxmwyXXV0b8nHzFCdfbpNxZNQMCVkfio\/\/rmU7khIdGSGR51F\/v386u+o1pOIno6r6jkxoe5x21EtqRNTR1nvF+e7dIjt2LO7Njh0iO3culoVKRC8QB6mromxAbnlSysDySSk6gH07ABm5iCKhdrTTLh+QEI\/6B+HT2RUlonIKKnlElH7rsCCyIN1TD1rEHVC3EBUxR5CTwUZrZfQmsxQZeitbigygN9kwpmzT+v3T2RVP9HwoGXz4ehivL2POHBGxILIAp32FHTtEdu6M7vLOnSI7d0bqjBzCKXOEDERWjBBSJ0K8LJF33q8m1k\/TJ1buktK2a57nBf\/DgH561D\/rF2QmBXOq79LUdr3ZzETU9Z52ogO7d4ukRT1x0ZL2BwIxaHHhZbJmyGihchszcWQTIW9jq511xXbt9NNPl0Kh0NmG2uy97Pky5xUSUZHhXY4tj5xFFkabr13n3e3cKbJ796J2ND5aVA70t966SMa4IRtXSBm5C2RmY3JXZrpOppBOGGntec96T6JJ9Zk3J+pz5dIZqHhFKaegokS1tOZwSFoiIhYVCyoM5H01bURDW7aIbNkismWLQEnBxxk1T3kBn\/qUyO7dYn+M2\/JuitxFlM5k2JG3lDywsqWujHwWHH74\/XLwO7cG2P\/ALfLk\/e8RPijI\/1KJJ1BZtjRxZBQnz9KvYbaBZMq+klECqn5\/RXntvJ4tEVE7O9BVX7t2iTjY\/aUvBd3Z+clPLpIHNpBToO3tN2\/\/H0mj0RD+lz\/T09NSOXCvyNFvSWn3W2X84O3i7f1IQEpZvtsF6YTR26Pv3d4RDc1pRJSEsvQGERFQhNGOmU3yMdxEFJqZTxH5qMxSzbbl5UY3bXEY4YQohyiID\/+dOHFCKpWKFKe\/I4ViQUojpSCtT39LVq9eLWuOfkKOHDmSmZAimosV1b\/zuxJGrPEQKeaJqKRnRPFg+9btKYGAuF\/DQN7JvuVEdHJ2d+\/eLTt27AhKlgaFPng7cOBAQCrlclk8zwv+zxqrqt8XDnb5YfvwEPg\/b2yYvkN4LG6EBJGF7ZotQ0BRdeLkUbaDKpvz4gnIdGzfujl+yAYCiuoDcvRRunbI\/FacWKfomAvkrfjrhToQkduPnTt3usWez\/OhP6IdSKZUKqX2F4Kyx+EYc4aUZbuGbRTSyCZNH+VzkGSz3qhMe2OJmPVGujrktPWbpl9O51siorgGIaU4Xa\/Lw8TT7u1ZJ8d\/uj7OJrpppQ2ipnZ82bSVtoepzpxGRLNKNEkoS\/o\/IJ2eM9ZwHDrZdktEREdhxyh0srPt8P2mN71JXvKSlyxBmHjYnkXZIWP8YbSjb1E+aCdK3m6ZRUcQmm3XOG9qdzvD6q9fzoii1rTJOnntWiKiTnao077ZghH9hIE83HbYhvK1114r7oVx8+H6K11ee8GvJTY5NrktUU90ZIREnkf9\/f5l08QBr6ByTqOdNFQyPDXjHyaD232TkWaRuzZxeXwZ4mzaJW+JiFh8dLBdnVhJP1\/SR\/Sf5PF8k41u0cf3v\/EbvyG33npr5dhZvwAAEABJREFUYk3mBZiR5d2UvMG1Q2ZlUitbiiwNjTN+MTDxJy8LUnsLk9Cai99rqiUpJDQoXzZdMrguCdh2zcmIJKGiZJXUPe4D1p7BbMNyyuhIzZaUMvIswJY6BspZ6rVqk4mI4pzTuTDibHtJ\/sY3vlF27dol1113XaZuQUIQWBYSirpwzBHycGMmMz1l8mZHmbyl5LNg\/UW3yGkX3ypnvOgzAgEBt14SCbl2bNOyftnUvzj509ZperfdQczPSVFmg3OiUmzK9i1t7NwfIM2u3\/QtERETweKIQr9MgJELpJTUZ6IgSAv7JDt0zAdzAygbkFuelDIgb6AOsHK7UkgnjGZ9f\/vop+TxxmfkweN3yBe\/e1uAqMf9cWQTJ2+2H\/1sX06JhoiUykpWaWPkvgGduFfS2u6kviUi6mSHVtr3ueeem9jkY489lqh3ldwc3CTAlYfz2AFXTh2DK+92\/p92\/37QBR73r1q1SgCf3L7\/4MeFQ+1A6bxBOmGg\/uhjfydhIB8WVHTbVVYySsKBB470zHRwL3KPGih3snMtERGdooOd7NhK+f7yl7+c2NSOHTsS9a7S5iVtbrADZmd5yiDKpysL5\/9kz9fk93Z\/Xv5gz86walllIyHXSaFQCMiIzyr9y96PBh+kTPv8EQTk+rD8IrkJBzSdkVGZbowlwj9jsqdGz31p6HTHWiIiWyykYXS6w+30v3v3btm5c+eCS7ZfUVs17BaMnAwXySkGWWQGBORJDZRtzsi7csrAZJZGyUwXTj81dX9Y1JHyyMhI8HURzpGIjPhAZNR2LY1s0vQd6XwXnFZ021UOoqKSxKX+GWsTe8Z9EHfvmJwUOxyRUjZQRp4VVs\/SrPVasWuJiBhQHFrpRLfquNEOJMSBNE\/UwmdC7+Nb+m3spM1dG10ucvXfH\/\/ionInCrsqP5BHZp6Qvzj2Ffms3C9\/efyfMkVHMqR\/lYYSUAoqjWLq7MTdOyYndZ1QNrjytDzkY\/UsTauzHH0mIqJTy2mkV+vatix8IA0pQUbXXXdd0PW4iChQDuHbw9OPLxo150d8veRvK3eLRUdp27VFDoagUM4QEVXVZgimInKImYgIRoSMQKSXNGEP6flNHsNXv\/pVufHGGwOYzE3vuOMO+cAHPiDYAVfXC\/luTOt3pnbHNsv33IiO3O1arVaLtR8mRbVRECKeJFQzfKBxJeeM9e6ik21nIiI6ABkB6xiydsD8hVPXt+lcmeWTdGZDevbZZ8uVV14pr3vd6+Saa64JwHesvvCFLwR5k4XTj3\/844LdG97whkS7cL2VKDMWxrRm42kMse34oS1vT\/RZn5iPGF0joiP309n8JlL+VRGRqm7LKimoZtiauXPd6Tzr3UUn28tMRNYJ6xgEYLLlpubTTc0n7ZicvMlJKcfp0LuAiG677Ta58847F\/CJT3xCPvzhD8unP\/3pBRn522+\/PZCj+8hHPiKUkbt1m8lHtZO1\/it\/790SxsW\/eaMY5t78Q+4w256PI6OZkRcltmWfzv7FLf8h+G2k48ePBz\/WFq701nNfGRYNZLmmEVFNiSYJdbUZyMFnGFTTRGQ+IQCIAJis3Sm+acf8kkdGmZQyeUAeGfk4QEbbt28XF5dddpm84AUvkK1btwqfKdq8ebNcdNFFctVVV8nLXvYyeeUrXxmkV1999aJ6ro8sedrJYhe22XTZcySMq190tazdel6A0TPXLxnuLz3zpUtkb\/nOIxLGEqMYAWRkaKx5idRWXxtjuVTMNu3dW18rPGXj95KmpqbEnq61l4SWtt1LkmpjRLdmo4moasTUS31mPbnoZN9aJiI6xeIH1llkrcDqk7ZSv5U6LAYWxaFDh4KnPfblTn7Xh60YKYuoFd8rUed5azYvacbzPPmpiecvkUNAS4QqiJOrqu2vX77wx+Tm5\/yEvGHDtXKDf5m8emTbAiG1vbEedFivFyUNjR6KiFjXYXRyWlsiojBhWIeRg2Y7bPVJW6mftT3Ih\/MKSIfPvfDLhvy2s51p8EXPXiaf8DghI\/ArW14m4KbNSyOVNLJJ04fbfHTufLn7+BH5xty0fP3YYbnr6KFFJj937o8uKrsF264xz1wLrsGwPF2r6UF0rce3Zp1ce+59EJVviYhwRKcNlA3Nkgn2VpeUMn7JLxeuH254bnx+2gIympyclLPOOktYFORZJMttrxP133P+NYlu0\/SJlZtUvuuRbwU1Thu5PEjtzcgoiYTMlnRsbCx4APBbx6bkbd97VN54z31y4ze+JW996BHUA4m6Rjvz50QFiU9bXo5tmTNbe+66aYvjDE5aHjmdNnS+4xlGEmFC\/6xvbMMgHIiHrRdR0Pj4eESt3hPFkU2cvBMjMBIy32tkq5w+uk3OGHtBACIl02VJIZ3R0dHg09n8I8D5ET\/6\/5YHH8pSve9sqhoNpYGoqdsDY80A1g1Yqf74K9VQXDvhwVJmIrAnpUwekEdGnpQyeUAeGXkXJjPy4V9jV98veUgnjJXo+7vuOSDgrgOzYvA8b1lNQ0LmwPf94Mf++UAkX6aFjIiOTD8oaa3h6yP8QiKw6ZXxsm4A6wp0ul9dJyJ3sAyYsjtoysgB+aw61y7PtzYDEFBUzbsPlqPEqbKfe+BRATsPnhCDVYKQOJ8bGRkRoiO20WynTd\/vaVkjojTwocdeGydrDrD+Otm3lojIOkbngJVb7Sj1DVE+WtVF+Ro02c9\/+zEx\/NeHn5T3\/uDEoiH+8cUXLiqHC3F6I6F\/nN4n4LvlioAvX\/XCwMU3jgdJ5jcIKMoYQnLltl2DlOzrIpzpuTYdynfUbUUjorKeEyWhovqOdmIZzlmDy6ieWrUlIsIrHTO4ZSMmZDk6OwMQUFQLv\/DgEwvit33zSRmpTMjX99cWYMo4EjI9BER+X7ksUxU\/AOX7Z+okmRFHQuYgTEZER5zhsZ3m\/IgHDDzpNPt+TGfrIzKdgjmNmnplbKxjty\/hsqtrR75lIoprHHKK0+Xy9s1AFAlxxmItoIeErHz15DoxQExJJPSWbz8unzyyW\/aW5+S7s9MyVa\/KuF8yV0H6rbIXpPb2oQsvtWxk+s8Hp8Wwf6YhINLQEUJCPFzgM108bOCLyP26XZsTX+Y04klCRaMmZ\/hdzxr5kLKuSTvVqVQiarbxZu07NbBh9\/v\/Dk0nToFLUq4hJGTl6XrNsgEZHbv+RUHZ0i8\/PU9GYRJ657375bp\/eGIBf\/74UXl69pSvjXoOhKM4Mvroc05tJ2++\/ym59Xsn5KNHV8mHny7Iu799UPjCMZ\/\/kj76qykJcQaUBGz6aEht7WoqERkTphEMeoB9W3vYHme5lwwzAAlZ1DJdr+sTHpmH7sSqCtfFmBTlhWvXSxQJfX3\/7ILpnup8fqZWz0RGYRJacKQZOz+6bZ8IT9dU1DcvPkdU161XIqTQc+NhTdMp0k6u7VQiohN0ANCZOKAH2A86bvnuvRLGIIwZErJxjBfmo51GQ0RfJl5Iy3VP7tdzp+v+cY9c8jePyUs+u1cu+evH5c5dx2T3dGUB0\/qATTlIQBQZER2xZYSAgDVws0ZCEvHH+RG\/m3379LoIbQ+L6koyqci0HDs2SNa2OWcth+Hqza5daVMjD3fMLberQ73uBwKK6mOcPMq23bIH9ngCvvNkQb5\/YEwe3Jt8We\/bVxPw7rsPiuGXv7FPz21q8sTxeUxVGmIkBBHN\/cj2Rd0++vIrZNdUVR4\/XpWZakMeO1GRwzInNb8us1IjJ2Vvfju2tjwR1IWMgkzo7WOXnB+SJBfds7Bky97R+ro1S0fydev0aFjPcWSDHH2n+tDdkXdqVB3ym0Y2afp2dut\/bj03cAcBBZnQ24bpNYGkrlsszlM47AV3Pz6rBAO1BOqFt797fFpmqwtFGSmvCgrERSX+JQ9KoTc9XK2pq4pu22b8ivrV6EnLotBXUK57SmhazchoVklLiwuvf7uuM7+ltNDACmaSmirUfSnqPCahoPMpXf6DbCCdMJB3sms5EXVydjvs28gm3MyL143LttUFueexueAspVKpCP\/3jYeOjCg5NKSqZfT\/+lRZwF99b0ZmTxRlZHpMz4QaUqlDIyKlyiop6OKZL4Vb0bIqaso6tcI8g2lRhfqCvSgoPN3CqYn41YKsPzEpE1PrZOrpiQV84ZH5qElryTvue3oB9inu+\/bWJQxs+w2jjZKM1ZMxUk\/\/zeqVGDekE0an2\/WzNuAyZNY6uV3nZ+CHNkwIuGpylWxfMypbvarw0yZ8OvmKtSPC9+n4cCApZFQaGZHt68flnv1VKSshPXG4LvWqp6GMSKlWlFUz89+\/O8lFMjG3VmZecUUwkNN++rfFxdzf\/4V4gcZ5Q6AEdEqCQN1rZISMUpU9HwVFrViTl\/3tDwIC0uKi14ETDXmyOrdIRkF3kSR9haIScjGIinyNjKLRTETEehTnj7LBEYvJSF15r+X9rB1yGZJBhZHVT27Xvhlg20W0w8+x8hSJ\/OrVq4MfIaMVDnY\/evkz5Q+e94wAL96wSsC3jnhSKhblqakCZotQqhZlYnaejFwFBOSWLV+oFDTa8WEaEy1JPd1yeLoIUXhQV8MLIi87EP9edVr+72OLP25QqJ3qWxQZjc6O4q5vQGRZ1OgyCYWTc5Q2KNaea0M5vD7Rx8nR9Rr0Dmq+S+6gLc+gQfPe+qNGr\/SS3\/HhrIdPGkM+nP\/QN77MS+QDEfErA+53tqK+InHwhMgjbzg7wPc1feJ1WyTA67fIvv98gUz96KWy+i8\/K95n\/kbO\/tAXZfzCKwOsfcnraW4BU1+4U2p7HpUTn\/8zmf7cn8\/j85oqTgT4M6ns\/V5gH5CQ5jxFSRbfepxP3bunLn\/90Jz874dmZdehmszMeDKtmCtrBef1wvX9RUJ0vaAklAZfCRvbJLDGWHNJNsvR4R8sx0crdRffDU16oMMGJgc06aKvzN\/\/7MW\/wxPufJo+bJ+1bOTzrs8ekHf+\/X655UvH5UNfr8sj+1cJ5MPj7FJp8Sef7TM3fDp53759AsLtXXTH3rBooXzmG35nIb8oo1uMReUMhZHNFyjteHo+pca6bWNnxgH3CSWYKd15VfSYCDx6rCJllPNmwvYQ0qrXPCnNlWT7aeMBVN13L1+jQF8jniQUvvfNxHGx1jq9xvAPaMuQ2Kk2KZsmIuscKR02tKk\/Pe8mjmzi5MsZEJEMkQ\/fRId8+F\/zEOkQ9YDtG8flvt26smMa+W\/bTw9++I2vSXz4ayVpPOHJ3Y+VhbMXIhCqQUYXfGqvbHzt7y1gy\/u\/IqsuWPy4HlvAUQ\/REXlD5cF\/texCun7TdXLmthsDjEyPSGGuKIWyolIUX1O\/6gdEY73n2Vrd08dv6gEC0iR4neQleeJIXe55cv5QPFD02Rtb0yQSQieTm1JHxboDGFpKvt1w1zXtgHa34frLTER0BFgHSV1Hw5SHdMJo1\/iJfvg+FeRDFAMZfeyRtcGhM+RDpMPZj7X3wjNHI8nog7Mmsm8AABAASURBVC\/cIO\/\/bCXAa\/5Ut2GHV8uD+0flcilJrVbX6KQhfFpas+LPFmXddf\/FXAZpcWKjbLjip2T9ttfL6nVbA0ysuyTQjWx8tqxV+8lrfjIo83b8j28hCQAJjZ51ofg1X8b0SZxoNICC6MaIRTSygow8TUXZaD5VC80HZa3jKShS14XnqZ0r6IM840vFumQiYs0ZGDJ50naCNe6CNgztbCfsKzMRWWfcToad5eXWZsDIB+KBgDgDYstFJMM30CEftlhx3iEjiMcFJIT9vXt036MZz\/OCR\/iPKCH9+\/HVMqaHxiUlgcJMUYq67SmeGJPTrrhR1l\/yEzK+9rlSHJkU\/jy\/KI06PohZPCnNjGhNTyCRI1+5Q1af9+IAm3\/sI7L26UnZuOblsmbtpTIyMyojs3xcQGTVkdUCuYj+eQpf2w2gROXrYffkvg1S1EjJ063LAlSnpgIZrZ5eenj+Sxf0V3RExJMGxsqYmwVr012XlPFBGiVH12vITETWcQZncAdp+jzNNgNR5APZGPmsX79exsbGUp3dt8sT8P5\/KMsCNBKKq+h5njx0cFxeuW4iMCmUS+I7T6gKq9aJ5xXEr5ZE1Fb0z9MDnUadbdN8fFKcKcmRr346ICBVS+2+b5DIhu1vktGzLpLAH6Ya0YhAPd4CGXl63iPO3+rDE+JXCzJxYJ0jnc96Skbjx8bnP14wLwreb92mxBbk+uetoOMuVD1Jgq82kvGPNeiaUjZkkbs2bt58WLpSa9x3O9Fs3jpLah1u1scw2UM+RDtu5OOSDz93kUQ+nAe5+Py3WORLZ9CioKWaUxKirPXHlQQ0IhHlGE+JA1jkAn+4ZFQ4+WG7eUIS2fCiNwbOFkjoyjcHZeuRr+QiLCz1jX\/RKAiyWX1ojaw+uHYBnkZBQUV9g5TCKCpRFrUzq3xfrjhzRH5r+6Ra9t\/L03nwdA7S0Csjc9cz6xt0sm8tEZF10k3pKOhkZ\/vRN+QzMzMj+\/fvl29+85ty4MABgXwgHbZdpEnkY2OGgCxPevD4\/KU7OEVpKVwyOnhMJAxqlMvqQ6MWTyEGVbBYRIlJs4tfc1UhOqo+8aiMHB9fiIQwOnTXJ0RYaHre5AEOpGdLUtDtGfoA6tPTLZiv5OcpglSjHqIkwIE2ssA29PYjF4zIb169NiTto6ISrheM1ZfYVOev2yOyNc1aNqxEn\/ysjVgHSa2DbprVzzDYQT5EPvbEi\/yZZ54p69atE76wCRFxBpR1LkaPrEo0Leii\/+b3RQxGOlQiTxrGF+8XqVbm4xflh7BaXCIqTU9I4fiIkI4cWyvjI88Rf19FNjzrtQEmnnGtAMhl3uNidwU9V0IyMjUqRT2TKqmvgm7vfIWnT9M8PaPydAzYQGZGRuZrvOD3NwnpwCD3VPCPgdp282VreqX74LfSIGQUh1b8DUIdyIcnXEY+pJQnJyeFyGfLli1y0UUXCeVWfot5++TqyGk6c6Qoh45FqmTnfSJnjRaWKOfmRKanfD0IFvH1X+klBiZQhioeG1PG0sPqak08feSOym\/o4\/iRCSnJ6gCrx58tY2vPF\/6lh0jk5J9HqlsS3VnJyNFVlIL2akV1HJScN12EkBF1+MzNmJ5RrS0UBWzyRh3D\/sx6REQpENV3e3Rx6xp5J\/vmZ3UOU5ot+TiYzbCkEBCkw9Muzn5c8oGAOHR254Iy8mKxGHzIkDquPikPGRkgIOCSEHlQ023b3JQn1UO+7NsvUpopLLiFhNYoOXi6DfB08aNYREYqa1QqoqGbFDRiQQ88pZwgrZfEK6sDLdRHoA3N6MvziiLlsoguJk99qyh4YVEoF+bzSmS1gpKQvgJB+E3b9nTrVvSpdUr5go0DQERK+BB1Ipx5OzX6ZnLLt2VdmxfyLkzeidRvxql1CnY0NFN\/UGwhH\/usDwRk5OM+8YJo4saLDltAXXzgL84+i\/zQyahoVqMd7Iu6qEkLJ\/QSH\/Wl9IOSlPaVZNOBEZk4NKKP7D0ZIw1+e7qhkYq3gMqB3dKYntLdWV2kVhX78zxfn\/r44hdGpVE\/JTc9KWc9WlEgn6Jut7xqQclJiQXy0YWmOTn5MA5z8ZWcggxvqvRF38ifxMvP04jsZL6fE6K8tMf36HthjOF1vhJ98ltpxDpKaoRE2oqvfqlj5EMEA3Fw7sMhM2RChEOkQ7mZ8WBP3YmJCWl2u3bFWaWFpsrzv8YqRkIoTpsqyVjFl5FZX0nHlwmNVEZmPZmbrsuJEw0patAjjYaMHh5R0rDbwBM5SQTH7v1rOfLPd8iRr\/9ZgFJZ7fQsR07+JZGRr+2Kchgo6CPrk1Xmk5MEOV+QoLWCkhHkRCCkx0EyVvQCDAoJif75SshpIFpS0555sb4Baxt0smN2B7bcBh01dLqzUZ2kTRClW64sinwsmoFAsj7xSuoH\/iAx\/JGH6MLR0a++KvoyGRmNlyCQU61AQpSCzyGSUXBIXqs2pOoQQSkgCU9WHR6ViR+My4ZHRwN893eukL1\/dZPwt\/HSnxFAlEPZBWQExvXJHcRW1OiqpARXVL+eY+gRDQGTaR\/QB9C3gIR061JUshzXx\/Rn6rYVmPmvv6Jo2f5NdWwQTSI0YuylAbKugK3vTvYt+g5vokU6aqDDTVRdtint0iYgv2yH6qBarQrRDoRgkQ8EAelAFqREMmra1hdtEF25h9kuIf3qq6Iv1Q3njMg5tVIACAhYx3yfT0PDAHUpz5IX8fgiV62h50YNzYtujeoaGDVkbKohfl1k58dKYn+bLvkZMQIqVESK5fk6ntoB7CAhyGj0eIOi1KvlwG9BySgQnHwLop55k0DiKxmR0aCMRFaPBsnC2+Vb\/CA\/ECTESCAZJSNJQoZv3+Oq02AtAdYV6HR7+J+\/2uSaAJ000FFDEy6WbUr7tGuOyCOzcjNpmHwgAIgB0jHyYfvUjM9WbS06or3wdo3IKIxfeY23qCkin0ajLvUgHGrI+IiyRrABEn2qpbxiZKBpcU7fRGTsmKb60uzC66U\/XZFVeuiNwK+KBFGNyEIq+rfmkJ7\/aMoLMho5MqdENP+7Ql5dpKQRUrHiyYYfFGRcxavm6kLE5J9kNyMj3YnhQs7eIHL9cz35zC+MCAQEAsUAvCVGQhoNzusXX8tuDNtdQ+RddLI\/fjPOrVMsekMz9XvJFvLhg4bHjh0LPmhIBET\/ukE+tOsCEjRCIk\/fIEfXxs1vPa8ufDO\/Xq9rdANgFU9Gdcvm+wUZ06dbRDuqdKspK4msPqTkoIRU1IipWFYi+KmyXP+GshQr+BBZe8A\/WccLSKig0RSkNDIzL\/dr8+pANjIp62dOk4mjBZk4ptB0\/TFfOPu5aEQJryRy7nhF1mpUVtAKYF3Bk1W6N7v+El8JqCS\/\/srivMNBeyci4pPmScCmy+O2dR2VdrJr83dThhYgITMjHwez6cUU8uEplT1uJ+LgG+2A\/rLlIhIh3wuAhOK2a4zFtpA\/\/qLH5cLNs\/LiS8ty2lpPzpgsKHzxPC8YxmlrgkQ8jUQK1br4lVNQUaBEFxBVIygGb6PH6wH5rDnky8QRUJCJwwVZp+QEsfmQEqRSbQgRUKGq1Rrz8Odqeghek+LxshQUR54qyzm6Hbv6zIK8cmNVfnTNcblh4pi8Yt2M\/Mcz60pABa04uC9Pt2RpkO5vzbp2AfysLUcxZJQsq7+VsIMsrR0iCs58iC4go8nJyeC3ei644AK55JJL5PTTT2\/6yZX57nRq0RFEuXfvXrn33ntl165dwpggK6K4W356IviS7GUXnbqkG9aKGAmNlhriEeU0ROAn4EMgcurPYztnhzYnxdiQ9ZRwAlBfsfpQTaMmEc6NxqfnZPTArBQPz6N0aCYgH+qB4kmf\/kyZYvAVFwh\/ZGRE+G1tCJWxBMoBfeNjDekY0MFnGJafwaZvTSBKIyNudiOfc845R1jcLGwbHGXkLGzIChB1mL5bKX2g7yxUUhYwfeEnYslDQqTIOC8CO37dE8Mnb\/Hk0meLHko3AgLCjigoIKVKVQSwpatp9DNXkWJ1Tm1VjmFD3xS+Etgp1GXt4f1SKs\/b+bWa+EdntE5FoyL1cZJ0tKaIRkKjGiqN6rYMUkT27QeqJAFGR0eFaLRUKi38I8B4A+WAvfm67fJ1W5YItRmwYWcejp\/ZsscMXZKhaxAOMvIukIFrr71Wtm3bFkQNrt7NQ0JshQALgggKAnBtViJP20RttoUkpQyR8lWRyy+\/XDZv3ryweNEl9euXX+vJaRMNWV1sSElJx9ftmZSVEJRkPK3oKZl4SiAFfWLozVZl1fQRKR07pmdIddWqEcylOV7+1AyJ1IimTsyJd6IiNdFtlUZM81s7tdcXVUrqd+1oWS6\/ZFo4vwoqht58fVz\/jpvWBF+DQdWtOaftTqKgh\/bFii9JKFT7djnKcv\/6euQQDAQEyCdNBnqALUiyJVIiOmLhc47E4iAaSarTDl1ViQDSoT0iMgiGPtAXQNRm7ZBHBnliC6hv+nC69Tm+bFjvyeioJwXdghWLolskkUJBoVGQNzMtjSOHpXr0uEwdq0r12JSUpqak8MTTSjazAeT4CWlo3ROySnmGUyVP\/JPEJMpZHj88HaCq51AVPSSnjaJANuc9c0Y4UJfQ300\/p+GSyhgH42G8R44cEeagG\/8IaFc68ipotFPQiCgJvs5hRxrvA6d+H\/QxsYuQC0g0cpTYgjQyoootdogJgkhb7NRpFpAHC46FB4x8iMpYmPSBRRrlFzl2YMefj8uH\/uCY3PaHU\/KR2ysBwnW2PscPyCgsb+j2zG9UZXT2uKyaOSxeuSyFuVlp7D8gBZWXDh4KCMhXtvFOVvYadSkcOqaEJGpfFU9JNIBGRp6ioHfWnD6u9zxP+HF\/zoPOP3dWIKSf\/E8nBAICEvpjvIyb7aYREnMSMuu7YqEmkoaciPrusi6\/w0ZGaYTEYucchsUOaUAWEMdyeoAffEBs+CPaguxog0XIYqSctY3bP10QzlpY7Hb4SxsQkvn4yhenBBx6clpJoxZg01mejB7bL2O1acX8lgt7yIcUVJWkQOmpp2TVk49L4SklpwNHpHTgkC6ssq6ugpKRh+k8GurbKR7SQ20Udh7EfBrB0Ed0YWDDHDAX5Jkn\/iEI2\/VT2a+JzlcyciLqpyvaxr5CRgAyAkmuIQYWRqtbBxZdmHxYZEY+kB1tJPUhSueSjS12X89d+IwU\/+NF9Df+zFOyfnxuSfUf7K2K6NNDsF4f+W84f4PI5HqRkVEZXTOPVRMFAZRlclKEk2e\/IEFK3lO3fFCo4IsoPM9TwfyLbeB8bv7d13694+3rMp8H2fwwN5C1PSmc99Zf775GiXzcIRn9Naao3rYq07un1aqDUw8yApARSBqZ\/Uvtbh0gmag6yFlA\/ItukQ+Li4UFqZG2Qj5RbZmMxc5WaHx8PDiT2bnzRJCijyKjmWlP1stx1AE2bPAEAtmwQbdxDgJl6G10xJOibtdCYuWjRuADOX79zofXAAAMrklEQVRIwU1vGSPRs6liQEYuqTNPgTLijbk+77zzxOz37NkjPDWMMO1ZERFRGvQBY2r\/uT9B2BCZwdWZjNSV91re77UOdbM\/kBFIu2iQiRES\/YVkiHbIh8kHOfaQjpEPCwvbToI216xZI57nBU+sKpVKkEJGZ62bkVEpB\/Arc0u6cc11Y7L\/ib0B9jzyuIDpA3ukMXtYGjOH5BmbRCAhqwgZFQqeGDZtKgRnUddcXZKtzy0IBAQk9GdzCBmz9YKwmb+Q2UKR8TB3119\/vRDxMcYFZY9nPD78mQaNmpKGwX3J\/QnImy15ZAbK6EhNRkoZeS8iJ6KIq2IXLe3CsRAgFxYHHzTkN6kfeOABYVHhdqXJhzbD8DwviEA8zxOeWtX0UBmbyXV6aEEmhK2Xjsj9\/\/yYrN9QkLmZxTYzUydko5LMwb37ZXJdY1HN0WJdwL972ahsvaQYYJFBTIE5ZJ7YokJCLqlTBRlkzrW48MIL5corr5S77rpLLr74YtR9A68m4lcbyVCi6psBtbmjORHFTChkBFgAIGzGAuFpDqTDtoLzmUKhEJh5nm531q8XCCoQdPnN87yAjOhfvdGQqkZHkBJktHFjQyAfAyREdw8frMjomCebNpcCkAcHnz6uJOWLkdFZ6+Zk0zM0AtJt3DXXjVN1EW5666pF5bjC2NjYwnaN\/8HAww8\/LMw75LNt27aAfB588EHhmkBc2Mf56kk5JJOC6cN3JXadsSca9LEyJ6KUi8fFBywKTCEg\/oXmX262EpARZxdERnxVBIyOjgo67KjTSdz0s6VE95Pjp56GcX5UKhaDz\/XU63Vhu9ZQYnr7u86K9LHhtKIc3D8doFEvy+z0bACM1yvxbL20KH\/yp5vl9o+tl63PG0W8CFlJiErMK4QO6fzwD\/+wvPzlL5fPfe5zwReSmf++JB8GdhJ8pMFTIkrCSGnzSevkhHuROUm26i9tTkQZrxcXnhuAf6FZMJAP2wkIiLMO+xearQZy9PaYutOEFEdGyP\/kf4VIRqMjv1AIIiTP8+S9vzYTfGft7UpG4NLnjwswEnKnZ3TMF9CoTgU22Jse0gnDdHGpkQ9RJfP6vOc9T772ta8tkM+znvUsQca8x\/noG7kSvx7SSRKKI3r4ljIg5oJ7McWs79Q5EWW8ZNwAmHITZPm6COQESbE9M0IiesJHJwDphGHtLCEjVXieJzs+uXnhSRQRnkuYREJqFvv65r\/uj9UlKaLIh3MfzteYW0icOTMfyICV+zbVaEjSkHJYbWPnXgRWZn4oGyijIzUZKWXkvYgFIurFzvVSn7iIgD6RAi4u5TgQHRkhkV+p7VpUfyCjMLCz\/rH4IcwTJ07oP9p1VG0FJOxGPpDPPffcI4888khw7kP7bW2wx5x5GhF5fLE4EYsfAEQNgfvO4OpNRppF7tr0Qj4nomVcBS46ZASS3EBC\/Eu\/ktu1pP6EdfTPCOlNN20WyGjNmtmwWVA+7fT5s6BLLhsJyklvRD9EWczPc5\/73OCJF+Rjh860SdtJPgZGF0RDSvBKRBIHJauBGW+TA8mJqMkJC5tDRoDFBsJ6t8zCW8ntmtt2ljykQP\/e9t6Lg6ho9epp4TDb6mYhIZd8OPfh8DlMPnaeZn6bSZnjKDTjoyu2kEwa9MFBV\/rWA40OJBG5N2p4jk0XllNO0qFPAmQE0nyw2I2QyLNdY8uS5HuldfTv37zwDLnk+evk8is9ecGLCnL1S1YLURCQ0F8U+fBZHzfyCcgnVK\/VIvMcRqu+Vqwen9+qVEWSUK2tWHd6raGBIyKIwL1JKdukkzcdeZOTUo7Toc+KrD4gIduu8RQufFictb1O2b3zAy8MfruJr4sQFbFdc79W8fZbnh\/8306YN4t8XPLp98ft7Z7Xhm7NGrolSwQRU7sb7hN\/A0VELAqIIGruwzrskGFLSpk8II+MfKswH2l+iD7YDnFYy2ExhMTBbqvttrPeze9\/gfAhSPtmP0REH3\/8zacL5MOjdcjHnnitFPkwp4Z2jrejvhoa7dTToGdIHe1E7zofKCLqtWmGjEDaoiE6MkIi30vbNSKfn3\/nc+Rnb75Q\/vT\/3Ch3\/t3Pyktf+tKFz\/pAPpDoSs49c2pgbley7ZbbqikJpSGPiFqe3lMVeyDHzel2g5s0LHP1K5WnD4D+JLUJCbFdY3GzXevWz15w5kNUxtmVRT72uJ1xAKKhtPEkjbVVHW27dSl3ox9uHzLlAxLSM6JaAoiYMjkbPKOBjYi4OblJe+mS0R\/6BZL6RYTBds193A8xJNVphw4CMvJxH7fbZ32I2qwdxgKsnKfJM9BQkmkoGSUheKyf7GZgtQNJRCz0Xl0k9AvQRxB3ZxEdsfAhJPJs10CcfatyyMc+60P0Y5GP+8SL9lv13+564TmjzHy2u522+6trJFSviCShoTZtb7g\/HA4cEcXdmNys6OyykEdGmZQyeUAeGflOAf+AtpLagATYrgGionZs18Lkw2d9OHR2yaedj9uTxtecToJPYTNnBuawWR\/dsG9Uy9KoziWjpkTVjc71QJsDRUTcnMwpqQtkgJvW5OSRGSjH6cymE6nbbpJ\/iMH9lcJmn65Vq9Xgy62MkcgnTD6cS9FGUh+y6PAPsti2asOcGVr1seL1GhVpaDSUjDwiWvHr0okG7eYMp25bpnNllk\/SmU0nUmuXBQyS2ojarkEyUXWQc+iNT5d8OvW4nXbcsUT1aVhlDd2aJZOQElW+NRvW26O3xu0uYhZ1XO\/c7RpkQ3TEOQ\/2lCEfzpMgH55use1yyYfDcGzbCfpL\/80neWRWHvZ0noR0e1aPhyhZDes89dDWbFgvwdJxs4hB2kJmK8VhNsRiP1Vr5HPVVVd19bM+S0c13JJ5ItKoJ2l7lkdEw32T9OrojYyiCInIh8NrHrfzpOuGG26QV73qVcGvGtrjdgiqV8c2bP1qBGdE8dFQI4iU8sPqYbsv+ma8kBGAjAAExDaMyMf9rI898eJXDdH1zQCHpKOV2tNSqT2ViAZfAxmS+QgPM9+ahWekR8uQEYBkeOKV9NMa2PXoMLrdrRVv\/+yzz5ZR71nydPkP5cm59yUCG2yps+Id7XKDORF1+QJkbZ5oCEAygKdnnBFlrd9pO\/pE\/6wd8sisPKwppPK5L39S7rzzzkzAdhjnKieiPrnqLGrQy92lfxAQIN\/LfV3JvkFG27dvlyzAdiX71itt5UTUK1eiC\/2AMKKwnK5AQGA5PvK6wzcDg0REw3f12jBiSCOMNrjNXeQz0NQM5ETU1HR11tiik862knvPZ6D3ZiAnoh65JpCQRSbkV6pbtGVYqTbzdvIZCM9ATkThGelCGSKAhKxp8sisvJwUP1Ewn7RlwM7keRo9A7m0MzOQE1Fn5rVnvBrJhFM6iIzUQDknI5uNPF3JGciJaCVnO28rn4F8BiJnICeiyGkZDmE4+qFMVDQco89H2UszkBORczWGLQvpQD4GysM2B\/l4e2MGBoKIbCH1xpQ23wsIgDFYTfLIrNzJlHYMnWwn953PQNIM9BwRsQiTOhzWYW8Libzp3bzJejllDPQZkO\/lvuZ9y2eg3TPQU0TUzkXIYsZfuyesk\/7oM+hkG73guxPXBZ9R6IXxLupDXoicAd+9eGbhyty86UldueWRRwF9lLwZWZyPYVi4zczTMNtyL4QRd98M8zz14th998K5HXTllreLSmoyN0Xu+iCPDBtSynFAj12U3nSkUXpk6ML1KSNHnyOfgXwGencGempr1uo0QTaQTqv183q9NQNcTxfh3rk6y4dt8nJ\/zUBbiaibZNATN2R\/Xfue7C3XkfvIBTLrLHlXh5wyaY7+nYGWiIgLzw1hiBs+emzRk1Im3wyoQ13qkFIm7wK5wZXn+eGaAe6NMLgvhmsW+nO0sUQUvqCU3YtK3oAO9OcU5L0elBmw+9FNB2Vsgz6OWCJyL6bl4ybD9C4ZWZ7UQH3ypFlgtqQG6pEnzTF8M8C9xvU3UB6uWRjM0cYSUdJwuQmS9KbjJgnDdFnTcH3KWevmdoM3A9x73AOGwRvhcI6oJSLqxFRxY3GTtdM3\/vDbTp+5r\/bMANcmClyvsByZ22pY7+ryfH\/OQEtExI0RvhkoI2ca3DxlF9igd2VReWywjdIhRx+ly2W9PwNcvzjQ+7AOGeCah3WUTY5Njv6cgUgi4uKmDQebMKwOcstHpXF65NxU1CFPGoc0PX7SbOJ8d0+et5w0A1xPrmsYyJPq5bren4FIIupmt9t1U7XLTzfnIm976QxwXcNYapVL+m0Geo6I+m0C8\/7mM5DPwPJnICei5c9h7iGfgX6agZ7sa05EPXlZ8k7lMzBcM\/D\/AQAA\/\/+123H3AAAABklEQVQDAO\/eHGltcKabAAAAAElFTkSuQmCC","height":259,"width":431}}
+%---
+%[output:1d8cf9a6]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  --- A10 | Section 3: Desirability Function -- From Properties to Scores  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:9386c9ff]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  Lead (Aspirin) desirability: D=0.415 (d_LogP=0.54, d_TPSA=0.88, d_MW=0.15)\n","truncated":false}}
+%---
+%[output:8755a3cd]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  Library desirability: Mean=0.268, Max=0.858, Median=0.000\n","truncated":false}}
+%---
+%[output:79b40db0]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  Top 10 library molecules by composite desirability:\n","truncated":false}}
+%---
+%[output:773432c8]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]     1. D=0.858  LogP= 2.39  TPSA= 50.7  MW=307.4  BETAXOLOL\n[21:19:53][INFO]     2. D=0.851  LogP= 1.96  TPSA= 45.3  MW=276.4  MOLINDONE\n[21:19:53][INFO]     3. D=0.830  LogP= 1.99  TPSA= 50.7  MW=265.4  OXPRENOLOL\n[21:19:53][INFO]     4. D=0.824  LogP= 2.00  TPSA= 67.6  MW=299.8  METOCLOPRAMIDE\n[21:19:53][INFO]     5. D=0.822  LogP= 1.77  TPSA= 64.4  MW=303.3  FLUMAZENIL\n[21:19:53][INFO]     6. D=0.800  LogP= 1.88  TPSA= 41.6  MW=261.1  CYCLOPHOSPHAMIDE ANHYDROUS\n[21:19:53][INFO]     7. D=0.794  LogP= 2.45  TPSA= 61.7  MW=286.7  OXAZEPAM\n[21:19:53][INFO]     8. D=0.791  LogP= 2.09  TPSA= 69.6  MW=385.5  BUSPIRONE\n[21:19:53][INFO]     9. D=0.772  LogP= 1.91  TPSA= 57.3  MW=248.3  PINDOLOL\n[21:19:53][INFO]    10. D=0.769  LogP= 2.66  TPSA= 28.6  MW=285.4  PYRILAMINE\n","truncated":false}}
+%---
+%[output:1a63afb1]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4Aeydf8xkV3nfn+N9jXddtl0LvI7bpYy3NFbUuAgka5fSmAUrUtT4jYoAtSxEeVHJH1ahqEpIaFGKXaWtom1RkFUhKge\/QskipFgpXsMfFYa1Q8GWRQT4DweXeq\/rXWyvbUDsCq\/ldd6ez515Zp573nNm7vy4M3dmzrvvd56f5znnfO+ZM3funXn3ip38kxnIDGQGFszAFZJ\/MgOZgczAghnIG9GCD0DuPjOQGRDJG1FeBY0zkDvIDIxiIG9EoxjK8cxAZqBxBvJG1DjFuYPMQGZgFAN5IxrFUI5nBjIDjTMw9UbU+AhzB5mBzMDKM1DZiA4fPiwpzIsJ+p9XX7Psh3GHmLQ+dcZtO0kb+qBdCsSbAP3Nqm6dWmHOKHtWY9M69DcKmrtoyTgXMYbKRsQAnnzySYlhUQNkTG0H3CwzZ7Gx42Nebed+WcYHn8OwLPNoapy7NqJUR5A4j4VJP6kxtNEPJ6kx4yc+7rhpN26bJvIZxyTjHzUW6o7KqcSnNEb1F4s3Me8ppzHz5rE5xriYeceRgrU3ItoyyNjgiWXEGYCzeGQ5vIw\/H\/PlOFbLPMqxNqJlnmgee2YgM9BeBqbeiHi1tAinSkx96Baj\/MTJRwJ0BbaF+kOpOSm\/jVtd89WXknrGQH4qx\/pTedZv9bAtMQsbV31UXPMmlbY+elgHXwibQyxlExsG287qYZswZu1Qp6360AE2EqiOTEHzUvE6\/lQN6w91bBCrjz8EeeoLdbWRFpqv0sbQ8SMBugJboT4rNYacaiOiKE9EC3wUDoHf5mn8sL9TF\/NrXGXYHjsVox4xleSiW+AjJwR+zSOGPQzkaL7Nwz9LUFv7sRK\/7Qd7WNzmTqKH9ekLn9ZCxxcCv+akJDnajhzVrSSHmAU+m4OOz+bU1WkLyEcC1VM18WseuTGQk0Isf5SPWvSpwLZtsDVmpfWTrzH0GGy+5uKrk6t5SG1rJX6tM\/FGRBGKaiGV+IipjcTGj26R8tsc9Lp55IZItWU8xGw+Nn71oY+C5iJtLrUA\/mlBHWrH6lj\/sLxY23F9qfqMgdiweuQMi9Pe5lh9WDtisVx81CTeBjCeFMYdH\/OiVqrdsPiwdmG9VB1qELP52Pitb5Ru8yfeiOiEzmMgZmE7rOO3Oeip9sTqIDZGfGHbafux9agFYv3YvFnq9DfLerFazCcGzWUMNq7+UZJ2YY6to3qYM0+bMTIO2yc2futrWp93f3XmM2xMxOBJEas31UZEBynEOmvKxxh0kirxaX\/oKWjOpJL+Jm27jO1SPOLX+aAr4Eeh8TqSNlrDyjptd+dkz6IZsMeQY6vQcY21EdGYgto4JclLxZrw0x\/jsqjTD+3q5DWd05ZxxObJ2OA1FrM+8rBVogPaAvRVAHPROSKxm5wXfTRZfx61wznAGbB9196IKGYbo+OzxdDxEUOfF+iPfkPQv8bQLcglZn2T6NSgVqwtfuKxmPrq5FCDPG1jZcpvcybVqU3f2h4dn9oq8RFTuylJP7HaMT++JsdE\/dhYZumjj0nmQBvaxsaS8sdyU3WoQSzWZlLfro2ITmKIdYwvzMU36WAmaaf9028IYtTEj26Bj9gsQC1bW3X8YX18GkdihzkxmzzyQ+CP5Y\/jC2uqHauNT+Mq8Wl\/6Oq3Er\/m1JHk2\/bo+GJt8RO3wBfLreujva1n2xHDVok+C1DP9ok9aV3a2lqq49ea6OpHqt\/KMIc8fDZnlE4+7ULg17aVjYhACtoglGF+LB76sGmHDBH6Q1vzB34pvxun\/pQk3yLMIxb6xrFpHyLV3uZpDr6Yrj4kOSHwA\/zIECm\/5hFPQXNCGeaPipNvc0bZmkueBX5spEJtpIXGkfiRilG2zSMXqG8SOU57chXaF3ZMVx\/S5mADfCHwW9g4fmykBT4LG0Mnhgxh\/eghbH5lI7KBZdGZXLjTqk1sWeaRx9l+BnRdIfPamu3xWvqNCDpYFDEQy8gMzIoBu8ZmVTPX6TKwEhtRdyr5MTPQGAO5cMMM5I2oYYJz+cxAZmA0A3kjGs1RzsgMZAYaZiBvRA0TnMtnBjIDoxnIG5HIaJZyRmYgM9AoA3kjapTeXDwzkBmow0DeiOqwlHMyA5mBRhnIG1Gj9ObimYEuA\/lxOAN5IxrOT45mBjIDc2Agb0RzIDl3kRnIDAxnIG9Ew\/nJ0cxAZmAODOSNaAYk5xKZgczAdAzkjWg6\/nLrzEBmYAYM5I1oBiTmEpmBzMB0DOSNaDr+cuvMwHwYWPFe8ka04gc4Ty8zsAwM5I1oGY5SHmNmYMUZWMhGxJ\/anDWv1IxhWD+xfHzD2tSJTVNjWFtiw6BjS+VoHBnLwR8DuTF\/6CMvhjBvXJua47bR\/GFtbSylax0ryQXWhz6Oj9wQ1JgG1Ju0\/bC2NpbSJ+1X2y1kI9LOZy3tn\/JU3RIX60\/zrBzVJlZnKt8YjXWc2gQbXaWOHTuExpBhDBs\/tSzwpWI2T3VyQ1BD48sidcwqddyhrf5xZcgR9qxqjzuWWeRPO\/aV2ohmQSg1pl0UtKfOrJGqm\/LPuv9J6zG+aRYq7Sfte1i7WdZlftRDDutzWGwW7YfVnzTGuGJtU\/5Y7ihfKzciDqZFOAkbUz3MmZWt9VXauupTqTHsUMcH8CMt8IWIxfGFedjqV5ny4VfYXPXNcmFpzVDSr4WNWz+6xmI6PkAO0gJfiFgcX5inNlxoHKmIxdUXStpQJ\/TXsWlrYdtYP7rGYjo+QA7SAl+IWBxfmIetfiutTk4IjYf+1m1EDJSDZ4FPB45uY\/ixkbNG2Bf94KMfJLYFPmIh8Gue1a3PtglzsG08pVNPY6ojU+3xA20TSmK0x4\/ERp8UtKeOBT7qIa0fHR+xEPiJA6tjA3y2DTZ+BbaNj9K1HXnoSItx69m2MZ169GOBj1yk9aPjIxYCP3Fw+PDh8v\/\/Q1cQt22wNYbEtvGUTi4xJFA9bI+tcXIsWrcR2cGNqzPREKmJj1u7Tn6qL+u3eqpmnZxUW\/VbHvBh27roCmKAvDaB8cXGY\/1Wj+Xiq5ND3jTQPpDz5pI+Y2O3fqvHcvHVySGvCazURgSRIaYljUVlofXox\/rRNTZKkmsxKn+SOONT0B4dGQMxwJg0rjpSQQwdOSlob6F1tP9YTHNS0rZBT+WN62dM2oa61lZ\/U5L+LLQfxmD96BobJcm1GJU\/z\/jSbUThgcBukjDqh9D+Qj8HWWMpSU7YLpU7Kz\/90S\/1VKKPAu1CjGozKh7Ww9Y26BZ1xkqObYOu9ZqU9Et9leizBPMIofVDf50xkBO203pNSfqjX+ojsdFjWLqNSCfEpEBsUtP6tI9YHWL4VaJPg1idmG94H+2OMp\/UsSLG6FWiT4NYnZhvmj60rc5JpfXTZ+jXeEoOa0OMdirRp0GsTsw3TR\/jtF3YRsSkY+DghX58dlJh3MbG1cNa2NofEtsCH30grR8dH7FhIIdcBXaYj0\/jSOwwJ2VrLu1sDn58SIAeAj9t8KuObYGfuPVZnVgI2pCDnCRG2xTCmthhLj7bL3aYk7LJpW0YT\/nDvJRNzRDUJB85SYy2KYQ1scNcfLZf7DAnZZOrbW2O+pHWH+oL2YgYVAoMMIzhA0w0jGGrn5xxQNsYbI0wXidGG82zuvXhB\/hUWh2fAj\/ARgJ0oDpSgR+oHZPEQ2geftVjMhXHH4OtEcbrxGijeVa3PvwAn0qr41PgB9hIkNI1lopbP7mKlJ84sRiIKcK4+pGpGH7iwOrYAJ9CbSTArxIdYIM6uubZXHx1sZCNqO7gwjwmyaYTAn+Ym+0BA8pX5mnAyTTamvI5NmXj8LRUGxFM8GQKgT8jzYDylc7IkXEYyHzWY2scnpZuI6pHweiss2fPyrwxelTLlzFvDulv+VgaPmLmNG8MH9H8o2u5EXHQP\/7xj8stt9ySxCduvlmeuPHGEu9++9uTecNqhLH3v\/\/95eY3\/8PcTI91eLQc\/Ne3vrXkE16tf1x9lXgcxuGs+Irx2zYO13YjeuSRR+TEiRNy8uRJ+fznPy+f\/vSn5Qtf+EJp47vjjjvkLW95Swnywjg5FrEaNv6xj31M6LOZLWHqqhMV4EnEnODHztXqlpePfOQjJZ\/wanPQbR52CqvG4zAOh\/GV4gf\/KC7byOFabkT6rDty5IgcPXq0xJvf\/OZSqv2mN71JrrnmmhJHfV4Y17yjb3ubgGPvfKf883e\/W\/7pr\/xKaffjvfr0pf2ummRu4XytrdxVOO3xEub1+evxCrclevn0tWr8MR\/mZblAH8UXOSU3AVesReW8zOlxpzp90WebsNIbEVftGyXbOZGdnRKXXnpJzjz5pFx+5ZXSbrTfORdvnMfefG44fHjAX49X5beXsrSiEQ7N+uvz5HljLS4bUSu5EXHQwVQH49ZbRU6d6uK666YqtayN4RDMbPzHj3f5hNeZFW13IfgDE41yxfgaxsFKbkTj3DYcRs66x+rweOnIJTk95N83N74pD+99uMyQNfypw+Ea0rJryiu5Ee2aZcJx+fJlSWHna1+TndtuK\/Hd\/\/VNeetb\/7X84R\/+uJrP2zB\/epyqYf2JISy9+5kvPiO\/eeg35Z2Jf7+68aty\/PrjUsqTTk4f2y+P\/sIvyLlz56pc+mPxf554QjauvHKXfx14tHNUfefP\/qxcf6xD9an8\/ve\/L7f9+q+L1Fx\/2g4pLfxZ643omWeekaeffrq8pf7ss8+WOjZ4ztsv+es+4Hd+5xX56U\/3yJ13ivzxH\/+kn8eThmOKfO3+\/fIPf\/EXZe++feWTiRoW1Cd33XFRLspPd34qP\/rRj\/o8whN3j+APfuAzBDlgVXnUtcgcFc+\/8IKw\/oD6VD7z5DNy\/1e+Al3lerN8sRbhSXNDSaxs2KKHtd6Irr32Wrn++uvlOn8NSHVs8LrXvU6uuuqqEj8695r+Ifvud68p25DDRUHFT378Y\/nrxx+XixcuCD7iFgcOHOjXWEVlnDntuB05ePBgn0d44hhY\/uDQghywqjyG64+5XnPgQLn+WIfYFgf\/20HZlNvkvDwnlz\/wSrnmlC\/WYqyetm8jh2u9Ee3du1fAPn8Ww8FGV1z5mtfInj17Svz8pcHT7Ny5jbKN5qmM1dCYSlnBnzfc8gb5y7N\/KWcS\/x6\/9Lg89PRD8snLn+zP\/lV5VeBLeUFih8cAfwz9QiukxOZ5pX+bqmswjG+c3ejPfuN\/b1TWZB0upWU\/V7RsPO0ZTu+uWXHXKf+qc7A\/rm+c9rfs\/fvy0oHsYa\/fzLj9vOEXD+\/by\/gaPPCE6Mjwf4cuHyozvuhvmm3eJfLPbn5V+j89\/rAr\/KlfJQnrhthdM+Wj8Dcg5X45KP6ObtFbk70Ya3HZqMob0ZhHzMmOlJ\/ZoN1OT\/eS0+JV\/RwRU20Mnjvls8Kf+lU2NoAlKwwfZ\/y688PWt2Z+Qfpf7yPmwVr04aX6rbURLdWMzGC5dWrM8dQHHhDZ3JT9xzf9q875Stui6Jm8AvXUVRZTk38i8gAAEABJREFU8dgjhnOm95\/0r+If9XhU5Of+Xy\/UF5wR9Y0VUybi8KQnzK9B1mGFjt76O+XPiPr+nq9vL5my0htRU8eiKJqqnOtmBmowsILrL29EI477iy\/uTiiKns+fBq\/T9aDerCcSnBHZhoUoidL\/4a1ZeY2t78lKlIEedbw1K68RkdTzoS4j8kY0zVHTt2ZecoGQtxblE8nb05RdxbYjNyI\/afjzQsrNHQ4tJP\/0GXiqqw3emvmL1e\/06PHFWuxmLM9j3ohSx6p31+y\/\/JPqXTPSH3yQRw\/OiHrgAiGv6Jf5tDU+H86\/VQb0rtnmzVW\/WhX+4NBCk9ZJxu6aMf\/e2Q9nRHyOyF+pFrknX6yGmpVFUazs1OY+MXtWFHtrNvcBrVKHS75O8xlRajH27pr958eqd812xMk92\/40mHa9U2HxktNh3lrkt2YQE8e\/O9mRU727Zk9J7\/2F506Ab1LhD5+Fj6\/db+yuGZzwWTZPBm\/NuteI\/Hq804OYB2vRh5fqdz4b0VJRUh3sz39etfkcESi95q1DfmtWMjL0wZ4R9ROVQ+\/Ib808CaN+y88Q7ZRZlbdmW97X45K1WCYs0UPeiEYcrJfKr3fc5LNOeQw+Ye2N7q9\/BeIVnVeh\/it6N5IfYwzs906uEUWo9JHyC5zwWQGBjAoDN8lNcsr\/658RcZbeW4uVxCUx8kY05ECFZ0M2tSi8xYE3r0L9V3T8Ppx\/qwx05I19R+waERt5\/2J\/j1dBZj77vAnrTvTHvx0TfyYEOl7ClQcvipqxLDJvRKkj5e+anf+TU7LpX3XOy+6X76JINcz+FAMn+a6ZP7Hc9IhtRKl29fwrmBW7a5Zadyn\/ktCSN6IhB6oo0sGiSMdyJM6AvUaUN6I4RyO9w9bdsNjIwotNyBtRin9\/1+ymf8\/50OCu2aFDl\/vZReFVfxpcXsvwqv6Wd83wq2NBcuK\/k9zgeG89eV5ObUqJWDe8tS35s0HelrWATzukuemxu2ZP2d792zHh7Znxeb7yxWrDxyqo9u8QsQl1OoNZPcWC8Ae99HjJ+3Kucagt3leidMzvgQ0ITPQly4aHebXsq\/QQnhUl+VMukZUKa2jwAtiftm5CSI8bPHxM1+KuTd3H2vq7JGdEi6HvpeDW\/RsH11q7A+KVugdehXhF33WxtZvZ+CObD6CjNm5CjGufXI1IIspfj9\/yojV6svWaBOxG9CnOiAx6n66urMUloWWhGxFPHNB+rh6Tixd\/Q\/bvf6E\/1NOn++pCFfgDbD5goYMZ0Xl5RnTBJz3qcV4kPCOS\/DOagd5G9Jg8Jptf3pTz\/t\/oRu3PWNhGZJ886K2jyt8143tmXCU637tr1ukMRlkUPd28XeCtxbxPh9l8AByC3qjaKfxdoM27RPS7ZrGNqMIf3IJ2zqb5UXm++v+3Hr3pmkMH\/p1u93NEGB4f8m\/NlpSvhW1EnrbW\/xbFYIj79nEKPLBLjYPee7vA+\/L+Wwv8ZcL8HtiMAD22eUOyd84YqwUbefnWFiccwi1Ax9cs2l\/drEcGe+rb98v5X3oO1cNvQr1PV7MWvWOpfvNGlDpc\/q4Z3zPjk0QH\/env3r078o53pJLb42czAq3cjPxdoLs\/+pyc4q2Zpyx2RuTdc\/+FKzD3jkd16Pkq\/zojf6UxlWvO0lMpy+DPG9GQoxR+srrTGZLcshCbUcuGVA7nahlcsO5\/8bWMLO4BrgCbkWJxoxnSs70u6d+W7cosdnmWxrHQjcgedNWRbWGv+z2z7mg4I0LrdHhsFyxn6KBdIxyMZl9wC38QWbzGZgQYCRwC9FZC93O7HvNGNP6h4oCnMH61kS3GTgjPhvbu\/ZtdNe7g9inXLzy4ZUpCebF1J3I9iWAD4MkCj5RWHRsdX5sRvjXjGlvJn+dTlEOrNzQZuLKAP0VDXU5W9sFqs83bbpODn73OO\/31Ib5vxkbk+dK16ANL87vQMyJYYgEgFaGt\/nnL8zfdWn7PzN41YwzHjvHYRfmhRp4woOuS8mKrXww9MwvLgL8L9D\/v+ldD75qV\/Bk+yw1pXfn0fFXumlkue+vw\/B9xsdq88Hnu8sVqS9QYum4+SF6JkGM0byS1KKplY3fNimKQw8Hnrk\/5iu4XwyCSNcuAvWsWnhHZvPJT6WxAoGE+WXMWrD9FZUyLNsx66w+l\/9aMsyIPz1c+I+qzs\/zKTecfEO6YAb1rxqzeaD5dXRTe4w98+aTxKm8tyld0r8\/rlyeQPmnQ6RdbdezWwN8FuvWjn+nfNYuNq9zI4ZQgGxBAnwPgDdAV\/AH0uph5nuerf9eMtQa0k94d3IP\/Qt+aEfBnRuUfTkNfLiz8rZnSpQsAufAF4AdlrxHt87fuvav87XT4U+X8jUYnZwr\/CsQTBZTRdjy0gb8UE+Wnq02wPCvyG4+eUZYb+Zz5ZM0BeFOYIbZQdXLTv\/nHcur+++X8c8FbM7tZtXDkqSEtfCPiwNvBhbaNzVN\/KnFAtz7kpLsN7ZSyKOY5qt192ScQ+u6Mdnn2yJ7KgDruBr+z7whvJzijrATnbMBfiDkPId1df505n7Mjj933feFitTeqv\/28qrvt1hWLHiAHns1Hgb3oMdF\/8RSPXdg7ZoU\/9e1uQd3tqJuRH+sysCfYiE7vfEPEOdEzIlnAD2tPu0W3UH975I4fij8j+o3uGZE3RPxZuiz5zxVLPv7Ghv8nxeCu2YEbb5G7775bXv\/610unI9LdgnZK2eFPL\/gnkuSf0Qz4u0D7T5+WzWd9au+PXpZvzXYGZ0SVa0Q+bV6\/uvnwQgjm1e\/QfjxfcuqUlDhtMs2fhT143XUiBWdJ0v3JZ0RdHpp+ZJGAVD\/EYkjl1\/F3OtWsTmdgb9\/DhtS1+3fNuqY4ZxZIz9cWoRylxqPxUKbyx\/HbO2dhO64R9VmDP9BLcq4f6XlmL8bZkJSb1Cg0HspU\/lC\/OUMXs\/7Kjzcc25Huj+eH\/1aoa8iVV17Z06ribW97W9XRAmvhZ0QceHugsFO8kEccoKfyiIdI5ab8t8rgrtmRDhcE45n6v77qNQ6eSH4Hiic35IULQHmkAjsG4soPeiwHn+ZYiX9i9O4C3b054LM8I4oV9GdJ5ZMMOYcNSIcAH0DnrP5Q2hz0MK621rFSYyNljy\/hu2bDznTKjYnNyGNrp3ybO7J2yxIWvhHBhz1IqYOKnzzyATo+9Elx+fJlSaEoBlUvv\/pqJe\/YMY052ea\/cfHmvn37hPHwKuRfl\/xe5OSVV17pt\/MpjfzCQwqxDhkj+RpDx6f2JDLFYejf8ZsKsN83++HlH\/Y5YhzwxxiccyWHznnpHc51+fRqI7\/0DeADDOtE8zSHfHxqTyJLri5X1yNcKWzNy2+v5lViP7wszjt0PM45ca6Kb3\/72z6jXb+t2IhmTQkHQTGs9jPPPCNPP\/20nD17Vp599tlSxwZFMWj5y\/\/ohUr8woWLveCOHDlS\/sdn8vjjj8tDDz0kTzzxhLAwAXUU1O81mqlgnjMtaIpRW2Hcu1TlUedqpeX2+RdekJdeeklec\/k1\/RqXLl0qeSdP+SMIfyGo2wSPzJE+AboFvmlQt1aMQ+ULzsRcI7pw8ULJGXyAn\/ydn0j\/x69bXYv4Qg6xm+CQvqbBSm5EkK1gIaQIuvbaa+X666+X6\/wFP9WxX375+kqT173+dWLjv\/Zre\/vxRx7ZWz65whrUsThw4EC\/zbIoyiGyDo92vqpbXq45cECuuuoquWLPYNm9+NoXdx0DnnjaPpRN8Mj8Upj2WNm643KofF31N1dVhrH\/tv0lZ8rN\/l\/e349vnN3or+cLFy5U8jS\/CQ77A5hQGayICQu0rRkH3o4JO7UA9u7dK4C3VTxB0BUPyOCu2Y83\/l75BNLYxsaG7SJZQ\/NVVhrN0GB+MUzTBbzZ9tj0YX2q6\/xi0nJ75W\/9luz56lfly\/d\/WJuWknY2D3sYykYTPjCHOpiwfKUZnFkHNn1bn+qx+Spfe+75qqaVkvVn87HLQO+hDpe91NaIhW1EHJAY2sBMUVRH8fLLP5APf\/jD8oJ\/a0Gk0+FxgKIQ4eAzH3uNY5AhIg0aLPAYGuxy4tKPPfaYfHnzyyLnuyUK8eTJ7h\/nXP\/aBlHnHGJqhDxR0PrURrYGIUV+\/cHjpr+Iff68J9LblbGafOdcIzxW+puBsbCNyB78UI\/Nixye6BpDx6e2SvyqI7FjecRSKArx50MPCN8zA519g7s8tDl2jMcBbrjBlW\/PbD9cZHTODZJaojFGONHhoONTWyV+1ZHYsTxiteHvAnU++lH5zKNP9pvENiLnnL9htlNCE5vgMzYn5ohf+43JMId8fGEufuvDjuXZnIru+SrvmP3bzYGbTQcMPCKhLd0fXhThDXQ9fIh9R9b29j0HoA6UrJTkIGoddJuHHxs\/ugIb\/zgoikH2vthfwhuEF65NMj\/apPjBz6RsDj5s\/BldBuADXgB619t9xIeGH12BjX9sBP+t1a724UZkLmzvym2pYy5nRBwAC7iI2fhHQduFefjVh65Q36xlpzPriqPr6YIeJUdXkv6dvTAX3tSHrlDfLOQeqX7fLHZWNIt+mq6R4ga\/9o2uUN\/Y0m5EQ9fd2JVb0+CKeY+EJxEHxvaLjd\/6FqmXf\/CsN4Cr9U9y9mwVnY5q85PwZEHPMRt\/m7GnJRsR3LHuQuBvFX\/dT4h0h5Rad9Zvzui7jdr\/eEX7hzj\/ERaFiN41+x+bp8TfD901iE5n4Nra2ulfrMbrnCsvENr35vhnCZ484RMGG\/8s+5lprePHpbjrLvlPNx+tlA3PiODNuS6HJDrX1fFjzxJwFmKW9aeq5fkqv2e2369BLfRGVYZIv36J8oFa57rcYTvX1fMHGmFjyWD\/EJoduvXz6Wo++8KC5uDzhAHkO+cQGWMw4NzgYjU8KijRxgutjKtR9DaWsg\/zAlja+hDcQMFtL1Yrh0hiZ86cQbQGcz8j4snKq3YI\/G1hpSgGd82Of9HfsSj\/+FR1dJ1O1Q5v3xN1rvuEcm4WmxEVlxz+LhB3zf7Do4\/KPv9PZxOeEeF3zpVnlc45zBLOOeHVvG1PonJwTTx4vuRWv\/4E9DoI1l3PWxV+\/arDObeLRzbzG264Qd7whjdo2sLl3DciZsymEwJ\/W1AUg5HsS1wjGmR0tccff6m8AMwZkXOu62zwEf7CzRwbf4Pdzq00r9wK55rnc24TG7cje31oWNvEWzblEOlce3lcyEY0jM9Fx4qiOoKrE7fvO51q3iIsNp0QixjHJH3aPwXylDw1SYn1bBN5C1YSYdbj3kcGX0EqY0vwkDeiCQ\/SsWPVhqdPV+1sDWfAbkTDM9c8+qKZv9lsjHeW6sJq5Y0ooL4oug69a3bhpL9jcd11XWfycUduv31f\/8+AtP00ODmNpgP+LhB3zf7jzTdXegqvESl\/zjlxbo2vs3m+5P1+\/QmoULbbCDapjbMb5Z+hca7LoXPt5jFvRLsPacXT6VTMitHpDMzf\/\/3BNSK8PMc2fB4AAA3mSURBVJmAc90FgC9jwIA9Iwo3IrLgTmFtvdCKby3woJmlWW\/GO1RVDpEkIvWCP39CBF8bkDei4CgURddxqzwgX9vn71ZsekTumpF17BiPwElRIHeDA7\/bu6YefxdI75oN24icc0mCeBIlg6sW8HzJY379CfCT6\/1fZl7b\/dtfi90QZ0Tcvu9aux+5a7bbuzhP3ogC7osicHjzxhtvFP3j+d6M\/hZF1N0mZyvGsn\/\/frnZvzU7eLD31\/NbMaoWD8J+vcMM86abbpJTp05JiseNcxsmu\/1q3oiGHKPU1zu0yeBDjTvyyCOJ22uanGWFAXtGRMC+PeMs0rn0WRH5awN7+37UW7MgPq+PksziWOSNKGDRfs8sCO0yOx11dZ80fI6H02HnXHmR1TmnCVkGDIQbkQ071+XNOdfn0bmubvNWXrebEJPtrzeM4bBvzZzrcudcV3KdbXjr+UfzRhRwXhRdB3fNyu+Z+dPf2HfNyOp0eAQ7\/mFHHnro\/5V3KnhFV\/hA\/lUGuAsEnx7hRhSeESl\/odRSayH\/wXE\/Te6YAa\/215vXY78mfuXZK3etReWyyetssWHV8eWNaAhLg7de8aROJ+7P3vEZsBvR+K3XpMWo9TYq3mKa8kYUHJyi6Dq4a1Z+z2zIXbNOp5vbfXRyyy1\/v\/xP7ZzrngI757qh\/NhlgLtA8Am8Jzwr8q7+r3Nu19sy51w\/vhbK6ZN+mtwx86isNe8e8ctbM1Kcc7t4zG\/NYKblKIrBAOt8z6zTId\/5hx05ceK8l90\/x4nCqTAyYzQD9ozIue5nr5S\/UI6utoIZ5TobMS\/zfTPumnG9Eu4ALVXmt2aw0WIURXVw+j2zH\/yg+sfzq1kD6+GHB3fOOOjOsUEN4suuzWL8\/Bc3jz76qPBH3+0Zkd2IYv2sJZ\/2w4wBKZU\/nq8xs1npGZGGVMJjPiNSNlZIHju2QpOZ81TsRjTnrpevu2EfZly+2ewacb5GZCgpioHBXbPye2b+Dk\/qrtkgu6udPbtcHyLrjnqOj\/6uWey7Zoxg1BkROWuHIrhrNooAc0Y0KrVt8bwRDTkinc6QYC\/0jvKVitv3Th55ZG95y9Q5V14g5DS4l5ZFhIE3yuCixrmNc\/0MeHPOlbbqznWvG5XOdXjgRRHoXOuceQfrdefMTrkOKbGz09Wd6\/5xOXxtQn8jatOgFjWW06cHPW\/ue0DK\/1OKOzyJ75oNstF2eCjBQQelkR8GDPi7ZvpdM5z2rdnZjbO4+rD8oYN+cG0Uc9eszpyDjUj8RmZ5QwfSwp+8EU15UDqdaoH89qzKR7YmZMBvIpWWwTqrxFJGWCOV1wJ\/3ojMQSiKgTHq1r1z3bcOx44N2qAVBY8ZdRiwZ0Ti6QzPiurUWNkcu464GVtzI3IQuYSk5I3IHLRxvmdmmlXUoqiY2bAMZL0+A7NYR7OoUX\/EU2XmjShB3y995FYR7piBEX+hsdMZFCmKgZ61gIHgrlnljMin5jMiT4L+ln\/Gu3fX7Ejvu2YaqyvLGnWTF5uXNyLDf1EYo4bqnD8R9igK57O7uPNOJ84N4AP5N8FAuBEd\/7vHd31FxrkBl865RKUVdBdmTuaFzniTqpPev20vPWfOVWX+QGOSutkH+JMcYJzK9kJz5\/+OvmvGHQiwtcUdsy7Q8SnG6b+NuXAIZjK24K5ZWPPE+RPlxx+Uu5gM2yyDDX9g\/LH27pp9a3OspjvS+3fMS3\/bPuRxtb\/iMRZVzSZz0PW\/2UGv05vdhMjvdHisB\/st\/aKo12YZsuBuXB7HnZc9K1rFt2YTc2g+SiI1\/2+9Xdwv0VpcubdmeuD1oPBEwqe2yuefPyF\/8AeH5EMfErn99r3ymc9co6FSXrp0SRQvv\/yygHPnzsnZs2dLkKR6p4PVxenTUtakrsXnPndU6LOb1f5HOIM7HSk6PrWtVB5i8tlnnxVADD5fffVVAdjA1rl3\/73y2xu\/LR8a8u9zRz8nz5943jZrrQ5f8KYDRMentpVwoZA7pPJzyV0q15zGkXAJ0C0qDdmI\/Pr2dPpF6SM9\/ahfiyf8+vee1vyu3EZUh9lDhw7JxYvvke1tke1tke1tkXvvfW2\/6cbGWfnTP\/2wfOtb3ypx++23yxNPPCHve9\/75JZbbinBHx9X\/fd+7+P9tijb2yLb2yLb2yLb2yLb2yLb21L2Sd\/krAKYy5EjR+S4vwitXITyXe96l3zgAx8Q5Cc+8Qn5zne+Iz\/72c\/kve99b8njC\/e+0KXCv7M963nfltH\/Lr7notC3rMAP8wg5fPiPHq7M7K\/++q9Kriy38Pe9732vz6PGfvfa3620Fb\/uYniPX\/\/0LS35WduNaBj\/H\/zgIfnIX\/yFXP3AAyX++5\/\/udx3331y0l\/jiOG++94zrNzKxljIJ06cSPIScvUvPYd\/6+tfl7\/94IP9Np898tkx+Fm91BiH+Loz9XfNOqfkiq9\/pc+XcvqlL30puibfs6RrcS03Ig7y1pbI1pbI1pbI1pbI1pbI1pbIpz4lcs89IkePHh0LZ850225tiWxtiWxtiWxtiWxtiWxtiWxtiWxt0fNqgSfNuFzZ\/A8e+qCc8f8+JZ+SrTH+yQr9hBwe+uQhEdYK+IaMtQ7hVvxaFL+O+zWoE4O052dtNyI2mxjuuGOyg9PpiNxxh5SbWKyu+iarvtqtOtKRO\/y\/e6T+P1nlny0\/Of9i6OkQ8etKxv2hjV+LZXutE5Pj1m0wf+U2ovCCIBcH8TXI4UqWhjO408mh41M7y9EMwBe8aSY6PrWzHDDQoo1oMKhpNQ42Bx2gT1tvXdvDHRwC9HXlYZp5wxv8AfRpaq1y25XciDhgHHSAPgosEjAsj7gilVc3Tl6qRtv8cAhi42IeIBabhS+sjR2D7Uvj1rdoHf5AbBzjjlfzQ2lra8z6VB8W05xFyJXdiOqSyYFhkQD0WDv8xBXYsbxhPtpoeyT2sPy2xxg\/8wDosxwv9UCsJv2F0DzaaAxd\/W2VjHGS8WobK3WOw2oOi2n7Rcm13oj0wCj5HFh8aiOx8aMPw7C8WKxOzWH9LTIWzoe54JvVmKgHxqlH\/7YNOr6gRmtMxsYYdUDo+NSeRNKeOtoWHR82EhsdoONDbwPWeiOa9wHgwCvm3feq9Kf8IVdlTuPOg7krxm3b1vy8EY04Mrxy2BQWQB2fbYOu7WgLsPFnjMcA3CnWlUOdP3JVOMgb0RjPAw46B982iflsXPWwnfqzrM9AyCE2\/NevsPyZzNnOAnsVOFiljcgen5nrHGwOeqwwMQVxdGRGZiAzUI+Btd6I2FjspoGOL6Qu5SePfAv1IRXEqaH2sstwPswNX9Pzoh\/bB7b2i8TWODo+tdsmGRtj1HGh41M7JcmzMWxth8TWODo+bCQ2OkDHh94GrPVGxAHgYHBQADo+C\/zYSAt844Datj32OO3blsv4dT7o8xgf\/WifSGzbLzZ+gG5jbdQZI2MF6HXGSB75CmzbDnuSmK2xCH3tNyJI5+AB9BD4Ywjz1CZX9VASU4SxZbSbngv1Q17wKcIY9rAY8Wkx6\/aTjFfbIGPjwQ\/GjcXy5+XLG9G8mM79ZAYyA0kG8kaUpCYHMgPtYYC3W+0Zjcisx5M3ojYd3TyWzECEAZ70qbdakfSKi7YVx4wMxjPL2mu9EYVEzuIYUTOGWdTONeozoMegfovJM+lrWGviIMyp6wvb1bWpz4ZRN39UHvVG5UwaX+uNaFLSRrXj4Ido8iCOGs+yx8fljnzlH13nb3X1zUqmaqf8dfulPXOpmz\/PPMbF+GbRZ96IZsFirtEYAyx0FvwsOqAO9WZRa9oajKPJ8Wj9acc5r\/Z5IxrCNAfTIky1MdXDnGWwdewxqeOPxfBpHIkdAn8M5MX84\/hSNXiCj1NnFrn0GY4HGz\/1kdiCkQBx8hLhipvcEJWEwCAXFxKgA3SADtAt8M0DeSNKsMzBYFFY4NN0dBvDj41cNjBuBWNXHYmtwA4BD8SRYQwbP3ELfKlYLM\/6VK9TQ3O0DbJOv+S1GTov5gIYq0p0jaNbqJ9cdIAO0AG6BT5boyk9b0QNMMvBC8HBbaCrXDLBAPy3lXM7NsaInZjG2G5qUTPWMPSHdqzNvHx5I2qAaQ5wiAa6WYqS8LCogfKkBPPqn7lqf0jsefW97P3kjWjCI8giY7EpsGXCWqvQjPkrF8jUnIiRSxyJjT4OaENb2iCx0S3wK6x\/FXTmxZwV2MwLW3XsZULeiCY8WnrQOfBgwjJL1Yw5h7BzR1do3lJNsOHBwg28IG1X2DE\/ORpDV2guMaD+eUsdxyz6XfuNCDJj4ACHfnyW9DBuY6uoM\/8QqXlqHhxpjupIBTF0ZB1oLlJBO3TkosG8GQuyybHQR4hp+6T9rGvW5WCtNyKITwECwxg+wMEKY9jqJ2fdwNzrzBmeQtRpZ3PC9tg2Pm897H+YHcZ0rCk\/cWLK7+HDhwU7BHnDQL6Np2z8Fqk2jIc8G59GX+uNaFLiOAAciBD4J62Z2+1mAD7heHdkcg\/1qDt5hcW01DEjmUMI\/PMc2az7yxvRhEePAxFiwlIr0QwuwicHNn4maHVsC3KIW19MJ4fcWAw\/8Vhs1XzMNcSyzzFvRMt+BGc8fhZ4rGTKb3PJCaFx\/KrHZCqOXzcY9Fhb9Y2KU2dUjtbKcr4M5I1ovnyP6C2HYwzMavOYVZ3YGLNvOgbyRjQdf7l1ZiAzMAMG8kY0AxJzicxAZmA6BvJGNB1\/uXVmYNkYaOV480bUysOSB5UZWC8G\/j8AAAD\/\/4zm8LIAAAAGSURBVAMASGHbxF8SoNYAAAAASUVORK5CYII=","height":259,"width":431}}
+%---
+%[output:70890537]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  --- A10 | Section 4: Goal Attainment Optimization (fgoalattain)  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:40f4392f]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:53][INFO]  Running fgoalattain (200 variables, 3 objectives)...\n","truncated":false}}
+%---
+%[output:62dcf164]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]  fgoalattain completed in 0.41 seconds (exitflag=4).\n","truncated":false}}
+%---
+%[output:8a543336]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]  Attainment factor gamma = -5.5275\n","truncated":false}}
+%---
+%[output:670b2109]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]    => All property goals achieved within the convex hull.\n","truncated":false}}
+%---
+%[output:385f653a]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]  Top 5 real molecules closest to the optimal blend point:\n","truncated":false}}
+%---
+%[output:4281a14b]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]    (Optimal blend: LogP=-3.53, TPSA=64.5, MW=214.2)\n","truncated":false}}
+%---
+%[output:6c39698c]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:54][INFO]    1. Distance=0.380  D=0.000  LogP=-3.21  TPSA= 52.3  MW=182.7  CARBACHOL\n[21:19:54][INFO]    2. Distance=0.999  D=0.000  LogP=-2.04  TPSA= 40.1  MW=166.2  VALPROATE SODIUM\n[21:19:54][INFO]    3. Distance=1.329  D=0.000  LogP=-1.03  TPSA= 61.8  MW=194.2  CAFFEINE\n[21:19:54][INFO]    4. Distance=1.450  D=0.000  LogP=-1.42  TPSA=107.4  MW=236.3  METHAZOLAMIDE\n[21:19:54][INFO]    5. Distance=1.563  D=0.000  LogP=-0.79  TPSA= 91.8  MW=233.2  SULBACTAM\n","truncated":false}}
+%---
+%[output:353a2e8e]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4AeydfYhlZ53nv+222iEJGo2kxY4+nRndjBNByEB3MJO+FRVkhgElMqgBc4oZwQyKyGzQoNC3ZlfCTCtsmD+y4Cx9ImtWYZsR1tnRmYQ6nRF2GnXzR2SccdQ60i022xFdbEk0PfQ+n1P1u\/XU6XNf696qe8\/93dzv\/b0+L+f31PnmOee+9Euu+sMr4BXwCuxzBV4if3gF5qwCt91225zNaP+msyy1cCLav78xH7mhApx4P\/zhDxsiy+miFtSk7UfvRLS1wix2E7bCCy+ajg3fbg+MPlJYf\/hM340c1M+g2G7GHKVtOnaqj9J2WM60+xs23jzEnYiSVeD\/PnXMyx\/FNOZRPzbs3fRLW\/owJKWcSLX+6o3x133LZFPfttfAiWiZ\/qJnfKycMLMYgn7n+URkfrM47mXq04lojNW2kwEJaIpMgc+AHx1pwAZmm8RnwIeONKS26cg6yK\/7RrWtLRLQDpkCH8BnMtXx1UE8RT2+WzvtGz3tz2wkIJZK083fZOMD5DTBYsg6LL+fn3gaw15G7JqIlq1o\/NHwf0CQ6tgAX1oTbPwGbGC2SXyD2hGzXNP7tSE+KejTxkn11Eff2CZNx65jUB\/13EE2Y9BXPQcfsRT40jxsi5s\/9aEDy0EHZpvEZ+2bpOWZtBzamc8kPuJI8yGx8S8bnIiSFeePoA7+OJIU1e001qSPm299TNrO2jfJ+rFh18ep20397JePuTHnccenXb1N3TfMrrcfZjPPep\/D2hCfpA3tFh1ORMkK8kdQRxKeqsofaoqpdt6ns\/qxYfdJnao7PU70qXY+w86Ya4pRh6JNvbb4Uoza17LkORHt00rzh1rHuFOhPX\/ctENio88bmFcdY80xSaYfjjVxzURlDMZKMcpA1q6em\/Zjej1nmW0nohmvPn+Yowwxat4ofc17Tr9j5QTtF0uPadS8tM1u9VHmRQ5zG2Uscpvymvz4Ru23qc9F8DkR7WKV+OPgjyQFvrRL7Hq87iOOL21X14mTB9KY+ZGpfxo6fTJeCnzj9E1+2h4d3zh9NOVaH0j6TIGvqc04PvqYpM+0DTpj1vvCj68pZn5iywQnoq3VHuUPoCkHX4qt7naIpnjqQ08b1G2L4QdmjyNHadeUgy9FOib+fnYaQ0+Rtqnr5HGimh\/b9Lq0GDJFmoc\/tdHrvn42fkO9HX58wHRkHcRBP389ZjYSUAvaorcZ+09Eba7ujI+NP1LQtj\/Uth3Pbv4MlqUWTkS7+SsZ0nbWf0T0D4ZMw8NegbmvgBPR3C+RT9Ar0P4KOBG1f439COUlmPcKOBHN+wr5\/LwCS1ABJ6IlWGQ\/RK\/AvFdgKYmId5qmtTDD+hoWn9Y8mvph7H6w\/H7xYX5rn0rapDZ6kw8\/qMew6yDPQMz0QZK8OtJ8Yqm9Vzrj1jGtsel3Wn3tRz8tIKLxysaC8U4TcryWi5nNsTYhPf6meN3H0ac+7BT0RxyZ+pt8xMkjhg7MxpcCP\/FRQX7a3nT8o\/YxizzGt7mkEv8sxlu0PpeOiKa9QPxRDepzWHxQ27bEqEF6wqHjs+Or2+ZHkkccfRjII78pDz\/xptisfYzL+E3j4CfeFFsmnxNRstr8QaSwED50pAEbYCOB6UiQ+lKdmAF\/HcTqPmzzI1MQc8ymAtS5qWfzI1M05Q7zQUaWk\/aFbn4kdgp8bcFSERGLaIuOxLaFRMeXAl+\/eBqzHCR+6wO7jjROHnY9p8lPnvmRKYjV+zCbWBNoPyjHYqNI+rf+kNj1duYnhl6Pz6vNXG+77bYd07NjMEmOAd+O5DEM2lo\/JvHRBdJ8JvERawOWiojGXTAW3Nqkuvma5LC8YfGmPof5BvVJrAnpH3FTfNiYHm+uALVsjuz0Uv8UO6PXWqP2e23LxfAsDRGx6CwJ0mA2koU2v0n884Z5mye1okZIg9lIAzHmDtDNv8jSjoXjMYx6PLQ1jNrGxjA5artFyFsaImIxbOFTid+Q+tFZcIvttUzHZx7YNgf0FMQtth8ynYvp+zGPWY3JMVmNkdg2FnoK4habpqTfdBz0afa\/330tFRH1KXblZqErpc\/LsHifZlN3z8s8xjkw5pyeOOj4rI+6bX4kecTRh4E88pvy8BNvik3qo89R2jJuv9x+\/mH9TtpuWL\/7FV8KImLR+GNoKjJ+iyNTELM26P1iljNtaWMirW\/0dB7o+Cxel8SbkLZpiuOr91W3yUn7SeP4iQP0NIaOjxg6MBtfCvzEDWks1S1Ofuo3Hb\/lIM1fl8SaQHtykRZHx5cCn8VTiT\/NMx2\/5aGb3yQ+4kjzIbHxtwVLQUTDFs3iyBT1RW6K4bO8VG\/yDYtbm1T2a4PfkOanusWbpOU1xcxnOUh8yBRNvnp8UE49hl1HU3\/1HOxhecPi9AHSvLreFMeXot4mtdM804mjIwF6CnyGuh87jZm+iHIpiGgRF8bn3K4K+NEMroAT0eD6VNH0\/zyVw1+8Al6BqVbAiWiq5fTOvAJegUkq4EQ0SdXmtA03MUeZGnkG8tGRDq\/AflXAiWgKlZ+HLiCTUS4hLS\/NRcc\/D8fhc1jOCjgRTbDunLT9QHeDYsRBUw7+Osir+8ax6+0hnXHae65XYC8q4EQ0QZU5mQ00Nx2JDdDrMFJA1mPY+GlrwG7yW9yk5Zlt0vxI85nER99mo+Mz26VXYC8r4ES0l9Wek7EgHIhnTqbj0xilAi3PcSLahwWGBCADkA6PP7VnoduYSDCLMbxPr8C4FXAiGrdiI+ZzkteREg06sJx6t\/iJ40dio48K8mlHPhLbdGwDPodXYL8r4EQ0oxWwEz2VTUNZ3IiiKcd9XoG2V8CJaB9W+BrSiXOAkMyfSnQQU2QSfRAsD2kgHx3p8ArMWwWciOZtRbbmAzHVsRW6RpBXJxl8dVzTMHHQnvzE5apXYM8q4ES0Z6XeHogTnhO\/DvzbWa55BZanAk5Eu1zrJvJo8tWHIacOy8Fveir7+ckhBrGZjqyDnLoPm3b9YsQdbajAfB+DE9F8r89Ys5uUTEZpVxTFWHPxZK\/AOBVwIhqnWkuaW5alVlZW1ERGV65c0eXLlytcunRJdfzsZz8TeOGFF0TukpbQD3tIBZyIhhTIw9Lq6mpVhrW1tYpMIJ6f\/OQn2tjY0Pnz5yvyMbI5duyYAKQDIKCf\/\/znIp9cgM7loKHq3F+WugJORK1Y\/tkdBLsgwAjIr3zlK9UOB\/uVr3ylXvva1+ro0aO69dZbdeLECXGZB972trdVsTSOfsMNN4jYU089JXD27NmRP5bAmI52VuAl7TwsP6ppVIBLMtsNWX8f\/\/jHK9KBVG666SYdOnSoCrG7gYAqI76g44tq9Tx48GCVe+edd1ZkBXFBZIoPCIldEruqaPpzCSvgRLSEiz7KIXNZ9dWvflWQEfkdXiIuXLigbtwBqduNlqpLNXIxuGRL7xHhg1zwc4mGbXjTm94kSIldFKQEUXEJx6VbPdfauGxvBZyI2ru2Ex0ZpAJ5fPOb39RHP\/rRqo8QX9cjOhE81+LN65L7Rb\/7u9U9IsgDP+0gEfoA+CAXdjuAe0r42CmxYzJASq95zWuqnRaERC59keuYmwrMdCJORDMt72J1DnlAApe\/8x09Gi\/BbPant5STWxKxFl8OfuMbuvWDH6zuBUWzIhJ2N1y2AXzcP3rjG99YxW688UZc+vrXv9670c1uqXLGF0iIdlyyQWAQHHOKIX+2vAJORC1f4FEPjxMeEiL\/V\/\/yL\/ryuXOoYhd0\/PBhXXzkEf37J56o3hFTfOQRRQRkdOhLX4ra4Cckc\/PNN1dJEBNkg8GlHJKdFBJw7wlCQ2dOaQyfo30VcCJq35qOfUSQELsPGkIAH\/riF1HFJdnnjxzR\/zlzRv\/3935PN73nPfpSQjrsisTj8cerG9BccmECdC690FPgI2Zkw3jEGR\/SQQcQFzEkficjqtJeOBG1d21HOjJO8PPnz4u31Tnx8zzvfXCR3dDXjj2mU6ferD\/7s9v04IOHtLYWFMLmRVoRR1hRptXiAcVm4gHJAAgH24DPdGLYgPtD2Ixtc0FaLpdqvDPnZGQVaad0Imrnuo50VOyEOMEhIW4W8w7ZWrwJbY1PROVM3A3x2aEzZ\/5HJJu8QlmyVwJSoTz+l8Ub22eqXRGkoobHMD9kAxnZDii9d+Rk1FDQlrmciFq2oKMejpEQJz4kRLs8bmvKskStwOepC+WS0OrYzpO6eu9775M9IB12O2bXJTFy6n7mAulw\/+jSpUvV10YsBz9khd98LttTASei9qzlWEdiJzQnOA3LsoyXXWuoE2BNL774pLikYicD6IS34PGhjwPuH0GOzNH6oj0+I1Bsx2JVYNBsnYgGVaelMU5uCIITm10Ih4nv6aef1rPPPquN06e1EZ0gU0f24G38TNwfIrKh09qOffGL79QnP\/nJ3vfOFB+8Bc+lH58f4mY0xNRvNxTTdzy5XLSdEXMlyFwhTmyAz9GOCjgRtWMdRz4KdhTsNDjRudShIb7rr79et99+u+644w6FLFPodBTEY\/MVrVRHufhENb4QL9jWJUFMUcTno48+qnvvvVc\/+MEPoqXed9AgD8bjk9T2dQ7GrJIGvLAzYo6QmREPNn3hG9DUQwtWASeiBVuw3U6XXQk7C3ZD9AUhQEypD7\/WI8lEMqr0gS8QEzukTpVVlmX1kyFGFPQLeUAqJLz97W+vvvTKu2XY7JCQ\/QCJ0Z55W47NnXmbz+ViV8CJaLHXb6zZQzpcghkp0JidBn47ufH1UJHRiZ75I7ETUsMjSIrEpe3dEf3yqeput9vL5wa14dvf\/nblP3v2bCUHvTBf+quTEcfC3Ae19dhiVMCJaDHWaSqz5ERmh8KlDR1yErOrYMcB8F2DEHquXA\/09GYF0tm5O1pbW9N1110ndkrsfgyQi\/Vhuyez65K5cb+Ie07MmTjHwLFwTNiOxa6AE9Fir9\/Is+cEZgfBCWyNOIk5mRt3Q5Y0toS42B2BzcbsZrh3ZLshJISE5NKLLG5mI\/sB4mKuzNly8HFMZrtc3Ao4ES3u2o01c8iAE9m+eAox4WO3MaijW2755144hLCtq9QNN5zRffddVry3rfhGW3Vb6eDBC9p8cM+I3dHm5drGxg\/V7UrxFtJmeOuVOUGEzGXYzggSTYkHm25SH7Zj8SowEhEt3mH5jOsV+MUvfiFOekCMEx8JCSCbwAl+882Xe6EQeqqCSn34ugd16tQl\/cVfXKrI6O67r+jWW+\/Rs89e1v13f18SDSL76Kp4xKu0+E6a1O3yO0ZHcFVgTnyqmjmByll7KYpC7IAgUOZlYcjo+eefN9PlglbAiWhBF26caXPycoLbboi2RkzoTaANl0EPPPCArl69WmGTWDazIaLjkQAgMu7dXLx4sfptIqLXX39J\/\/EL\/07PfOw\/K1Ou+gNCOn\/+6YqUIr9UYXZmkErTroj7SytbP97PMTD3qlF84f4TxMR8o+nPBa2AE9GCLtw4IwZvNQAAEABJREFU07aTlJOddtgQEzsM7CYQxz8o577Ll\/Xiiy9Wv2H94x\/\/WNxQpg3vlrHDueOzH9Fjf3tY3z18l06qq\/qDy7TILxUh5bkEqR28cEH8HlKau7rK10tUffIbsmJuHAM52Eh8SMdiVsCJaDHXbaxZc+nC5Q+goZ3ERkz46mDXQdza1ONvUCkev\/ybv9HrX\/96vepVr6reHcMHaAcOvetduv1\/\/3d1O2e1oaPqR0irq0cjIXX1X+95Sje85S3SgQOKDhWrqyq2tk3Ib33rW9XP06bEwzgco\/yxsBVwIlrYpRt94py0nKzWApJJbfObJB9wGWQ+ZFnyuhNnPvpRHT58WIcOHdKb3\/zm6hv4OzOiFYJu+9GPdPhvH1NXa7qWkA5IKlWWazF6Vke1rq5ORrvUap4rfbA7evjh1+qP\/\/igIkdVeOih1+jMmRvTNNcXrAJORAu2YJNMlx0QRGFtsQcREbsL4mkba2sy6EeV+rF3v7v654DsnwjivhJvzRtIQke++U\/+RPfceqsuHrooCOmqDkS64ZJtXduPQqVWxNdvV2J0m\/s64lGWZSSdz+rLXz6kPJfyXJX+5JNXCPdgY\/Ycu1Torwm77Nabb1XAiWirEG0WEM9LX\/rS3iGy2xlEMsQhol6DLSVywJaWiDyvdkF8Joh7RHyf7Hvf+17lsyxihv\/1T\/+kWyJe+MQnqnA3Us5VQTmZgjJtP9ZUCjpSfISIdYX4n6rHmo4d+2d1OpWxZy92DKmEnPZsAi0eaG+IqMUFnPdDg4SYY51YUmIiXscgoiI3qFTvkeeVCgnxlQ12RTg4YesnKjeXmcsv\/vRPpU6HtApd5dqIYG8UVH9s5pXi+\/+bsSNHPq3qGyibocppx1oZ\/rJQFXAiWqjl2v1kRzlZ2RHVRyrLuiexz57tGbzLxtvpwMZCpjhw4IBUllJR9NqZAq9ARmZvSohuJapEgeLl2Rk9+eST0TfZE4JMkfZifnzoSMdsK+BENNv6zm3v7EoGTW7YjulX8QZ1r31R9FR2PL\/+9a8jz5S9zxXx9Y0UP\/3pT6t4r1FNWd2yjxw5Ei\/Bjm1ZJ7bk9q7o05\/+tJ5\/\/oUt\/+gCcmG3lgIfPSDNbzp+gF0HucQcu6uAE9Hu6rdwrYcREAeUXpZ1u10dOHAgvpMedzEEt\/CGN1zd0qIoS8UkPX3+vK5EcnjZy14mSMS+R4bs4Ve\/0uv+\/u912xe+oKYHe59iK3Dw4Dv04x9\/I1qQz+NR8uTCbfNrI+fOndO5c1\/CKWk6AmIxskFPe8WuI427PnkFnIgmr91CtOxHPFwq9TsAYrxzRvxH8W13pAQBqPc4FEmgZ2wpR65c0cHPfKb6Rxe5cW2EdujiRR36x3\/UoQcf1KHf+i3d\/NBDevVXv7rValtEOpPdnsZblid04cJ\/Q42AfKCpXJ\/4xOGK6KIzPm3\/FNUpPCEhI5spdOddjFgBJ6IRC7Xoael9n37kZMdoBGJ2k9xxs7qWcPAbcRezsqJ7Xv96\/fCDH5SiXiHPa5k7zTzUe4VkrsWf\/\/mDkaDsy7X00eWl+i5dpezyBTIy7LIrbz5iBZyIRizUIqdBPHxfLD0G2\/GkPtPJ52az2XVZpwuLX4n3dEznRjSXauKLZWXZc\/eUSDo6GXc5nY5KBXWVaa0sNdljLZJQSkybvRiZpJIIO57Uh46PGEA3EMPnmG0FFoSIZluEtvfODofLLTvOum1+k3ajOt1FWawnQ9ClU6d6JsqV170O0RcQ1eX77tOVeI9IGxsqs666J07oqEqtKZKSNqQtBK3rpDKdVkdZOK0s2+jhvvue1f33\/+sO++67jyh9GJHUpeUM8kM+BvJoYxLdMf0KOBFNv6Zz2WO6w+Eb64NIhne+ICu+CtL3YE6f1nUf\/vCOcNN9I0XCunL\/\/frZX\/+1LvzDP+jFz39eF37zHep2y3gDfCVumOyuUIh9BfF6UnymaEXdUCg7eUKnNzKdPh0qfP7zR3Tq1PX6q786Utn4\/\/IvXx2J6UVN6wHpGKbVp\/czuAJORIPr04ooxMOB2K4IosFOyQk7Bd8z4+c9+HZ96ke3S7OqnxBw9QUE9JNHHtHlO+\/Uz3\/+Cj366E3xdlE3EtDR2KaI4BkJKBT61Keu6IknfqL\/8Ox7patXpbhrioxFQg92DObAhlTtGM3vcrEq4ES0WOs10WwrwogtU+JhxzPoPhFtyPn+9\/mBs9hYQTseZVmZLzz2WCV54dLrhWP2uR880uVXv1r08\/Wvv1bvec\/\/iwS0orK0XRA58QIsXnatr3f0kY88pyPxEuuGO+4g0Ag+tc09LPokARJKbXwTwpvtYwWciPax+Hs5NCduurthxwMxsaPoNw8+Jd0Uq3ZEjz9e\/RzHpd\/+bf3smWeq3cvBeOl16LrrtpuEoH\/7t1v1h3\/4S33oQ\/8pElB9F7Su9fVuvMSSDh9+QRBjvzHplLlCPJAkNuDyESJCdyxuBZyIFnftxpp5nXjsZObE7tcROXbj+pqcolC8yaMbPvc53fjcc1JRKF5zSUVRpZYKWo23mo8eLaOLt+C3d0EhnIzksxGvvDrqdLRJaJcuVTsnxlSfB3OFdIysjJg4tj5N3L0gFXAiWpCF2u007QTnZLa+8PHPCZndJDnx6\/43qBQPfk3xpkcf1cF3vlPVDwOVpSCgrk7qqDaUl5FloiZtklMIQSdPrkcC6irLVD0gE34elnH49HXlbHghj8uyQ4cO9aIcC+04jp7TlYWswLIQ0UIuzrQnzQmbEg8\/zcqJzQneb6z19fXq52BDWO+XUvlTAlpTV9uPeNM5GidPnowEtKFutxOtzSfkcuHC5ud\/mMumt\/mVSzAi6W6IeTN\/\/I7FroAT0WKv31izt5OYe0PWkBOZd8fYXZgPmeeqNjn8CuKHPvQNlSXeTZztdMVlF+jqpMCK1rWTgKS4AYo7IEUCuqputyt7QECQCF+EffnLXy52QuxsLF6X5DNHiNTybL5+WVav1mLaTkSLuW4TzZqTmJM53RVBTpARxJB2yi975LmU52UEP8FR9MJFIeXKBCAfwI5IySPLFG9ES92uBCERglAgQS7FkHwfbRQSYr7MnblaP\/iYN8DnWOwKOBEt9vqNPXu7BOJEtsb42GFAEObbltxoxlrjpcKRIzt\/lrVybr1AOvFqLt6MltCNfBiP\/pGQCgRkxLLVtFFwSUYfzNESIE36GKW9tdkL6WNMXgEnoslrt7AtOanZkUA+HAQnNcSAzUmObxNx6yOg+EAC6cKFg9HmyfUauyUJcjp16pL+7u\/+Vb\/xG+er3yLa2NiIl2Ubgnzom90Y4wDGpIdBYC7Mk3a286EffJDQKH0M6t9j81MBJ6L5WYs9m4md2BCEDcqJDkFxL4YTXYJkbDekrYfZxOI1l45GP+R0IBKO9JGP3Fjd76F\/QH\/8+2b275xBHowTGw19QkLMhX5oRwN2RsyZPvDjc7SjAk5E7VjHsY+CXQmNuFxCAk5uyIOT\/fnnvxZdEI7U6XSizhMbMgKbl2oh8Jb8SbE7MYKAOAD94aPlqIBsnnvuOUFCzIV+aIufeaHjRzraUwEnohHXso1pkBGXOnUy+uUvf6kvf\/nB6pAhGt7Cv\/vuuyub29QSuyDFR4j3gU6r2+1GffdPyIZ7QnwCnBvZEBm9mh8JCUF6+B3tqYATUXvWcuwj4YTm0qlORp\/73Od6fd1yy2O6ePGibrnllp4vxF2QdDLaG5GIOlHu\/snlIISI5C35dCcEOeGHhMbdYe1+Zt7DXlTAiWgvqjzHY0BG6c6oLEvleb41447OnXuX\/uAPnqv+1Ywtp8gJYToExC4HAuKyC5JhLulOiHtFkBDERFz+aGUFnIhauazjHRQnOATAzuh973vfVuMQ5emIA\/rWt94SJTa7oKjGZ7njG\/TRMcYT8oFcICA+1IjN+Ox4IEa6wkecOeE3ciLWWizxgTkRLfHip4cOGT311FNxB3Such87dkz3339E9933P6O8X1l2OqKru+\/+VBXnPtGxY\/9Fd955WZDFlrNRQCoA8mHnA\/kg8UEyXB4yPo3xsQsiBxuCshi2o50VcCJq57qOfVRcbn3mM5\/ptXv3u9+qO+74rH7nd76jd7zjHTpxoozI9Ud\/9JvxvhC7I0XSelC\/\/\/uXxM6FzwxBHgAb8D0ybAMEA9FwIxryAelOhxgEBWEZQdkOqTcxV1pZASeiVi7r+AfFfSHIyFo+\/PDDMqyuripFmvf4448LQoE4IBUAeQC+R4ZNjJ0NeUju9xC3sYyAICx08mlncZftr4AT0V6t8RyPA7Gs8a9tTDBH2rHzgTggGACRGLCJ1S+vIBx2PuycICAu72ynVM+dYFreZMEq4ES0YAs2q+lyaTUMzzzzjJ5++ukesL\/73e\/2LtUGzQ3igWyMfBiLSzXaQFrsliAtbMfyVcCJaB\/XnH+yZh+H7w0dQtC9995bEQp6P7z1rW\/VXXfdFe8d3aHbb79dr3jFK8TlF6TCrgaww2GHhDRYHJvPBHFZxiUa5INkx9SbjCtLWQEnon1adkiIf7Jm3OFpN26bUfKZyyh9QyLsXNjF2HfIjEwgFOLXX3999ZUPdEAuIA+gkzvKvDxnnAosbq4TUcPaDTshLW7SuhhmW96kkv4hjEnbN7Wjzyb\/qD6Ihns6kBOAZEyiA0gHkDdqv563XBVwIuqz3v1O0H7+Pt00uulj2oTSONCYTubE3MZs5ulegV1XwIlo1yXcmw4gCIhib0bzUbwCe1sBJ6I+9eak5+RPw9j4zYeODxuZ2vjGAe0BbUyib2OnZjlIYFF0YDYSOwU+h1dgnirgRDSj1eDEh5hG6d5yyTc9bdfkI25+a1e36znkAfKIObwC81IBJ6I5WAkjBwgCfdQp1XPr9qj9eJ5XYL8r4EQ0YAU4sSEHUpDY6NOG9d3Uv8WmPab35xVoqMC+uZyIdll6yCMli7rd1L3lpDH6MKT+vdQZn7nt5Zg+lleACjgRUYUB4MTcixOUcQyMx5SQ+NAnBe3pJwW+Sfvzdl6BWVTAiaihqvUTdbd2wxCiT8iBmOnYANv8yCZYjsUG2cRSWBskfmQ6LrbDK7CXFXAi2stq18YyEsCNbsCeAQZ2ydgDEzzoFZhhBZyIZlhc79or4BUYrQJORKPVybO8Al6BGVbAiWiGxfWuvQLLVoFJj9eJaNLKeTuvgFdgahVoLRHx41yOC1qWGkztjPCO9qUCrSQiTr6HHnpI99xzj2NJavD+97+\/It19OYt80F1XoLVEdO7cOZ06dUpPPPHE3uGRR\/QE2Msx93CsPa3lGMf1sY99TKz3rs8G72DfKtBKIrJq8o8EHj9+XDPF4cM6\/rWv6fjDD+v4+963ibvu0vH4f+jKP+vxvX+xzrbmLhezAq0mopkvSVlK\/DM8oCh2DleWm7GVlZ1+t7wCXoFrKuBEdE1JRnSUpbS6KuX54AZFIe0hGfFVjcETao72a9fP39yLe70Ck1WgR\/xIkyIAAAfxSURBVESTNV\/iVkUhFcV2AUKQTp+W1tc3ZQjbsaKQ8nzbnkOt31c8+vnn8BB8SgtcgeUioqKQikIqCqkopKKQikIqCqkopKKQikIqCqkopKKQikIqCqkopKKQikIqCunxx3cuOyQUwqYvhGvJiPyikIpCKgqpKKSikIpCKgqpKKSikIpCKgqpKKSikIpCKgqpKKSikIpic4yGV3YvEAcyDWMb8JuOxAamD5LEAPkOr8A0K7BcRMQl0rRQFDvXoanfstzOKQpVl2hNeeP6ynK73yEaxAE5GSzdbOLmM4mPuNkm8QHi5nPpFZhGBZaLiKZRsTntw8ihLo04zD\/K9GkzSt7YOd7AK9CnAk5EfQqziG4IxJDO33zjkFHa3nWvwKwrsFxEtLEhTQshbK9NCNf2y03rTmdwzqRzCWG736hBMJBNVHtPbPwp8FmC+VOfxVx6Bfa6AstFRCFIIUghSCFIIUghSCFIIUghSCFIIUghSCFIIUghSCFIIUghSCFIJ09ur1VZqrr\/k+dSWUpFsfnWflFs55AfghSCFIIUghSCFIIUghSCFIIUghSCFIIUghSCFIIUghSCFMJ2n1taPzLBn2IrvRLmr4z4gh1F9cuRSEOT33yW49IrsNsKTI+IdjuTRWufZVKnsz3rslT14UZuPPP5orLcjoUgZdm27ZpXwCuwowJORDvKMaZRv\/xqah7C5meLmmL75PMdzT4V3oftWwEnor6lGTEAGdllV9okhM3LN+4DhZBGXPcKeAVqFXAiqhVkIrPb3Xmz+urVTbvbnag7b9SvAu5vawWciHaxsnmu6utm3BKqsBa0ClZ3+vN8F4N4U6\/AElTAiWgXi3z2rJTnUp5LeS7luZTnUp5LeS7luZTnEnm7GGZoU3srPpXWKPWZTsz0VOJPQWyQTSzNQU9B3IDf9LokliKN409t19tZASeiKaxrCFKnI3U6UqcjdTpSpzOFjsfoghvQKdITOPWj0y0S1HXsfiA\/7RcdH\/mmYxvwERsEcizfJL5BbTzWvgrMERHNvrjV5VPtsmk3vqLYnHNZSiFIIUghSCFIIUghbMaLYuel2m7GpG1ZbvY7y1fIAGJApuOYDz96GnPdKzBpBZaKiPJcynMpz6U8l\/JcynMpz6U8l\/JcynMpz6U8l\/JcynMpz6U8l\/JcynMpz6U8l8pyu+x5LuW5lOdSnkt5LpXlZrwspTyX8lzKcynPpTyX8lzKcynPpTyX8lzKcynPpTyX8lzKcynPpTyX8lzK880+668QQ4qUJFI\/er2t216B\/a7AUhHRfhd7luNDPClSwkn96MPmYW3rclg7j3sFJq3AUhFRlklZJmWZlGVSlklZJmWZlGVSlklZJmWZlGVSlklZJmWZlGVSlklZJmWZlGVSCJtlD0HKMinLpCyTskzKss0YryFIWSZlmZRlUpZJWSZlmZRlUpZJWSZlmZRlUpZJWSZlmZRlUpZJWSZlmZRl9Dh7QFiGdDTIyfzoaWwBdJ\/inFZgqYiI3y6bJjqdzVUNYfN30Op9dzqb8U6nOV7PH9UOYbPf9BVSSAFZWDz1o5u\/SRJP25KDjR+g4wPo+FId20CcmMH8JvGTY7ZJfMQM5jdpfpftqcBSEdGslq0oVH3nla+ZrawUPb0sZzXizn45ceuwjLof22LIYTY5gDyAniL1oaeo56UxdIujpzA\/MvWbjt\/Rrgo4EU1pPYtCKooyYiWiiJDKckqdezdegZZXoE1EtOdLdeKElGVSlklZxvCrvESsVXaWSVkmkRed\/vQKeAX6VMCJqE9hRnFn2fa9nwceKGITEIUKYds9nyyTP7wCXoEBFXAiGlCcUUNlWWqVTxomDep2EnLVK+AVqFXAiahWkEnMoiji\/aCyatrpdCoJOXW73Ur3l\/ZUwI9kNhVwItplXSEc2\/2EELS+vi4jo7W1tR5B7XKYoc3trW2TQxs0JNC2we0ur8DMK+BEtMsSQzbWxWluCkXjJD+UFiXPNI49C0Ag9ta2SXyzGMv79ArMogJLRUQrKysaFaMUm77yPO+lQjr4kOYkjs\/sQZK8UcAubFA\/xCAkJICUDNiGJp\/FXHoF9rICS0VERVGoGIA0NsoikJ\/mYRvq\/tTup1vbYbJfe\/xGLkizISVDk9985Du8AvtRgaUiok6nU92\/6Ywghy0GOx3L4d5QU5\/4LSfNN19dNvXR5Ku3S20jnNTXpJMHAYGmuPu8AntZgaUiIm4kj4pBi8ClUXr5xT2hBx54QHXgNzKyG9qD+h11btbnoL6GxSAgyAgMy\/W4V2DWFVgqIppWMdndQEbWHyTTD2let9u1JlOVkAnEksIGqMewiSEtH9uxRxXwYRor4ETUWJb+Togl3Q31z7w2QjvaXxvZvQdiqcN6Tf3mQ9b92PgdXoG9roAT0QQV39jY0KSYxmXVBFP2Jl6Bua6AE9GYywOR7AZjDufpXoGlqECriejChQvaU\/h4+1LvpThTW36QrSSiI0eO6NixY\/rABz6ge+65x9HyGrDOrDfr3vLztbWH11oiOnXqlJ544gnHktSA9W7tWboEB9ZKImLd+L\/j8ePH5ViOGrDerHv70c4jbC0RtXO5\/Ki8Au2sgBNRO9fVj8orsFAVcCJaqOXyyXoF2lkBJ6K5WlefjFdgOSvgRLSc6+5H7RWYqwo4Ec3VcvhkvALLWQEnouVcdz\/q5a3AXB65E9FcLotPyiuwXBX4\/wAAAP\/\/JHOeRQAAAAZJREFUAwDUGPGmP3NhSQAAAABJRU5ErkJggg==","height":259,"width":431}}
+%---
+%[output:411f81fd]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  --- A10 | Section 5: Pareto Front -- LogP vs TPSA Trade-off  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:522dccc9]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  Empirical Pareto front: 7 non-dominated molecules.\n","truncated":false}}
+%---
+%[output:79addf7c]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACtCAYAAAAUL3IPAAAQAElEQVR4AeydC5QcV3nn\/zMaSWNZsiXLEpYt45aD7YTYsXhZIiFibDCQc8genzWQRWw24xMCZ3MS7LAhJHhBoySQh0+c9slueOwBjc3JkM0Gx9kkh7DEq\/GSBByWYCCQGIjUYNmWnxKyrLdm8v165hvdKVV1V3V3VXfPVLv+\/T3vd+\/9qu6nW1Uz48Hp8lNmoMxAmYEuZ2BQ5afMQJmBMgNdzkBZiLp8AsruywyUGZDKQlReBblnoOygzECzDJSFqFmGSnuZgTIDuWegLES5p7jsoMxAmYFmGSgLUbMMlfYyA2UGcs9A24Uo9xGWHZQZKDOw4DNQFqIFf4rLCZYZ6P0MlIWo98\/Rgh3h5ZdfvmDntpAmVsR5KgvRQrpi+mguXNx79uxJN+LSq6sZ4DxxvvIcRMNCROdxyHNAcf25zvt1OUrdDo3akNHHoZEtzh8dbeKArRcRN1bX9eJ42x0Tc\/MYIe+6xUZ7PQcNCxEni2oYRZ6TCvuK9o\/sCP2c93FBXRdS9N7eKTp8oK5LS2kXRStx0vTXibjRsbqcpv8sPs3Gip2+s8RczL7kq6j5J\/XF+UqydWJsTQtRJzopY5QZKDoDLJyi++zl\/no9H3OFiGoXRdbE0j6ujeuhIeq+BX5lPRmMtZ3h0T5EGAs9MhSEPDJAB5yHAnQAPgS6VkEc2kJByCMDdA6XoQ5s8E6dR24GfEOE\/uiRoQ5k4LJTdAAZGgX6EKEdPTLUgZwE93Hqfi47dT0UnVN4gAzgQ7jOKTZ44DwUuA7egc6BLsqjc2CDd+o8chGoFyI6ZZE66BgemgW0IVbYBtn10BDYQt9O8fRBbEdSXOz4YociwzvQOZ+VEov2IdCFcZDdHvKhDn9kp8438sc3DrSJIvTDRnwQ8sgAXZK\/26H4QAF8MxAX3xDownbIUXtUhx1d2C7kseETAl0jn6jdfdGHceDRAfgQ6LwdFDlqj+qwu442yADe4Xb0IY8M0LlvlGLDx+Eyfq6DLwr1QtSoMwYYBQNt1CatrZ040TEhh\/HgHdhA2nGl9SNmFPRJe6fwSUjjk9S2FT39RRHGwRbKzfis\/s3iNbKn7SutX1Jf7bRP27ZTfmGckE+aW6jP6h+2zYNvWogYcBStDIQY0UXbShxvQ7wo3Bal7kf\/bnMe6sAGD00DjxvSsB2xQoS2OD70hY\/zWag65hsizTzJe9gGPr5d72s7MRfmH6L3Z31mhPVCFE0C8hmXbBxtSQatoMjwAD4EdvSdRtq44Vic79RYGIPHdNostvuFtFmbhWIP5+x8mrm5r1PynqZdHj7t9u1zcJolHr7ezmkec8wrZr0QRSeRR2f0kUfcfonZyvxbadMP+WChNJtb1B6VmWecDn0\/otNzySMe5y2v3NYLEcEZeAh0rYIBEwvqMeDRhUDn9k5S4ob9OI+efpCdRw6BHjs6p\/BZ4XGIAZAbxcCOXwh03gbebehC2fXosLWDg9Z40nDnnj3a8Na3qrJ5s7LGZxzexkI1PUJ\/b4cubIjsNigygA+BLmwX8thCX3h0oU9anna0D4EOhDp4dM3i4oNvCHS0g7oeOQ6hD77IcX7NdLSjPWjm20n7IB3SeRSub7Uz4kXbogsRtUdlfKM65Pl6NGcDnyjcC73zcdTtThv5xNlcR3sHOngoCHlkgC4EuhBuc53LTl0fR\/GJ07sO+0MmVA0UIvh3fupTGn3oIf1fK0rYzTR3RGUMoQ4eoI8DNq4xtyGHcH1I4+yhDt79G\/HYHO4PRQcNEadzO7YQzfTY8YeGcB00RNQHm+tCPtShB+icNuKxgahvKHOeQhn\/TmOQDugoCvSd7qyM17sZYCd0X8Lwxk2P3UhHj\/Ia62g6cwtWxHmq35rRURS5zaoM3JMZeKjJqJrZmzRvy8y12VaAghvv27dPraLgofZMd\/VC1DOjyTAQTvRdd91VP+EZmp3leurUKR04cEDQs4wLVMFco3NutuNpZu\/lVMXNN+N4U7tzXb7nPe\/Rtm3bWsJb7bkcMVJ3uEAc+74QtXseuEgPHjzYbpi+ah8359VNZtDM3qR5V81x881rQBSRBx98UL\/79B2a2D+RCe86eKtom9fYejlu3xaiXk5qP45tc4NBU4QqDeyl6ewMXHdii15xYmsmXHd8y9mBFommLESL5EQ3mybFZjTGCT1FqixEMclpoJoakKZsdWXBtPk3CLmgTblPPfo2LppNt0f1yI1s2DuEMsxsBig2txk\/YqD4QClOUFOVR4YMZClAc75WvDJ0saBccy1EFBLeeIRA5xmEdxu866HISTbsJfLJADsgCs9NFh6KbGx5ZMzA6SVSVkxZm2bdsC4ccb6NbHH+vaLLtRA1miQJo9C4Dzw6ZCgyPIBHB1+izEA\/ZIDbrLmdjq2yVHyTHRFrgLXgQA5zgZxkC\/3ieNo64ux56yxF+XVBUjoZnTcSDo\/rcqt0\/\/79Aq2278d2zBf049hbGTNzBY3a8matGfyaS0Ojz4jSFCKKV5rYnfahALFWHcid7qNZvFwLkXfOxBxM1vVpKRcQvuHPZmzfvh2VoKE+K3\/DDTfobW97m6BZ2\/arP3NdTHNOM983v\/nN+tKXvqRHHnkkEfzsVf2iS\/GVpvBEfb609MEUkZNdWFtZ1xn+tAujIqMPdXnzhRQiJuZoZYJeiO644w5NTEyUKHPQ0Wvg1ltv1Ve\/+lWtW7dOGzZsSMSqVatSr8dokUkjX6SNqePHObK22llncTGL0uVaiEhMJyeyZcsWbd26tUSZg45eA1xXXKfDw8NqhKGhIdxSgdusNMUn9Llo+pJUsReiU66FqFHCqNxhoYJHRxsoMjzg9gvaqyjHVWYgmoHTtrIyvzWzNtE4oezrgrUBkN3uMhSENvdJovhHkeSbl77J1NvrlmREJ4jOo8K7Hd71UGS3cTuGrkjwSx\/8oqf\/SYwi++61vjgPvTamVsZT5DzCnU5anl1Us3mxLhyhLzpkKIBPA3yTkKZ9p3xyLUQMMjpJdCHcHuqcb2RznzwoxYe\/y8OfxYCHjllH8EZyP5IWjOud5j4Q64C+OA\/GZjpol6lBh5zpN0QYlnlgC3V58RSVtAVozq\/J6\/u8xtoLcXMvRL0wySxjoNiAuDboQZytCB0LqYh+vA8WbdF9et\/tUMbsYA5hLPRRXWjvFN\/x1\/edGliPxikLUXBiuB1rVmiw4xc0K4wNFxA88M6dd4oeHsAD56MUG3A9fBywO0K766Ch3nn0jlDXiMff7U7RReG2JFpU4Yn2P7fLsRWWhY\/GKUomr0X1FdePpSlOvTh1aQtMrQfSwwID4QUEj47hOY8Mjw7Ao4OHIsNDkeHj4HZ8ADJ+UGQHMnoHstugyG5LovjgG7WjiyLq0ytyluLjvtNdvDUjr+TdUXQey0IUZDxtgUlbsILQhbBcTN4RfNxFhd592qGdihM3hqTYPp+QxrXvBR2\/N5b1rRlv2ro5dvLuKDrHZSEKznzaX\/BM6xeEbszmYOVC8osqh\/D1\/7NHHnEbxfT5hLSRPzbPA3yR6MdnROTK4TkuKmdlIQoyvTngk1iKUBq\/pPZp9X5BOI22cz0XTNSGjN59kJPgftCoDzpioHceGSA30mMD+OHvQI7qkTsJ7wvq\/Xn8OJ3bOkn9disT7eKtmeeFfAHPRci7Lg9aFqJIVvnTFxHVPLGIIsTJj4JBoHMKD5BByCMDdA6XoVlAey5S2sA7kB2ug4a6kMcGXAdFdiADZGiroH2IMA7zwBbq8uIzFSBbhfjzyj+v8TSLW1ReksZhKUgyLU49hQhEZ89OCD2I2vpZZnE2G3+3L9Jm40trL3IeFBWKSybkuiNqnKXodRCVG7du31oWopgcUmz4S4X+x8GgyOhj3PtaxeIEfT2JHhx8vzwjouAAUgh1FH1NlIWIMxADdkCrazVpclIHDTEuparMQGIGMu2EbBXW\/buwI6LgACYCdSAXCUtBkd31R19jY2MaGBjQpk2bdP3119cBj74\/ZlCOstsZaOX1PcWoW+OmAHWrb\/otCxFZCECx2blzZ6CZYWu1mtDfcsstM4qe+i4H02sZ6KdbM3Lnt2QhRV8UykIUZHp8fLxebALVWSw+4CxDBxXhxeB8p8ITr5VYtAOttA3bdCJGGK9XeXY3mTFQ\/Gx8JwSNosjRlIUoyDY7nkBMZIvYFUUvim4uYPr28SQmpTTMy0DmImQrkTdt84IUIHBuk1BA93Nd2PTn+L5jeG7TSXD7lTYJ3eqX8fmFAw+QQ+q865GBy05dhwyQo3A9FGB36jwyQAbwDmQHOnin8AsVFJXMxahLOyL\/RyZKI+cmV7GvCxGFo5PIkum8+2WxhuAiYXzo4AE8OgCPLuSR0aMDyCHFhs6BjD0ENmSn+ER5ZIANX4AMojq3QRcyymdE2c5uw0LERZSEbN2U3lkzwCIO4e3R+TlxHRQ91BHn47Z2aLSfdmIt5LaZf+F1idSNX3r18wmNosjzE1uI\/CKODiyU3afIwUb72rFjhzqJSqUS7UJnayT88u5XCR\/y7uchwaWudh9oXVF+FZqBzLdlthK5nSt0kJHOuLYcEVPuok1\/fh8MhIsXzLfMl7AD\/OdbipN41d5JUFyio98RVZiMXyf7tZCpD895o7yHPlE\/t9Gh85dffnn9t+mR0acF\/sR3IDdriw\/+zfz63U5RyVyMUjwjIneOuBy5DRpnT9Lhz7lxICf55qE\/qxAxkCwdZfXPErto39HRUY0avF92Q6MmQI3UD4pQ6FNXdvirWU6xO+gaHhoCnSPUw6OHAngHchywo3cK70DnCHVxfCOd2xYKzeMZEcXBcw1FDvOFjN4R2nqdP6sQ9fqA8x7frl276rd79PMzfBlGDJVKpa5nJ2RieZQZaJiBzLshW4kUr4ZBUxgpRiCFa90FX4AAdSAXCZv+\/O58IFC3hLzrFjKl2ExPT2tsZKQ+zR2Vivbu3Sv0dUX5VWagSQZaKUTczjUJ29Tsu6G0a9b942jTzjI6NHKfV4gYfDgg5EaNF7StVpMmJ+tTrNRqUq1W58uvMgNpMkAhyvrm7OGjD6YJnZsP6z1Ebh3FBJ5XiKJ2ihIDi+oXhTw+Pn+ak5Pz5VIqM9AgAxSirFizfGODiPmaWOesd3pxCl8U5hUiBsCAgA8AHXB50dAHHpg\/1ag839pRKcx\/GDhJH\/pE+aQ2Sfpo+1blvOO3Oq6i2mUtQvivWX5Jw+GxDsmrA9kboEOGAni39QOdV4gYMBMA8Asa4+PSpk3JmJycP\/3x8WTf66+Xxsfn+y8yqZzu\/AzwvIfikgkpXt+zNh1hj+iQoQA+C2jjBcxplvbt+p5ViLIEZMBZ\/HvKd3RU2r17Zki1mlSrSbWaVKtJtdqMPvpdq0m1mlSrSbWaVKvNeNibNo2OzvA5fJNnEIZGBqEOHh2AT4LbneIHD+CB8yGFd+ADorLrQgq\/2MAbsExFyFYixaubeaIY0b9T+KJg08\/WlV940LQDxtcR7S1JtKHsuwAAEABJREFUj18jG\/a2YW\/D7HWYNDraWqgdO1RvT5zWIjRtRQ7IM3DnUAffTO92px7LKTHgAbz7waNz2anr3I4MH7Wjd91io1mLUN0\/xY4orzyG5y+vPhrFTV2IGCggGBcYgG8G2uDrQPY28HF67KFt+\/btqPIDOxrfHaXphcJDERobS+Odiw\/5AWFwcokOhPpmfFI79GFbZBDq6AuEuoXAH7RJcHN+3yxFNjb1kfWNGf78VcfUHXTYkfPazfPYsBAxMAAYKMgyf28X1yZqIzY6fKHI8GBiYgKSL0ZGZnY3IyON+6EIUbTGxhr75WwlPw7vyvOG3nVpaNp2+IEwJn05Qn0\/8w\/Z4KsGChE8FHn2RtwszQ9us+q7HFthqWkP7Ig4v47ms+ych6UpPhiD8QsMGu+1wLQUmWZTGhmR0vg1i5PSTu45F8CbhLokvfsmUY+B3fkwFvoo8APu5zwyCP3dFup6nT916pSenZrSvYapGPA6Iu3OqN+eEXG+oijyfCUWIgbFxeVoZVDECNsRK6oL7V3nazVpcrLxMMbHpVqtsU+b1miOkB0e2mWo66DIDpehccDP9fAOdPBQBzLnD8CHemTgOqdxOrf1In388cf12See0KFDh2Jx7NgxsUNSik\/qXZCtwDnfLuyIOJ9MBxoF+qJgaUjuigvJ4YNM9m5soT2xGnt12To5mW4Ak5Pp\/BaYF+cP5DKtHgi6bt06LVm7VitXrozFsmXLlHpHZCtrrsCk5LmdU8EfP5\/QKIociqUoXXc+SLwpKgA+DfClfRrfrvrcffeZ7rn94oH09LQEPWORCvzhxrDbks83A8PDw1pvxWZoaEhxGBwc1Gql+1BUshYibufSRe+8F2vUo4a86\/KmqQuRD4SC4kgzYHzw9\/ZO0WFzGR4dMhQZHuT+1oxOajVpchJOogiFD6THxmYeZKPHY3yc7xILMAObG8xptdkqhjQHf22RN2FZQOFKEztPH9ZddP3l2Z\/HzlyIvCGUAUOTwKSwQUOgA7R3PTw6B7LbCnlrVqvNdM3uZ+9eqVKZkf27UpkpRtjRjY\/zXWKBZWC1zWfUED3QU6TsKoiaYmWKSlawi4oNtgiUZxUiFn+WeTfyp5jUsWePQhrGd32oc76RzX06QsfGpFtumQnFbRe\/spEE7JWKtHOnNDY206b8XlAZsLOr2ySNSNqsGUpxQjYx1UFRyVqIunlrxlpjLUNTTbDDTmcVIgbCgECjvrAD\/Bv59YVtdFSq1WaGOjkpTU5Kk5PS5KQ0OSlNTkqTk9LkpDQ5KdVqM74jIzM0x29y3Er4pHZJ+lb6WMht2AFxdm+ySUKRjU19UFSyFiKKV+oOcnAM13LI59DVWSHPKkR4MAjARZsE7AD\/vkelIo2OZpvGyIg0MpKtTYHeSecmSV\/g0BZFV1mLUN2\/C6\/ve+VkxBYiHxwXbRLcZ8FQfs0j7WQqFSmLf9q4ET\/+ESD\/0NCE7EDvPBQZON+IYgP49z96awb1wmKrKwvt9o6IawGQSafwRcBSVUQ3fdJH2uLiD6y7MC0uEIqTw4fgMnbXOUWH3WWn6AB215W0Mxng98ayvDGr+3ZxNXINcC10ZvbZo3Rx6tkHm3uL0VFpZKRxN5WKNDra2KcDVi4MwkQpFws6gD0NaJPGr\/TpXAb68RlR52afPVJZiKI5a7bbSbtrisZtQaaAOMLmrstSjML2JZ9\/BrLcks35dvEZEdeUX09Q5PyzdKaHtgoRAz4TKk+uwNgjI9LISHyHIyPSyEi8rYNa8hq9EJDRh0Dn3bo+1LmtpMVnYK642ApLy3f7GRHXjqPojFmasnXpFzyUQWdr3SfecbueSqWQB9RkKCmv6EPg63B9KMOjhzpcdoo+5JFLtJ8BikraAjTn18UdEevZ0f7ss0dIXYjCQXLhguzd9UmLSuXs3y8bGZEqlT6ZQDnMbmegn54RsbZZzw7kovPXsBAxIIcPsugBdq2\/sTGpUpnpvlIpbDc002G2b85Nthald0wGOqqqvwVbImWh7IyaDcLXI7SRbzO7t8Uvev0go3efImhiIWIgDMhRxGB6rg9\/cO205wZYDqhXM5DHrVl0TSLHzT9JH+fbK7rEQkQBYkKOXhlwoeMYHZVGR6XR0UK7LTvr\/wx069aM9cra7bcMJhYiJsKEHEwQoF9UiHtwnXMCkvKcpGc4jWzY04I4UdA2qkNG70B2uC5KsUd1STK+IGpH54jaeknmNisz2nxYTV5Yr1nzQLsossZo179hIQqDM0GAzgcN3yfoq2GSZ3IcDhoZfajLg6cPQGwogAfwIRgTemicHlsrCOPBewz4TvbjcfOgmYuQrcQn9j\/Y9lDIESCQU\/gkhPmM8klt8tDb9LOFDQebZqLZopfeaTJA3kHUFx0I9cggqkOO6tF1Alwj0Tj0hR7qNvgo3NbvtJVnRCvO29jWtMmvg0Dw0H5A5kIUTqrbE\/1Zpf8vHHcSnz7azyaFmKdPG+9JPTmvHQK5ZZHCQ5FDHhk9Ogc64HooMoB3Pygyevi0oE0Ibw8N9Wnj0S4K2qLzeMj9iFb+QuPw6ksaTjXMC\/lB9gbIzvcjbViImBwIJ4bsCPXd4FnAaZFmfGlj4dfJeGlihT5Z8p\/kG17EYexGPG1ChL6hnj5Dm8txFF0Ib+fxXO4HGo6xlVszHnCHMeJ4zws0tDeTQ99e5BMLERcHkwM+8FCHHtlt3aCvUfr\/0owvfbTXpAmXenSpggVO5N4RqGNZ94PGOnRAmeY6oH+Hd+lySLGliYdfL6OVQsTtXNFzItdJKHIsiYWoyEG02tdtSv+fUnzSR7stRTQpbbz1Wq+4DwuUiwTqdnh0DtdDXYcPMtR1UHR5INoPsvdDv6GMHhk9fBzcjg+8+8CjcyC7rdcoRSVzMWrzrVkrOSCHgLZQB3KRSF2IOPkMssjBlX2p\/re+o3ngPDjc5jLUdVBkBzJAhjZC1CcqR9tid4Q2dKHsfJI+tMf5oHO4by9SbrOyFiKKVy\/OpYgxpS5ERQyml\/sox7bwM7BJmzo2yaxFqO7fhR2RT5jizmbDgey2ImhZiIrIctlHX2Rgr\/ZqwP7rxGBb+QuNFKNO9N1qDIqPo9UYrbZLLEQMyKsjFNk7QQahzm0lLTPQzxmY1rSVooG2p1DemmVLYWIhIgyFxoHsiNO5raRlBsoMSOxuMqP9+tdW6tlchGgrWMbGDQtROCj4jLFL9zIDfZuBgzbyScN9BiiysamPzEXIVmI3H1azvn2D4TT1ZDvgaNOPjxI3MHTx3qW20xkg1yE8PjrnnYY6eIfbo9TtIcUnlJ1H73Ad1HVR2sgW54s\/CG3IjlBfJF+1zihAD81S5Nn\/raZpmh8UlczFqMs7ouazys8jsRDl12UZuVkGWIT+r5JTdN4u5F0HRe\/+UGT0UWAD6KEAHsCH8BjQOD1tWkE0nseI6pHdVgRttPMZtwE0spt57ujHZ0TkOsTcZApgCitETDBuPuhBVhv+998vpQX+zZA2Fn7NYmHHbw4NxopvFlAQknIWxsEvlDvJx8VmTOih3hd8FFGby71A2QE1Gkczu7fNvBuylUjx8vZFU85bFEWOwaafb3d+Ecb1gs0nDx\/6ILtt+\/btoWmOr1alalWqVqVqVapWpWpVqlalalWqVqVqVapW55o0ZKpVqVqVqlWpWpWqValalapVqVqVqlWpWpWq1YZh5ozVqlStStWqVK1K1apUrUrVqlStStWqVK1KT579O69zMZwhF84nUXzImyPJr5He2zolJv5Q10HRpQHtovB2rs8Sz9vmRa+3d2Y77M2ZEj5pd0RZ\/kSs+\/LKP6HbBa\/OvRD5xRbNJBcfNtfDo0OGIsODiYkJyKIGOQkTQH6iOuzoHXF2fBrB2zoNfV0HjcZ2OY6iCxHG7CWeH2jc3aAIMdbVfKVAvz0jCs+P8ymm2TGXhoXIB+SUXp13iq5b+PjHpbRIM8a0sfDrZLz18b9q1rSLaEHgnDRt1KJDmtiMx+HduBxSt\/Ua\/fapb+vqU6c0NTUVC4pQJeWguc3KentG8UoZPsGtdXV4fuBbj9Ray8RCxGDSoLVuO9OKBZwWaXpMGwu\/TsaLxiLvLPwQ6KJ+yKEePk0b2mVFo9j0iT2MiYw+1IW82\/GBdxs8Ogey2\/KmV1wxpOceeUQ3PvqoDh06NA86eFBXHjmi1IXIVlbWQkTx0iL9WLoW6cx7fNoswBA+XHTOOw118A63J1H8QltUDm3w2B3IDnTOhzRJ7z7YgctO0TlcVwT9538+pssv36RXrFun961YoTeuXKlXGaC\/YPR1y5alHkbmImQrsZs7Ii\/8Tsl\/6sl2wNGmHx+FAcVbSm2ZgYWZgb8b\/jv9zfT9OuecYa23ovPaoSG9yQBFHjI+7cwpKpmLURd\/jojCEyLtPDvll1iIOtVBUhwmHRY7eHT4Q5HhQdJbM2yLB+VM887Ap\/QpVe0\/deDTyp+KpXB1oOuWQ7DmHC0HabFh1woR4\/WCw+Th0TmQ0YPyrZlnpaT9kgGKSlawi+rW\/FhnrDkHcpFjaViIGEwzpB0sE4zzRQ\/S2Pbt26cSZQ46fQ34tfchfUgft\/9cbodSVLIWovJhdULGKRDNkNC0o+qNGzdqy5Yt4hZt27ZtKlHmoJPXANcV19dLN75USX+2N+sFTVHJWogoXs36CTcGcb5uj7Ol0HXNpeGOqGujinRMIbrjjjvELZrj1ltvrXtF9W5PSz\/xiU\/ozjvv1D333DMvftr2Rfg9\/vjEWWP7w4kJvc6ADTpi\/LUGZCh2xvbqWd3gLD1\/lk5\/8pO6wPjp8Qm9aMdvaeLxx0VbaBo08m1kI3aSPdS\/f\/3r6+N5840TAj\/1hgn9zFsm9M5fmajrr\/64jfuPJrTC5rDMwFyuM0ouHMR7h+nCc4yOvICQ5zqqX1CzX5NGW\/3Ne2uay58BociEGwNk+nIgux3e9Wko7WjjQE7TrlM+fVGImCzFaOvWrXLwLxh6qOtapddee+1c3FZj5Nnu6NGteuUrt84b47Dl4qOme6\/ZLjL+hYZrDceObRUUOzjfdFvM51\/NF9sBk6GbXvISvcx2ma83efDmn9KKl28V+q3HjikNGvmGtmMW769nseaa9+qiy94r7BcavXbwIoV9oX\/x8EUauO69Ovy6Dwt54wu2CmxYt1Xnr96qYZPR\/+uWrXr02q2afoWN2+bwtKFmWG0gH4Dc\/JrNm3Pj55i2yCDMK9cX19OAvbnaMS1RiPi9MmhVUpbfvJd9su6G8E+zI7LQuR0UH0dunSQETixEDCihTanuQgambXGwSBzXzy6YpKGwcPgXnZ8G3mpOP2Ptjehq+7rp1GntPneFPjY4oI8ulz67Srr2b3drWhbU7J06GMMtFmznLD6uir57xZi+MFLTFQ+PacWRvdYjvc7g8NpN+qu379Y\/vHpM7\/oN6a7bpdOnpFMnZ6DT0ndWSi9+Xvrmuap\/Tp+QyA3CfvvaZ+A4Zl\/IH55W\/Wk4KTcAABAASURBVHU8Px+0dOmQdpt80Gx+0NZzCt1hdreFNMtv3tOO3xvz3yFLS48+3N7\/crrdNeu7IShzKBKJhajIQZR9pcsAi8bBgmKxsdj\/xZpDkX0hIZu6fgzbd0XSDltkLzf+hy3IxGOP6+TJUzo4Jb3bFvbLn5I+8ss7zJrumLYSkuTptklzCMdxx5du0QVP1vSSB6+vFz38HE+9fExffOdenbho5meXq79mxceKzJQVoikrQDI6\/Zz0xGwBuuqIdMSu3sOGEzYHm4KOWX9PGihA7GaQoT9+ekpbjh7Tu6amxZiiOxxLhwA5VYMPsRqY55laeUY0uH7jvBitChSSrEXJ29AOILfafyvt7DS20qxs0wsZ+KINgoXOwoMi8689uyBg5sTjuSVL6rav2SI\/bgt5g4n\/871jevTSmUJQN7bxxXjYDYUhKHPX\/MMmLT+KdcZy8pyKnrxih566ekyXvkhaauNYajuggaPSEis+A9Oqlzx2K4ND0tRh6ajpnjX++4YDS6XDA5LVLGqV9kl62rDZcJGBIm2kflBIKE4IcTsccoctCc3sYTtutbJiYP0lYYiWeAoIhaSlxl1sNNjFvsuuW8wAC4J\/2Vls0RAsvB80ZdTGAmT5Y\/+ureplU1Z9zO\/7hhO2sG1Na40VgXt\/dYdp2j+4HQuj7DJhzBAeJ4Yr2nP1bj15+ZimnpWmnpBe+D1p2LY3y48btWJ0ng1wmRXLJVZwhuw2cv0hK0QmT1ug47NX74AVIjvEjOzOrV6IzCwKNDREqKMwhbZmxbuZPYyVtQjh3+wZEQWGQuNA9j7RhXwou74ZpY0D35BHzhOzpzLPLvKLfeLEVfr615UKaUaRNhZ+jeJ5ofiYje1PDP9ooE0jNIrnNm9\/r8V70nDC8AOG8w3nGKAXG33MEBYiFh+7JQoRPPh\/K1Zo8huDeuafbEfxTenQLP782lF95qq36Ou6Zh58DEk09P8TaztuUIAVxrvP1wau08G1O7T3xXYrZsXotFVJO\/TMl6UhK0KX2K7nAitCB6wwPWP3Wqetej5jhWq\/4eQ3pJV\/Lx03OmXznDZQhAZtYCsMFCMj9SJETHhw5BsDet58HzeQOxA9L0tmbfhHsdoUWfaKFBWKSyYwEeun0UHxcYR+6JChDuS08DZxNG0M\/FoF56\/Vtl1vd+DAe+zV+4V63\/vUFGkGmyaO+yTF419ZnkGwY\/k9G9f7DW813GbwtnE0KV6o93Yftlj3z+Jvjf6LYY8B+ndGsbNwRq0xi9HWsXEzx7CRF9gDkfOmpvTztw\/ok++Xvvzr0jfs4bDjF1f9od6nD82DNWt4hP4\/b20VwX8x2X1un36\/Dp1vo7NtzfEh6Tnb6TxvOyAeTJ+0Zz+DVoxW2MD\/7B+kT\/9\/aeKr0l\/9H+nPPys98GnpyAelk7dLp8F\/lc6xBcx8L7QRMj+7oxNFl1s0\/lFAfuQDS7XX5vtNy4\/n7k+N95xCf9fkhw2KfIi92XRZClErz4goXtZN1w7fATktciB9XYiKTFSavrjoeVMV58uzC3v0EWfKrLO7lIZt3M7CGTFPKM9LoNEFZetel9pCXjl7JZw0\/ol1a7X\/4o3WMvvBPIn5Smt6jsEP9M5Dlx+d1HHr64jdDlpd1IDdbg1Y8ZFVDX63dNAKkz3Rrj9Exi6zL7UxYltmhes8C0IBMlbM7WKTKRhDRumLc0E46KN278ZOybqS5wYajs+a1Q92VbcZR97IFXR0VjaS+kj7piz0Y\/eUuoMOO1J8oruhDnfRMJyd2ob2njauWXOH3v3up\/WhD9m\/v02QZiJp4rhPXDx2Q6H+NTamEG8x2dtHadguifc2\/83ihHFD\/maz\/abBY7AYKUA8N4KyY3DbDR+c1pvM9\/d\/S\/qT35F2Gl5q\/CtNt\/Z\/bw72MDHbBA8yS9k\/vcP2UG81PGj4qAE6atT2q+b1Pr3OePzA8NEHdNKqwSCFx6rEErsSBwzTh223YzslLZN+6hpp+7XS235EerNVtje9XvqNX5Z+4velm35butLGeZXBC5B1Ip8v86QoUaTQr\/zNKf3Yh6b1BvMnRx8wWjV4TkNKvBFrdJMBimxspoPdDYUlE6wwZ+pkATnbqe\/f2Sxb9rCuucaeRKRAmlmmjYVfXDz+9Q31621cIS4wmbZxCNsl8d7upRbnVwxhbPgrTfc6ww0Gj9FoEdGGWMR9ibW50hb9j9o2AGx9mfTkB\/69rpl9UkS8RsDvJ833Vwzwjl0m7zbYkzz9o1HXn39w3N6K1TRoRYidDw+jT9jVeNgK0HErTietGFXsXusFG6RNl0k\/YoXox14tXbxWuvVF0gYb748ZzjUwLi88q02g4FJAoGCr3YZed8UxXXe19BbzJ3dQ5h0HC9H2Ud6aZUuhnfpsDUrv5AywCJKtUjP7QUk8W+L2DoqshA8LLM0thNWVhAgz4yGOO0T7+\/zOMR3YGHq4ZzZKUdhrTXhuY2TuOPewzdJ2RUuG7Y2ZbV9OGKatCE3bu\/gBu4\/ldm2p3XudtOKzapMET+MVj0rMnR3Lf5DErseait3QylnZyNxhtU0XnT6tq+wej7E0Ow9zDdtgMu2EBm3+oMs7ovLWrI0T3ktNsyz66Li5rfOH3PC2RIUcXbwKPiwoFhYLEoocmOssutE6d+bruD0zeWrJEj1hlPhegPA94zXD3fMxXrzP8Gm\/icnP6YT+lLPdocL4lUce0GErQsdsV\/S8FZ9TRu2wVan6MyPbFImfnD5iD26+94j0iL1F229PoB+1QjRsVYfxkiveAh6WBOzZtv7KePLHOLDx4wpfWb5cAwPzVzo2xml3eYIiq0OfVgoRt3Md6r7vwlgd7rsx9+yAWRjRRc9g0VOkWIzIUVAI2AVF9cgsEOzwrYJ+2UFQrGzd63HbGfDWbLlRFqwXPMYY9mFrXX\/x0hF99TpahpZknsV\/vZn5YUbbxIj4SvhseGRcy47XdMwqzgl7kkwRmrZa4Q9wjy+XnrGn0gcP2G3is9L+Z6wY2ev8x6wgPfAF6Y8tMeEbQXZDxPie9bfHYK4yF55\/y+eKLPv8tYHdFPmFhyJT2MzU9kFRyVyMbO5td9xGAB5Yh2gjVOamc4Uoc8uyQWwGwkXPwmYJU5ygsQ1M2ezib2a3EE0PL4YUF8bIwgwbsRCRGSsUsEOYtnueP\/3POxAbggLEDyxSfOBxhlKU0CPHYe2Tk+IiDAvQKbuXOmqvtA6uUv2t2UkrUiePS8ds8Cfslu1pK0z77Bbu+FekIdN5XBuqgLnqiCmtdonCw85vhT0nOt8KL7lkXuyCFPOhYGOPMWVStfQXGm2emTrpoHP0tgy5g+Gbhhps6lE6ZM4Ai57C0+iWKQzKYgnlKN\/MHvVPklmESTb02ClSLEbGz7OXF9qOZOnFI\/qn14QlCu8z8IKz84xqHoc+LFChce3TD9TFpdya2fOiU1ZJbIOkY7YbsrqhU7ZLsDf3sjpS3zk9bUXqX60IfeeQdNwcVz1eb17\/MrW4PbOm9eKGzA6JXSC3otySkkt2QPUGs1\/4obe7PkH\/Uu1\/Mu+GbCVSjNvvufUI3doNMWKbPqRENzNA4WrUfzN7o7ahjUUWylHe7fRHIXqDOVxmxWHA3qB95pfinxX9dqWipCJjzecOihV+X15bmdPBXPzYuPh9siVWVM5\/TrK6Iz5T7A5M4O0TyiPn2u3ZC+w5kO2SnrfK8rRtefghSH4nDX9AEeKCpvgAq2n1goR+\/9CQGANzC3c82PznjuDJwR9LwlezH3TcYnL7DEWeNSWSVgoRbRID5mygCLELciDn3OW88Jy3eYpSKD4Dmxt0ycKZv3QbODcx2foVC+xbg4PaZwszuKsRH\/qCOnxcp9dKz94g\/cHvzS9G4zt2iN2O+zel5vDrt+zS37xhfpyN9qzIhqOltjVZ833pnKMSv2u2xLZCFKjTVgyfsVf51nzuWG62QbtNO03xMorBmmvIGKfwJs4d3zGOXR4wVvixC4IPwbOmcVNQcNgl8gyNAgQPRSaP5pJ49OMzosTJFGAoC1EBSW7WBQUg7sYHPcWgE4XIFxGL8WF7e\/S1Zcv0WaO+EOkr2g86H9fj9szmx\/\/i7rmp7K9U9JHRUR2r1eZ0aZhVz0snV4zqX16+V8+vYd8lnX\/oAS2xLcwSu+3i54r49Y4XUAXs6jy2QjqwRuKZi22axO0Lr\/mPma\/VJ6206jplxQt32yTJapjsblKmrhclH9MSu8+jALEbYqeHnh0QNMRKE\/AzoklJ7IIU8\/FCFWOqq6bYzdn42eWkBcWr3ngRflmqFuGse3DKFRvTbQaWJsUHOjorG2nrYJGyoKDsAqBHbFcE5XkIOvpkDNGO0DGurbWaNk9O6qHR0brLb+\/albkI0fBCe5L8omPSkksq2n\/9bn3\/qh266NFxHbfVf3qDNLhRWmL3cM9dbQXIOj98gT0LstsxFvbxJdIRK0DHDUet0pw8XzpldJVNwJrrRdaB3cFpuVELIwophYWH1BtPnarba5J40\/ZGo8zf6p9xMwe+xCAWGn5RGJoEinuSLW3xmec3kBQtfz23ZNyOOZDz7\/VMD2UhOpOLrnMsHArQTTYSKLKxbR8sGFv79QVo61aX2O6A1\/erbEdEHyzOzQ16wWer2SftVuw+K0D3GX1oZETDlYppsx13feJ63fDAJn1kz5iGbTDPXzemJ7bt1uWHx7XyB6XzfkRaa8+knrpKGrad0KlzJBumThplZ3TQis9hw3ErUKcMByUdHZIY\/49KAlzU7PQoLNzR8Uu+G06f1tHpaU1KAoc142sbLl1sPO3fMEuNpDroO8mRZ1ynrXBmAUUpKV4R+j179shRRH9hH5yzUG6dL1v2bAZYMNyS+ABt3YpCtNYWJkXGNhSiWKnBp1KpaHJsrO5x39hYnR6cnKzTrF\/7nq\/pzq\/v1C998RYtWy8N3zSiJVtH9QIbzFrb\/eyzncEhu8fiRwcusGLE7doBqyoUoUNmf86qx8khib\/QOG33Z9Mm+\/wqNhjfDVmdE\/K1Ns91Voj4wUbrQv55oTEXGWyDpR80al2Igk1hBqaqy9A4hLGidnZwFJYs6Natme+CmEPIIxeFshAVleku9sOCYYElDYEFezDJOKsnxugsP1yriSL03Z1ZH1XPBpgl\/2vPuO59blzDW6SL3ymd\/xJp6SX2dmxQWma7naFV0pAVGv4gGgWn3mxQGlwicUt15Kh02nymrBD5\/JjLy82R8VJYjNX37Db04aVLhQ5o9oPv5lmeQga4HYPOqoUclxviUOTcL0qzFKA534FolPxlCk+4C3Ieff69n+nBTusZoeQWZgZYbCy6uNmhZ1GBOHuoGx8b0067T\/ropk366vXXt\/SMKIwH\/86P3aLldj81ZFXj\/JdK0\/Z8aJW9pRuwHQ\/2I7ZdO2VvyJZZ5Tm6SjqxXDplxWnKBn7UCtBTJnMb9pQ5f8vA8x8KBzsd6HdMx+v5A0uWqCbpnwz4wFO8mPdW00FyKz4hAAAIa0lEQVTxp7iQL6h1IXh2i\/hq9oMvenxmVWeRueJiKywt360d0VmD74LC0tSFXssuC80AC+dXY3pkobFgWVAgxmVONUYR2tneDmguWISp1WpzmhO2y1kfXJXHT0hT9rpsjVWa0wMSfzrkhA38SStK++wB0EHbRVBAHrYIf2+g8Pyj0b8x+M86UtMOsyuyIsoOh8JEj\/C0tXAiR9yekQdkzX7QU6jIE8VnxPSjBqiRxIOikrYAzfnZXBIDLnBDcMoX+EwX+fRYZB+xHLDQeHjLWySenbC4AHozxx7j4+PamVMRosOwEC2zh9LLbUH+MNXDjPZ4R6dtN7TcCtLVtpUZsqI0bbdmT9sDa\/S2Kar\/PBDu5iIKEbdW7GCesPb83hkPpp+3ImSi4A\/BzILdDoWHgjOrOotgJz83mYUC1MjXXOpHPz0jqg+4y189XYi4TwVdztGC6Z5iVLXZ\/Nzp03rdkSPiLVGaf93zLEI2nHnHhZfOiOdbMXqZVZdLrPAMn5TOtdf+L7Rd0bavSytt1wTWPC+tt+rDK3e7s5PdxYmiYXVL1rQeyMziLzQi4APl542gAH8KC8UYOQn4JNni9Fnels35pliNrAdHXL9ZdTwT8nghRZ81Vjv+KabeTvjW25IUkgHgW49UtgwzwILaNjWlG59\/XlDk0B7la7WaaoaovlNypVLRyMiI\/LPMtjhX2jMjZHZGvFq\/xArOuVaMBpdKw1aYVtu2Zp1ta9ZZcbI7rnrRGbIG1rReiKyGmTRzUJSmbTd00oAPP+zInLnVqpjLZgM81NjYA398Y40JyrnbLVthaXlu5xLC1dWsA9aDA7luaPPL44W0zZCZm1uaMrfJqcGZsCSYpLgGHp3LnaT79+\/X3XffLWgn4\/ZyLOaads55FiFytGPHDsg88LD6mtdIG66UVtu7+PU\/YLsgq0jL7FX+smXSKitGw8PSCruNW0V1sdbshozUD3t8VKd81S9wK7xHjx\/XadsJLjMlOyh2hxQXCyMKDRjV2R\/0FCl8z7YmaygqaQvQnF9YQZNDL0hL\/Tz188z27dundsCivOeee9qK0U7\/3WibZc6VSqWly2NoaEgjIyMN27797W\/Xa1\/72tjcP\/nsPk2du08XbTK65pDWXHBI5644pOHhQ7ri+CEtX2rbodOHdKHxx63IDFiRodAMnDqllSdOaNjolAH9wMmTOma3oqfNb9mhQ1phODSLw3b9DBk4D9A3Gf8iw4UG6GtnKfaGk4kYBx\/bp6ygeEXCLBqxbwvRxo0btWXLFm3fvl3btm1rGbTnbEPbidNPbZlr2jnfcMMNoqjg3wz4bdiwQeDSSy\/Vd7\/7Xa1evfqsZvihv\/\/++5uet9e\/dps++O436pOf3KX7Pr1Lf\/nnu\/TZP96lx37vI\/ri335O9\/3RLn1zYkLf\/spXtN+KxmPf\/nad\/\/6Xv6xj3\/mOnv3Wt3TQsOxrX9MB83nkc5\/Tn+3apV2Gu++6S3\/0nvfoPwXXz78z\/gOGOw1QZD+3d5n\/WZOJKPy6vMiuy42v3qYsoA3XNDEiYRe82NeF6I477tCEXYQlJnLNA6\/u06wE\/O69914BPyef+cxn9IUvfEGf\/\/zntXv37jrg0btPM\/qJD\/+ufufdN+p9v3izbnvHzXX6hz93oz593Q\/pD26+WR+88Ub9j8su039fs0avueQS\/cQP\/ZC2X365fnrtWr3N5NvN9rErr9TnLrtMH7Z\/vH7D2tDuL4z+2a23ps7dzebfLA8UkXauS9o262Mh2vu2EHEyOOlbt25ViXxzcPvtt2t0dJSUJ4JnPfglnYtXvepV9Vu1kZGRls7Xyza\/WDe8YqPe+KqNdYr8oy9+sf6j7Yx\/wfDT69bpHeedpwnDuww\/aTK6O43\/gAG\/V5kfFH8o7ZPGG6fnektMQGDAL659Gh1tg1DzWH9WyvNSgDzPoY+FnixEJJhEe17h0blc0uIzwK0MxSbac6VSEXp2Q1FbN2RuBEes45sMUGRjF8zBOnAsmEnZRHqyENm46r8FTAECJB5die5mgGIzPT2tvXv31m+xuNWCR9\/dkZW993sGerYQkVgKEIBPgbZcKHhxaCtojzb2ebY6PHZB3GKBVmMU0c7nGaVF9F32kS0DPV2Isk2lfW+KXhTtR+2tCCxKnyN8b42u86PxuYa0872UEdvNQFmI2s1gH7Wn8LAgfcjw6FwuaZmBbmWgLERB5lmUjkBdsn2cAT+f0E5Mo4yRTwYWVSHiYoyDp5YdggM\/15e0fzPg5xNantPePY+LqhBxMcaB04Me6kAuL1zPRn9SzmE4cuTynIYZ6R1+URWi3kl7OZIyA2UGwgyUhWg2G\/xLOcvWCTL\/gtaFBfLFfJiXTwcencsLjTK\/cE7IC3m+4Vz7jS8L0ewZ4wLlQnUgz5oWFGFeC32OfsLCuTJnZLeVtLcyUBai4HxwoToC9YJjF8Mc\/aT5XKGuK2nvZaAsRL13TsoRLeQMlHOLzUBZiGLTUirLDJQZKDIDZSEqMttlX2UGygzEZqAsRLFp6R8lD2E7PVpixqHT\/ZTxygx4BspC5JnoBF1AMXi4GwXFaQFNsZxKD2WgLEQ9dDLKoZQZWKwZKAvRAj\/z7GJCRKcb2pyP+pRymYG8M1AWorwz3MX4FJZGt1dRO0PFH1qiVzOwMMdVFqKFeV7bnhVFKoqySLWd1jJAQgbKQpSQmMWupuhEsdhzUs4\/vwyUhSi\/3PZ8ZApNuOtB7vlBlwNckBkoC1FPndZiB0MRovg4iu297K3MwJkMlIXoTC76lqOgxIECE9WjCycatYe2ki8zUFQGykJUVKZz6ofCkgS6jNrQAQpQ1IbsenxKlBkoKgNlISoq0z3WjxcdCk8I9D021HI4nc1AT0b7NwAAAP\/\/tBoeewAAAAZJREFUAwCfS+eSILBv\/gAAAABJRU5ErkJggg==","height":259,"width":431}}
+%---
+%[output:3269dc81]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  --- A10 | Section 6: Lead Optimization Summary and Candidate Visualization  [Analytics L3] ---\n","truncated":false}}
+%---
+%[output:89e23aa8]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  --- Top 10 Candidates by Composite Desirability ---\n","truncated":false}}
+%---
+%[output:74a53dcf]
+%   data: {"dataType":"text","outputData":{"text":"    Rank                Name                LogP    TPSA_A2    MW_gmol    Desirability    Dist2Goal\n    ____    ____________________________    ____    _______    _______    ____________    _________\n\n      1     \"BETAXOLOL\"                     2.39     50.7       307.4        0.858          3.209  \n      2     \"MOLINDONE\"                     1.96     45.3       276.4        0.851          2.962  \n      3     \"OXPRENOLOL\"                    1.99     50.7       265.4         0.83          2.951  \n      4     \"METOCLOPRAMIDE\"                   2     67.6       299.8        0.824          2.983  \n      5     \"FLUMAZENIL\"                    1.77     64.4       303.3        0.822          2.869  \n      6     \"CYCLOPHOSPHAMIDE ANHYDROUS\"    1.88     41.6       261.1          0.8          2.919  \n      7     \"OXAZEPAM\"                      2.45     61.7       286.7        0.794          3.198  \n      8     \"BUSPIRONE\"                     2.09     69.6       385.5        0.791          3.201  \n      9     \"PINDOLOL\"                      1.91     57.3       248.3        0.772          2.885  \n     10     \"PYRILAMINE\"                    2.66     28.6       285.4        0.769          3.394  \n\n","truncated":false}}
+%---
+%[output:7d0232f9]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  --- Lead vs Best Candidate ---\n","truncated":false}}
+%---
+%[output:2c6e8196]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]                 Aspirin                    BETAXOLOL                  Target\n","truncated":false}}
+%---
+%[output:678f2fe9]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]    LogP       :     1.31                          2.39          2.0\n","truncated":false}}
+%---
+%[output:42d514bb]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]    TPSA (A^2) :     63.6                          50.7          70.0\n","truncated":false}}
+%---
+%[output:2f7500eb]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]    MW (g\/mol) :    180.2                         307.4          350.0\n","truncated":false}}
+%---
+%[output:7d14db59]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]    Desirability:   0.415                        0.858          1.000\n","truncated":false}}
+%---
+%[output:1500e64e]
+%   data: {"dataType":"text","outputData":{"text":"[21:19:55][INFO]  Rendering top 5 candidates...\n","truncated":false}}
+%---
+%[output:17819ea7]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4AeydaagcRReGT0cTdz83VBBFonxKRAzoLxdEXFAkYAju4g93wSD4R1GU4AJRQeMCKgiCuKC4xLj9iAiuYMAtoqJ+RlCCokbc95iv375UrNvpmume2z1T3f2EnFtV55zanpp509M9V2dt4A8EIACBCROYZfyBAAQgMGECCNGED4DpIQABM4So5a+CuXPnWsjc1kLxYX7X3y\/Vx2+rXuSTX6aYSmdq583FVCqmcpgpL29+H8X8NvW4CSBEcZ9PqdWtWbPGisx\/MxbF8z5N5vvU9k3jKa7S9xf5FFeeYqrLXFs+3+RXvKwp3+\/v6vKXHYO8uAggRHGdR2tXIzHwhUB1+dyG8m3nV6k8xVUfZspTflGe\/IoXxfDFTQAhivt8WB0EekFgxkLUC0qRb1JXAUWmKwS39KK4i5Up1d+Np1LtfD\/nV0z1fJw2BEIEEKIQmRb59aYvMgmC20ZR3MUoITBpAgjRpE+gBfM7QVPpTMtWXaUztZ3gqe78lBAYRgAhGkaIeEbACYxfZoFx\/GCOzhNAiDp\/xOPZoK6AJFJuNtXlC7WdX6XylK\/6MFOe8ovy5Fe8KIYvbgIIUdznU2p1egMWmf+mLIrLN2wC5fjj+PnyKy5T3Y+pLp9iqstcWz7f5FfcmR\/z6y6ufN\/v6vK7HJXOny8Vw+IigBDFdR6VV6M3X8jcYKG4\/C5HZb4d8snvTH1krp0v8zG18+b3ycf89rC8YXE3lp9HPQ4CkxeiODiwCghAYIIEEKIJwmdqCEBgigBCNMWBnxCAwAQJIEQThM\/U4yLAPLETQIhiPyHWB4EeEECIenDIbBECsRNAiApOKP+9E9cuSA26XB+VoSTFfHN5vs+vh+LOX1Sqf5F\/Jj6NWWRVxvT7h\/r5Oar7eWo78\/1FdeUV+Z1PcZlru7Ksz+WrVB\/f5POtKOb7\/Lrfr+v1DghRM0fkvnPil3qRlJlNecP65XOUL58bX+28KaacvF8+xcZp+TWoXXYdylO+M7Xza5fPxV0pn\/JUOp9KteUfZKGckH\/QWKGYxtJ6fJPP5ateFPN9ru769KVEiCqctF4kejENM+X5w6qtPr6vy3XtdZCJR53713iar84xNV5oXMWKbND8ytd4fo7a8vs+1eVTTPW+GEI0wknrRRKyEYYr7KIXo7PChJqcbg5X5od1fr\/M5+TbITby53ND7Sq5oTF8v8bTHnyf2vLLp1Jt1UOmuPIGWagv\/sEEEKLBfBqL6sWsF7Zv8rkJVXemHN+vtm\/Kc\/EqpcZQX9\/kc2Oo7sfkV1vlqJbv7+YIjae4s3xf10dxV2+orDSs1uMstOZKA\/YgGSGa0CHrhaoXqW\/yaTnyqXSmtoupVNs3+VzuuErNmTetqcr86j+sj+LOlK\/x1Vbdmdry12Ua142pUu0qY6uPs6p9la++VebrQi5CNMIp6sUSshGGa2UXvVny5jYSYiO\/n6P+rl21VF9nZfsq361Bpdpl+7o89QuZy6GsTgAhqs6s8H\/doxe1bIThNumiF\/omzgk4tB+txZnaZZahvJCpv8ZTXPWQKWeUWKhPXX6tO2SD1lzX\/F0dByEyK322eqHpRTiog+LK83PUlt\/3VanPtH+VufxcN6\/WLvNjo9bdmKP2L+pX15jaY9FYIX\/RWkI+N4Yfz8+Vb\/u5Xa8jRIET1osib3oxBdKnuZXn91XbJcivunyq+yZfUcz5i2Lq78eVkzflFJn65f3y+f3zcT82aj0\/ptpuLFfXOlT3TT7lqSzyKzbMXF+Vw3KrxjWmvy7V5XPjqC6fM7VdrO8lQlTwCtALpMgKUoMuv7+fJL9rq+6b86sM+fMx5ckXMsVDpj75mHwyvVnyMbWdXzmjmMYoMjeWYn5dbWfOr9L5VKo9yPI5g9r5mBs35HdxVyrPN+d35bCYy+tbiRD17cRL7ldvGIlO3uQvOQRpHgGqgwkgRIP59Doq0clbr4Gw+cYIIESNoWVgCECgLAGEqCwp8iAAgcYIIEQ1oGUICEBgZgQQopnxozcEIFADAYSoBogMAQEIzIwAQjQzfvSGwHgIdHwWhKjjB8z2INAGAghRG06JNUKg4wQQoo4fMNuDQBsIIEQxnBJrgEDPCSBEPX8BsH0IxEAAIYrhFFgDBHpOACHq+QuA7feFQNz7RIjiPh9WB4FeEECIenHMbBICcRNAiOI+H1YHgV4QQIg6ccxsAgLtJoAQtfv8WD0EOkEAIerEMbIJCLSbAELU7vNj9RAYF4FG50GIGsXL4BCAQBkCCFEZSuRAAAKNEkCIGsXL4BCAQBkCCFEZSt3PYYcQmCgBhGii+JkcAhAQAYRIFDAIQGCiBBCiieJncgj0h8CgnSJEg+gQgwAExkIAIRoLZiaBAAQGEUCIBtEhBgEIjIUAQjQWzN2fhB1CYCYEEKKZ0KMvBCBQCwGEqBaMDAIBCMyEAEI0E3r0hQAEaiFQSohqmYlBIAABCAQIIEQBMLghAIHxEUCIxseamSAAgQABhCgABveYCTBdrwkgRL0+fjYPgTgIIERxnAOrgECvCSBEvT5+Ng+BOAiMR4ji2CurgAAEIiWAEEV6MCwLAn0igBD16bTZKwQiJYAQRXowLKsqAfLbTAAhavPpsXYIdIQAQtSRg2QbEGgzAYSozafH2iHQEQItEaKO0GYbEIBAIQGEqBBLPM4kSeJZDCuBQEMEEKKGwNY1bJIgRHWxZJx4CSBE8Z5NtrIrr7wyK\/nROAEmmCABhGiC8MtMfcYZZ5RJIwcCrSaAEEV8fPfcc4\/Nmzcv4hUOX9r3339vxx57rCVJYv\/888\/wDmT0kgBCFPGxP\/TQQxGvbvDS3nzzTdt1111t5513tpNPPtlWrlxpm2222eBOkUa1l0iX1pll9UWIWnlgL7\/8cqvW\/fTTT2dXPltvvbUddNBB9vXXX9v69evtggsusBNPPNFOOOGELL5kyZLS+3rkkUdK5zaRuOeee9o111yT7cP40xgBhKgxtP0aOEkSu+KKK2zDhg3266+\/2uabbz4NwB9\/\/GGfffaZrVq1ym699dZMpKYleA19hDvvvPMy0TrzzDPthRde8KLjq2ovs2fPtmeffdbOP\/\/88U3cw5kQosgO\/fDDD8\/egHpTL1u2zM4999zIVhhezt577x0OppEPP\/zQ3n77bfvxxx\/tsssumyZWv\/\/+u82ZMyfb+4svvmj33ntvJmp\/\/\/23ffvtt5k\/HaLc39tuM1u8uFxuIOu1116zWbNm2Zo1a7KM++67Lyv50QwBhKgZrpVG1RXA9ttvn73Z9DFG\/xIvXbrULr300uzeyr777ltpvEkkz507155\/\/vmhU2t\/q1evtpdeesnuv\/9+22+\/\/bJ9b7XVVvbll19m4nPMMcdMG+e0006zTz\/91HbZZZdp\/mAjFTq7445guExA\/yD89ddfG1MXLFhgt99++8Z2UQXf6AQQotHZzbjn2rVrbaeddjJdAegqQQJ09tlnTxv3888\/t08++V\/6ZjVLLw6mxfKN29IrgSRJ0tzEvvjii3y40baEU+svM8mBBx5o2pe+mvDxxx9n4qO+urEd6i+h05WRrpr00c\/PW\/\/TT5Y+mrN042aXXGK2aJHZ6aebPfaY2VtvWdU\/SZJka\/I\/Xq5YsSL7h6HqWOSXI4AQlePUSNYee+xh3333neWvAPKTpe8LSz8pWHq7Ih\/KxEnvuSRJ7PXXX7c\/\/\/wzG3OvvfbaJLcpxw8\/\/GALFy6sNHySJFn+YYcdlpVlf2h\/22yzjelJlmz33Xe32f\/5j9mpp1qqHmZ33mmmrzw8\/LBZehVjBx9cdugsb8cdd7Srr746q+d\/DPvomc+nXZ4AQlSe1UQzDz3U0nsrZtdeO7UMXfDMn2+ZOKWfbtL34AbTE6bZqVrpzaQrjCRJ7Lfffpvq0OBPfc3gmWeeseOPP77yLLoZXbWTbnwfcsghdtxxx6UXPY9NfT8pvbm9yThbbDElTimH9EbTJmHfccMNN6QXVInpe0\/XXXddVteTvvfee29j2nPPPTcWnhsn7FFlVo\/2OqOtxtB5u+2mVvHoo2bpU2V7552p99mSJVP+\/E+JkcRBHyvyMddevnx59qbbdttts5uzF154oQuVLvVrKLq5ro9npTuliR999JFdfPHFaa3aX308097WrVtnupcztHf6JG9h+tRLIu3n6h5ckiTZGFdddVUm5hrXmZ6W6WPk+++\/n15cLUgvtObZ0Ucf7Q9BvSYCCFFNIMc1TPrJwU45pfxsuimsj035x8833nhjJkDuDfjzzz9nVxZPPfWU6b5N+RnMdBUhUdF3h6r0e\/DBB6ukzyj3ySefNH1T\/cgjjzR9HEySJHtKJ9F59dVXB459wAEHmL4jpVx9\/B2YTHAkArNG6kWniRFIHx6lj5SrTa8vFepLedull1RJktjD6f2Tyy+\/PLsC0L\/2\/mhfffWV\/ffuuy1VKRv2Rx+Rtkg\/\/ugms96kw\/Lz8euvvz7varR9zjnnZE\/r9Ghe67355psbnY\/ByxOYVT6VzFgIpE\/KKy9F3xDWVY\/egKfr7vagEW65xWzlSrP584uzPvgg1anEttxyy+zpnK6G9NGuODns1VrC0R5GerxlhKhlh79s2egL1hVB6d76Ls+qVWZr15rpMuyNNyxVH7OTTjJLlVAiInO\/TyaR09Osb775xkJ\/dDM9SRLbYYcdbFBeqD\/+7hJAiLp7tpvsTN\/b2cQ5yDFnjmVfDNxnH7Obbpq6M758uaWXQoW9fvnll+wXXfV0yU\/Q75YlSZI+8bvW3n33XZNg7bbbbjboJrrfn3r3CSBE3T\/jqR2uWDHaE5+lS81eecXs8cenxhnyU1dJ+nKmntYp9YknnsieSqmub0fvv\/\/+6UXW2uzGuL6tLD8GAYRoXK+BSc8zk\/+kyBFHVFq9fiVD3+zWjexFixbZ4sWLsxvj7vfJKg1Gci8IIES9OOZ0k2P+z2noaZyequkKSb\/smq6AvxAIEkCIgmg6Frjooo5tiO10iQBC1KXTDO1l3Tqzu+4yO+ssy35pLZSHv+UE2rt8hKi9Z1d+5atX\/5tb8ZdM\/+1IDQLNEUCImmMbz8hHHTW1lgcemCr5CYHICCBEkR0Iy4FAHwkgRK05dRYKge4SQIi6e7bsDAKtIYAQteaoWCgEuksAIeru2bIzCFQlMLF8hGhi6JkYAhBwBBAiR4ISAhCYGAGEaGLomRgCEHAEECJHovslO4RAtAQQomiPhoVBoD8EEKL+nDU7hUC0BBCiaI+GhUGgfQRGXTFCNCo5+kEAArURQIhqQ8lAEIDAqAQQolHJ0Q8CEKiNAEJUG8ruD8QOIdAUAYSoKbKMCwEIlCaAEJVGRSIEINAUAYSoKbKMCwEIlCawUYhK9yARAhCAQM0EEKKagTIcBCBQnQBCVJ0ZPSAAgZoJIEQ1A2W4AQQIQSBAACEKgMENAQiMjwBCND7WzAQBCAQIIEQBMLghAIHxEahPiMa3ZmaCAAQ6RgAh6tiBoFv7rwAAAZ5JREFUsh0ItJEAQtTGU2PNEOgYAYSoYwfa7e2wu64SQIi6erLsCwItIoAQteiwWCoEukoAIerqybIvCLSIQERC1CJqLBUCEKiVAEJUK04GgwAERiGAEI1CjT4QgECtBBCiWnEyWOQEWF6kBBCiSA+GZUGgTwQQoj6dNnuFQKQEEKJID4ZlQaBPBLokRH06N\/YKgU4RQIg6dZxsBgLtJIAQtfPcWDUEOkUAIerUcbKZpgkwfjMEEKJmuDIqBCBQgQBCVAEWqRCAQDMEEKJmuDIqBCBQgQBC5MGiCgEITIYAQjQZ7swKAQh4BBAiDwZVCEBgMgQQoslwZ9a+EmDfhQQQokIsOCEAgXESQIjGSZu5IACBQgIIUSEWnBCAwDgJIER10mYsCEBgJAII0UjY6AQBCNRJACGqkyZjQQACIxFAiEbCRicITIpAN+dFiLp5ruwKAq0igBC16rhYLAS6SQAh6ua5sisItIoAQhTVcbEYCPSTAELUz3Nn1xCIigBCFNVxsBgI9JMAQtTPc2fX\/SUQ5c4RoiiPhUVBoF8E\/g8AAP\/\/jQOSBAAAAAZJREFUAwC21lZ6W05RWgAAAABJRU5ErkJggg==","height":259,"width":431}}
+%---
+%[output:9d41b5b3]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4AexdaaxV1RVeBwRlKGrAVq3Dg+KAxKitYoxUokjEgGiiUEgtNQ6AaOEhNn3WMUb0WSMFlIhUEIeCGFARUeJAoECNBtQfEpQIPnHAAUWLgANKz3cum7ffeefce+bxe2HdPa219trfvvfj3H3P3qfNHv4RASJABFJGoI3wjwgQASKQMgIkopQngN0TASIgQiIqwLugR48eVUdhb0fZLroDtOllPY82JahHHqmTqDakTuJmY9fV9dCml\/W8akPqJro+89lBgESUnbkIFQk+eE4O7PUob9q0SeyCeid7ex3sUKdS5L3YQt8udjuU7Tooox79KLGXVb2ews5JdB3ms4MAiSg7cxF7JPgA48Pp1BHq0e7UVqsuqK1uh75RduoL9WhXbfayqmeaXwRIRPmduxaRO3048eFFfQtFFohABhEITUQZHBNDSgEBEB6IL6mua\/WHWOySVGzsxz8CJCL\/mNHCBYFa5OBiFri6Wn9os0vgjmgYOwIkotghTq4DfPBwFYAekaKMPIUIZB0BElHWZyhn8YH8QIKRhl3FWdL9VQmFTSEQIBGFAC9vptU+tCAPtEcxJviBv1q+oANd6CFFGXm7oB7t9npVRht0VJlp\/hAgEeVvzqpGrD6USJ0UUY8PrV1Qr+vb2\/Uy9FBG6iZe\/Nl1UIZfu6DerR9Vb9ex+1Blpc80WwiQiLI1H4GisX8IvZSho4vesV5fLQ8btCN1EtWG1EncbOy6uh7a9LKeV21I3UTXZz47CKRPRNnBgpEQASKQEgIkopSAZ7dEgAg0I0AiasaCOSJABFJCgESUEvDsNkkE2FfWESARZX2GGB8RKAECJKISTDKHSASyjgCJyGGG1D0n9tRB1bVKt3VT0nWQV3rIO4lqR4p2pLXEq14tP3o7fDqJrlMrD3svOtCDOOmiXolTu6qDjso7pWiH2Nu81jnZwRai2pB3EtWOVG9HuUxSACKKZ7qc7kPBG8VLb9DT7VG226FO10EedUoPZbuoNl1P1SWd2mND2WtcXvSgA59KUNbHiLJqQ4qy3m7Pu7W71dvtvZbhD\/EoQRm2qqynqFcCPb0NZdVWhpRE5GOW8UbBG6SWQE93izJs9Lqg+aj8BO3fix1irCZefNh1dAzhG2Vdx17W24LkVR9I7faocxOvccBe6ep51ZdqU+WipySiADOMN4mbBHDnaII3pxJdQfWr14XJqz5Uavel6vXUrmMvqxirpXabIGW\/MUFf7wdlxIg6pCgj7yZoh56buNl5rYd\/JV5tiqJHIkppJvFmVm86laJOhYO8ErSr+ihT+FV9qBR1qg\/kVT1S1KsU+SQFsej9oYxYlKCst0ec9+QOseiKiMlep7freaULfQjKenvR8ySilGYYbzS84XRBHcJBHVIlKKs2VZd2injsgjijigu+dP8o677tZb0tbB79Kv9IUfbrEzawdbJzanPTdbIvYh2JKMCs4o3kJgHc5dIEHxy7qIG4YYN6peMl1f170a+lA38qBqQo17Kxt8POTZQu2oP4VvZlTElEAWYdbzI3CeCulQneyK0qU6jAGBGLEpS9hAE9N\/FiDx30iTRr4jYu1CNWxK3yKFO8IUAiEvGGlKnl5U2GNyH0TPV9\/1BG\/b4Kn5mw9j6726eu+kXskH0NKWRULOgasaCMfJSi\/CLV\/aKM\/pDq9fZ8UB34ha3dX5nKJCKX2cYbwy54w7iot6iGnm6LslJAPfKoQ14X1Dm1qXq0BRG9Dz0Pv3oZedTpfaBOF70tjjz6gl\/EgbwSlFGvBGXVhhRl1VYthZ4f\/Wq+nNrg2y5OevY6FZeyRdmuU+QyichhdvEmcBIHVdcq3V5XQr0qI6+LqkfqVo82CNqR1hLouQls7W2og+ADYW9DWdVDJ4zAl5O9Xo+8Ejfdau3KBjoqj7Ra2d4GfYhbPdqUQMdJVDtStCN1ErQpcWovch2JqMizG2Js+ECAdOyC+hBuS2vKgVdHgERUHZ9St4J07FJqQDj42BAgEcUGLR0TASLgFQESkVekqEcEiEBsCJCIIoCWLogAEQiHAIkoHH60JgJEIAIESEQRgEgXRIAIhEOARBQOP1oTgWQQKHgvJKKCTzCHRwTygACJKA+zxBiJQMERIBEVfII5PCKQBwRIRFmYJcZABEqOAImo5G8ADp8IZAEBElEWZoExEIGSI0AiKvkbgMMvCwLZHieJKNvzw+iIQCkQIBGVYpo5SCKQbQRIRNmeH0ZHBEqBAImoENPMQRCBfCNAIsr3\/DF6IlAIBEhEhZhGDoII5BsBElG+54\/RE4GkEIi1HxJRrPDSOREgAl4QIBF5QYk6RIAIxIoAiShWeOmcCBABLwiQiLygVHwdjpAIpIoAiShV+Nk5ESACQIBEBBQoRIAIpIoAiShV+Nk5ESgPAtVGSiKqhg7biAARSAQBElEiMOejk7Fjx8qkSZNk2LBhctppp0n79u3FMAxH6dChg\/Tq1UtGjBghDQ0NUl9fb+nlY6SMMmsIkIiyNiMpxjN79mzZsWOHXHLJJTJ9+nTZvn277Nmzx1F27dol69evl3nz5kljY6NMmTJFFi9eLO+9916KI2DXeUWARJTXmYs47v3331++++47ufPOO60roj59+gjqvHYDvcGDB8sxxxxDMgIYFF8IkIh8wVVM5c2bN8tPP\/0UyeC2bt1qkVEkzuikNAiQiEoz1e4DPfroo2X37t3uCj5aunbtKl988YXMmDHDhxVVy44Aiajs7wBz\/Jdeeqn5Gt2\/bt26ydVXX22tLUXnlZ6KjIAnIioyAGUf2wEHHCCPPfZY5DBgkbtNG769Ige2oA75TinoxHoZ1pYtW+THH3\/0ohpIZ+7cufLhhx8GsqVRuRAgEZVrvluM9vDDD49skbqF470F3GN01FFHkYz24sHEHQESkTs2hW8ZOnRo7GP85JNPBGRUsyMqlBoBElFJp3\/ChAny5JNPxj76ww47TC666KLY+2EH+UaARJTv+QsUPe71mTp1aiDbIEZPP\/00t38EAa5ENiSiEk22Gmr37t3l9ddfV8VE0oceekjws769M2wVWbdunbU95LbbbpORI0dK3759BetXhtFyn1vbtm3t5iwXBIFkiKggYBVlGOecc46ceuqpiQ7niiuukC+\/\/FKuu+46mTZtmqxYsUI++OADwebZ3r17ywUXXCAgokcffVRWrVolWFvCLQC6bNu2jVdWic5acp2RiJLDOhM93XDDDbJo0aLEY1m9erUcdNBBMnnyZBk3bpz069dPcEe3n0C6dOkil19+eay\/9PmJh7rRIUAiig7LzHpqaGgQ3FxoGIbcf\/\/9qcSJr1u4ognb+axZs2S\/\/fYjGYUFMmP2JKKMTUhU4bz88svW1xjDMAQEsHPnTmvLBY72wFezqPrx6ufWW2\/1qlpT77nnnhNcHbVUZCnPCJCIMjx7v\/51c3ADBohs2SKyZEmlzuSXSsZ8xcb5u+8Wk3gqYi6zyLnnnitqfeXBBx8UbOX46quvBH9YNO7fvz+yiYhhGNb6T1SdDRo0SObPf142bozKI\/2kjQCJKO0Z8Nn\/8OHNBia\/WORjflORTz8Vk3gqYv7w1Kyk5bAzHkd+4P6hZcuWaS3xZdeuXSudO3eOvIPBg\/tJz56Ru6XDlBAgEaUEvNduZ84UgSj97dvFIh8x\/0aPrhDPnj0i\/\/ynWVHjH66Q1AIx8gceeGANi\/DN+HUOXwfDe2rtYetW2YeF8C\/XCOSEiHKNcajgR40SgehOwuwjxUbXRx55xHKHExgffvhhKx\/XCxbK4\/LdtavIH\/5QIeO4+qDfZBAgESWDc6Be\/vrXZrM\/\/1nkF7+olI84QqSxsZL3+3rooYcKtnfg6I\/PP\/9crr\/+er8uPOvjl7q77rrLs34QxSeeEPMXQZJREOyyZEMiytJs2GKpr2+uwNllWGpZuVLk978X+dvfmtv85rBojTuYYYebDHHWNPJRyltvvSUdO3aM0qWrL5DRmDGuzWzIAQIkohxMkh7i+++LdO+u1wTLY43owgsvtIxxX86QIUOsfFQvp5xyinz77bdRuavqB1\/PunQRMS\/wLD2zayv1+UL1FBEgEaUIfpCu8WH75S+DWLa2efbZZ+Wzzz6TZ555xtrr1VojeA2+\/gW3DmZpfut0NFy3rnLbw\/TplfW2AQMGyCGHHGIudButBPdbOTphZawIkIhihTd6501NInV10fjFVRHWjOANedxfhHxYweZUbOUI68ev\/c8\/i\/l1sGK1dKnIhg0iP\/wg0ru3yKBBItdcU\/kF8qWXXrIO+MeY7dKpU6dYT62sRMdXOwIkIjsiGS9HeUWEoTY1NcmCBQuQtbZN4B4jqxDwZcmSJfIzGCGgfVgz9SPgwIEixx4r0r69P4+4vyqO+578RVE+7bIQUWFm1uSNyK6IAAruK8JG0oULF1pbQa688kp531yIWr58uUyZMkXq6+vl7LPPNtelurf6GmMYzV9tcAoj1ppuvPFGwVWGYRhwn5iMH1\/pCutFc+dW8kFeMdYXXnhB3n777SDmtAmIAIkoIHBpmXXs+D9zfSOaZ5CpMXz99ddy8cUXW8Xhw4dbxIO9YSAkEMzNN98sr7zyinXFBJJxEtyx\/YP5Pej000+3\/GCT61VXXWXlk3g58sjmXnr1as4HyWEv3oknnhjElDYBESARBQQuLbP\/\/Ocg84qorUT5h\/t94O9I89OMn9ybzMuuFStWCE5xxPlB+GD26NFDlB50nQTtb775powdO1ZWrlwp69evd1KLvA7Eo76SReX8m2++sa4Ao\/JHP9URIBFVxydzrbgaMYx4vvbgsdP4OhZm0Dj58YEHHrBc4ICzuro6Kx\/nyzvviFx2WbQ9YHc\/vrICE6+eqRccARJRcOwKY4kbHA3DsE5FjGJQIMvue292enziRBHzaioKv04+5s8X+f57p5bwdTz7KDyGXj2QiLwiVWA97MqP+kGIH3\/8sTT997\/S9y9\/EZPhYkPPXNLy\/cuYn2B49pEftILrkoiCY5e6Jc56DhvEO+b3mvvuu0+OwAa2sM40+x927pS6M8+s1OAO63HjKvkIX3HXgbmsFaHH1q5w9tHBBx\/cuoE1kSJAIvIIZxbV8PSLmTNnWouqhmHIpziUyEeg+DXsTJMsrr32Wh9WHlVxSJL5K5rgqxny5tWRTJjg0dib2tChhmze7E03jNZHH31kYRzGB22rI0Aiqo5PplqxZoED6A3D2HcA\/qhRo6z7dnbv3i24J8gwDOspGF4Cv+OOO6wna3jRDaTTrp3I5Mkiu3aJrFkjMmVKIDdORliHSvL87eHmd0D8eugUC+vCI0AiCo9h7B7w2B3DMOT888+3bjrEhxAbVhsaGqz\/qbF36ntzxRaCtjPOOMN6PphhGFbqFKBhGBaBObVFWodT29QufOSPPz4S97hV4Brs2YjEW20n8+bNE+xPS\/Ou8dpR5leDRJTxuQPJ1NXVWaSBhw7q4TY2Nlr1Q4cOFeyRsOCk\/AAABy5JREFUOt78kDc1NQn2euH5YCAl2BiGYZ1hrWzxgbr99ttVMf507VqR1asr\/ZhrUpVM8FcsIKs9csG9+Lecb\/5EBzz9W3q0KLEaiSijk6\/WfrBBE4RSLUz19QwLz1hYxdWCYRiyceNGUWSFp3rABzajYvsG1odQTkR++1sRcy3K6qttWxHcxW1e3VnlAC94GCNOmgxgGsoEd5v7XYcL1WGJjElEGZxskNAtt9xiXe34DQ\/nUOPrA27EO\/nkk62vbosXL7bc4Cf6iebicRS\/tlkO\/b688YYIHjmycKHI734nYl69+XUB\/WOxmxWZhCXRq8iEx5Z2dySitGdA6x9XMIZhmBcMF0vY\/3lxVYRD63E1hSuI0aNHC\/ZPoax1mWwWzzlSPeKXuscfVyVfKRbm78bzk3xZhVPGvVbY9hLOC63dECARuSETdX0Nf\/369ZOePXtaV0F409dQ992MZ5th\/5RvwygNRoxo9jZrlsgf\/9hc9pEDYTeYC\/U+TEKr4u7zs846K7QfOnBGgETkjEtitfif3TAMwf+2cV+t4KGLT+CA58RGZ+sIO\/PnzBHBEbUgkr3bQGxanorACr8OelIOqYQHAKC\/kG5oXgUBElEVcOJuWrp0qWCDaFJvcixUp3GEawscL7tMZNEiMX\/aa1EdpPDaa68lssP\/hr\/\/PUh4tPGBAInIB1hRqw4cONBcr22K2q2rP6wRhV17cnWeQgMW5U844YR4e\/7Vr0RefDHePiLznl9HJKL8zl2gyNXBZYGMM2i0bds2mTZtWnyR4WzeAQPi80\/PFgIkIguG8rysXr3aur+oKCPGlhes4UzHIzqiHhS2p6R4\/nbUw8myPxJRlmcnhthw1zXuJYrBdWoucXNjLBt3J04UMX9IEP7FjgCJKHaIo+ogOj+LsFgcnbtMeMKCf\/\/+\/aOL5d\/\/Ftl7I2h0TunJDQESkRsyBa7HudS4iijaEPEoIBziH2pcOPC\/jfmx6NZNZPDgUK5o7B0BE3HvytQsBgJr1qyRk046qRiD0UaBqyIchaJV+cvicKN\/\/UsE60K\/+Y3IPff4s6d2YARIRIGhy69hr169rCed5ncE7pF\/bv7KNWPGDHcFnI2EZ1Bju8nUqSIjR4r07SvWebPLlzfb9ewpsmxZc7kcudRGSSJKDfp0O8bJjOlGEE\/vOOIEN27W1dUJzmwaP368zJ492+SUZbJp0yaRDh1EeveuEJDZJiCkVatEcJrkn\/5U2ZSL0CZNEvnHP5CjJIAAiSgBkLPYBT6sWYwripg2bNhg3SiKRXk8mw2PBcLping2W1X\/+IUMX8k6dRLZvl2ED1msCleUjSSiKNHMka8+ffrIeeedl6OIEwq1qUlkxw6RxsaEOmQ3QIBEBBTKIa1G+SK3LrTChBXpIEAiSgf31Hs1DMM6ciT1QBgAETARIBGZIJTtn2EYgvWTso2b480uAiSi7M5NLJHde++9MnfuXBkyZEgs\/um03AgEHT2JKChyObTD8bF42scI\/aTEHI6DIRcPARJR8ebUcURz5syxjssYM2aMYzsriUCaCJCI0kQ\/ob7btWsneGxyLDvUExoDuyk2AiSiYs+v4Dja+vp6uemmm0KPlA6IQFwIkIjiQjYDfjt37ixPPfWU3MPNmxmYDYZQDQESUTV0ctz26quvyrBhwwQPa8zxMBh6SRAgERVwort16yb4mR6bPQs4PA6pgAjsI6ICjq2UQ3r33XcF+8gWLFhQyvFz0PlEgESUz3lzjfq4446T559\/3rWdDUQgiwiQiLI4K4yJCJQMARJRySY81eGycyLgggCJyAUYVhMBIpAcAiSi5LBmT0SACLggQCJyAYbVRIAIJIdAdESUXMzsiQgQgYIhQCIq2IRyOEQgjwiQiPI4a4yZCBQMARJRwSa02MPh6IqKAImoqDPLcRGBHCFAIsrRZDFUIlBUBEhERZ1ZjosI5AiBDBFRjlBjqESACESKAIkoUjjpjAgQgSAIkIiCoEYbIkAEIkWARBQpnHSWcQQYXkYRIBFldGIYFhEoEwIkojLNNsdKBDKKAIkooxPDsIhAmRAoEhGVad44ViJQKARIRIWaTg6GCOQTARJRPueNUROBQiFAIirUdHIwcSNA\/\/EgQCKKB1d6JQJEwAcCJCIfYFGVCBCBeBAgEcWDK70SASLgAwESkQYWs0SACKSDAIkoHdzZKxEgAhoCJCINDGaJABFIBwESUTq4s9eyIsBxOyJAInKEhZVEgAgkiQCJKEm02RcRIAKOCJCIHGFhJREgAkkiQCKKEm36IgJEIBACJKJAsNGICBCBKBEgEUWJJn0RASIQCAESUSDYaEQE0kKgmP2SiIo5rxwVEcgVAiSiXE0XgyUCxUSARFTMeeWoiECuECARZWq6GAwRKCcCJKJyzjtHTQQyhQCJKFPTwWCIQDkRIBGVc9456vIikMmRk4gyOS0MigiUC4H\/AwAA\/\/8+dfYoAAAABklEQVQDAGRgu4nZpIztAAAAAElFTkSuQmCC","height":259,"width":431}}
+%---
+%[output:5081f75a]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4Aeyde6gWxRvHnzEty\/QX\/YQiM7EyCruYUWAEHas\/gjIsKirIbngkEMSKLJCy+AVWRJndL5QlUSYV3cnoQoGRmXRRunG0vGB200Q7mpfffvcwnnHO7r67++5ldvcrzpmZ53nmmZnPvOfL+75n33377eY\/EiABEiiZQD\/hPxIgARIomQCFqOQD4PQkQAIiFKIKPgqOPPJIsYveBuy6bdfahzqomPFBftjixOg4XZtjdNv2oW8XHYsaPtStCuLsYo6Bz+yz7QYBCpEb5xB7FfhF6urqErvAjiSw6zb6usAGn+6jbRfEaD9q249+nBjEYTyKHQ+bXRCDMXaB3Y6N6iPezoE+7FHj6CufAIWo\/DOIvQL8QuEXK2gA7PDDZ7bRhx02tIsumBfzh80LH2KC\/LDDH+SzbYhDvG1HH3b40WZxkwCFyM1z4apIoFEE2haiRtGq0Gb1swA8E0A7r6Ujv13suTA\/Ymw7+ySgCVCINImG1RAGu0AwTAy2H307Bn27mDl0GzEYr\/usScAkQCEyadSojV96\/PKjoG1vDXa7RMXAh3jULCSQNQEKUdZEa5oPIhQkaEm2mzpHkkkYW0kCFKIKHVvULzJEAn5sx2yjDztsaJdd7LXYfXN9WDP8pi2sjTjEB\/lhhz\/IR5sbBChEbpxD7FXgFwq\/WHaBHUlg1230dYENPt1PUwflQM6gEpUfeUw\/+kE5YDfjgmJg0zGIR98usOsY1LZf9+FjKYcAhagc7m3Nil8su+iEsOu2XWufrm2\/2Q+LMe1ohxXkgg91ULF96NvFHGf7zH6ruFZ+ncuMY7tYAuULUbH75WwkQAIOEqAQOXgoXBIJNI0AhahpJ879koCDBChEDh4Kl5Q1AeZznQCFyPUT4vpIoAEEKEQNOGRukQRcJ0AhCjghfV2JXQeEhprMsWFBZgzaZhz6ZjF9aEf54NcFcbqdVY2cQSVJfoxvFY8YXexYbUdt++x+qxj4UeKMC4oLGoc4lDg+xAUVe2yd+zUQonyOR19bYtZ4sMSZDXGtxtkxiIcN+VGjbxbY4ENBO8wHfxHFnF+3sa44c8eJQ4zOixp9nRtt2HRBX\/vC6rCYMHtYnlZ25NPrQo2+HoM2bLqgr33aZtba14SaQpTglPEgwYOnVUGcmRZ9jDFtadvIg3zmePRhN21ltrGWqJJmbVF7jPKlmQtjsP6wvPCFFYzBeLsg3vbZfXtMk\/oUohSnjQdQWEmRrs8Q5O5jzMmAXxCz2NOYPt22Y+w+1t+q2GPy7mM9WL85D\/qww4YafbTDCvyICyth40w7cugSx27G1LlNISrpdPFg1g9IXcNmLkfbUds+My5tW+dFbl1g0\/nQ1nbUsOsa7SIL1hI2X5QvbExCe6xwmw3WZdp0HzYU9HVi9HUx7dpf95pCVNIJ48GmH3i6hs1cjrajtn1mXBltrMcuWGdWa0EuMz\/6OjfaYT4d006N3JgDOVCjj3aSgjEYa46x+9pn29HHeO1vQk0hSnHKeJCElRTpKjkEvyx20RsJYwO7jolTm\/nt+CifHav7GKPXgBp97YtbY1xY0TngT5Nbj29iTSFKcep4kIWVFOn6DMEDuY+xBAP2iLXogn6cZSAurMQZjxjMiTqoRPmC4rO0he0LdsyDtek2+nEKxsSJq3MMhUgk9vniAdPqQQY\/4syk6MNu2tK2kQf5zPHow27asmjrvMiNkkXOtDn0WoLGR\/mC4sNs2GNQrjC7nSdorI7ROXQ\/qo7KEzWuyj4KUcjp4cFgFzyYQsL3MiPOHIu+DoAdbdjQNgtsrXxBfj0OvqBizmG2Mc7sow2bmQM2s5i+PNqYC3mxDrR1QR92FLS1HTX6sMcpiE06Jk5eHYPcdtE+Pbf2ow8fam1DjT7sTSoUooDTxgMhqASEhprM8WYQ7LqPtlm0HbVpRxs2s8Cmi2m32zomqEasbYcNRf9C2H5tR0w7BXmDxpt2tHWxY7Udte2z+3ZMVN\/26Vxhdu1HjZigAp8upl\/bUIfZ4WtCoRA14ZRT7BG\/GBAdu8CeIl3jhxBANAEKUTSfRnshOnZpNBBuPjcCFKLc0DIxCZBAXAIUorikGEcCJJAbAQpRBmiZggRIoD0CFKL2+HE0CZBABgQoRBlAZAoSIIH2CFCI2uPH0SRQDIGaz0IhqvkBc3skUAUCFKIqnBLXSAI1J0AhqvkBc3skUAUCFCIXTolrIIGGE6AQNfwBwO2TgAsEKEQunALXQAINJ0AhavgDgNtvCgG390khcvt8uDoSaAQBClEjjpmbJAG3CVCI3D4fro4EGkGAQlSLY+YmSKDaBChE1T4\/rp4EakGAQlSLY+QmSKDaBChE1T4\/rp4EiiKQ6zwUolzxMjkJkEAcAhSiOJQYQwIkkCsBClGueJmcBEggDgEKURxK9Y\/hDkmgVAIUolLxc3ISIAEQoBCBAgsJkECpBChEpeLn5CTQHAJRO6UQRdGhjwRIoBACFKJCMHMSEiCBKAIUoig69JEACRRCgEJUCOb6T8IdkkA7BChE7dDjWBIggUwIUIgywcgkJEAC7RCgELVDj2NJgAQyIRBLiDKZiUmcIDBnzhxRSsnw4cNl4sSJftuJhXERjSZAIWrA8Xd3d8ull17qi877778vu3fvltWrV8trr70mixYtknHjxjWAArfoMgEKkcun08bali9f7guPUkrWrFkjCxYskL\/++svPqJSSSZMm+e1zzjlHPvzwQz\/WN\/AHCZRAgEJUAvQ8p7zssst8Ueno6JBdu3b5z37Wr18vQ4YMkaFDh8qECRN823PPPbdnGQMHDvRtSin5559\/9tgLbXCyRhOgENXo+Ldv3y4vvfSSLyq\/\/fab3HHHHb4oTZkyRZYuXSo7duyQzs7O0B1\/++23csABB4T66SCBvAhQiPIiW0LemTNnyqxZs\/yZ8cwHbbwfhJdpo0aN8u1RP0aPHu2LmFJKpk2bFhVKHwlkSoBClCnOcpPNmzdPrr76an8Rb7zxhl+n+QHxwku3X3\/9Nc1wjiGBxASKEaLEy+KANAQ2bNggI0aMSDO0zxi8sX399df7L+36OGkggYwJUIgyBlqXdCtWrJBXXnmlLtvhPhwnQCFy\/ICSLO+qq65KEh4Zi\/eLlixZIscff3xkHJ0kkAUBClEWFB3JkZUQrVu3Tg466CDBe05Z5cwfEWeoMgEKUZVPz1j7iy++KOPHjzcs6ZvTp0+XBx54QB5++GG56aab0ifiSBKISYBCFBOU62F49pLVGhcuXCiXX355VumYhwRaEqAQtURUjYB33303s4Xiiux9991XBg0alFlOJiKBKAIVEaKoLdCXFwG+P5QXWea1CVCIbCIV7L\/11lt7rvcZMGBA258Xu\/3222Xbtm1y7733VpAGl1xFAhSiKp6atebzzjtP8BGOjz76SP7991\/\/82LfffedFRW\/i2dC8+fP9\/PEH8VIEkhPgEKUnp1TI7\/\/\/nv58ccf\/WdG+IgG\/oqW5vNis2fPlpEjRzbxr2VOnWfTFkMhqtGJT548Wb755hs56qijZNasWf51QKeffnqiHd5yyy1+\/MaNG\/2aP0igCAIUoiIoFzgHroT+6aef\/GdGf\/75p38Hxv322y\/2CtauXeuPxf2LYg+qWaBSqmY7cn87FCL3zyjxCpVSgpdn++yzj2zZssW\/MFGp6F8ufFpfKSVHH320\/0Y17uq4\/\/77J56bA0ggDYGmCFEaNpUfAzHCTdHwlzS0IUrmpvAGt1LKfxmH+xchBndoxDVEgwcP9v\/6hmuJmvQy7fPPP5cTTjjBxMR2AQQoRAVALnOKV199VfDeEW6eD1HB7T369evnv\/x69NFH\/WdOeD8pbI0Qr\/8efLCI9wsaFlMnO65Q1\/fzrtO+XN9LP9cXyPW1TwC3kMXXCJ144omCNq6cxrMf3Dg\/Tvadu3aJLF4snnpJ0n+33nqrN0xJ\/\/79\/a8wSjq+6PhHHnmEfzEsGro3H4XIg9CE\/6tWrZKvv\/5aDjnkkHTbxa1jly0TGT061vgzzjjDF6BNmzb5N\/HH\/bI7OjrkoYceijW+ikFcc3oCFKL07Co18oYbbmh\/vWPGiKdmIp7IyMqVIldc0Ztz6VLxVE489RGZM0c+\/fRT\/2UfnmEo1fNG+fPPPy9jx471Qnr64uC\/Aw880MFV1X9JFKL6n7G\/w88++8yv2\/7h\/SXOUxmRZ54ReeEFkQEDRK65RuTCC0XeeUc89RGZFn7jfVzX9McffwjeDG97LTkk4PtDOUCNkbJfjBiGkEBfAjNm9NgmTOgRpV9+Ee\/pTo+txc+DvTe\/8Y0jSqV7ZgSxUEr5H2tpMVViNz7ekngQB7RNgEIUE2GlwzZskKWnnJLtFkaOFPn7b5Hu7lR5Z3hChjfMlVLy5ZdfRub4xRM5\/ZIOH1vBN4xg7A8\/\/OC\/zMOb75EJYjqffvppOe2002JGMyxLAhSiLGm6mst7GTU24Uc9Wm7FEzcZMkTk7bdbhkYF4FP+p3gi+eCDD\/YJe\/nllwXXNB177LH+l0VCfPDXPx2oVO+Fm\/gGE21PW8+bNy\/tUI5rkwCFqE2AlRg+c6bIPfc4uVQIDQTm1FNPlZNOOklwTZNSyvvj3Gi55JJL\/MsNtm7dKrjgMmwDGH\/bbQukXR355JNPwqagPWcCFKKcATuRfscOkYEDnVhK2CLGjRsn+Aqj33\/\/3Xu\/e7fg22nDYoPsjz02VSZPFk+8grzhts2bN8u5557rv8TDpQ24sjo8OmdPg9NTiBp8+K5tHdcatXOd0fbtInPninjvhUdubflykfHj\/+eLD4QPt9nFs6r169fL4sWLfXtkAjozJ0Ahyhypgwm7uhxcVD5LOvRQkeuuE7ngApFt2\/ae44knxBMZkTPPFPngg5n+My\/ce0mMf3gzfNmyZfw+N4NJEU0KURGUy5oDFx5i7sMPF5k\/Hy2nS1ZfXYQ73L7+ushdd\/Vsd906Ee8PYtLZ2XOZk\/fqzxekHm\/fn2PGjJGvvvrKi1F9nbTkQoBClAvWgKRlmLyXGf60uOjw44\/9pss\/sr6G5847RYYPFznssJ5nSUn2jluo4OWaUkqadPeBJIyyjKUQZUmz7Fxr1\/Z8\/ML75fGvbsbHMC6+WGTECJEnnyx7ddHze2\/u4KZu0UHJvatXJx9jjoAYXXnllfICriI3HWxnSoBClCnOcpItWLBANp98ssioUSL4ZtbduwWf95IjjhBZuFDk55\/LWViSWdv923uSuRLG4qZxEKNrr7024UiGxyVAIYpLyrG4Y445xn8PA9fd4F5Dg703WGXrVpGJEx1baczl4EOzMUPjhuF6S5S48VFxO3fu9K9xevPNN6PCSvZVd3oKUQXPTikl9913n\/9XHwhRBbdQyJLxCRSUrCY7wnuGef7552eVjnkMAhQiA0aVmlFXGldpH\/5a8Vmzjg6\/yR\/NJEAhqti544rjkfjAacXWHbpcfH3RRReJfzuRFSt6wx5\/vLfNVu0J9Kv9CXs1SAAAA\/tJREFUDmuzwZ6NTJ8+Xe6\/\/\/6eTh1+3nijyKpVIu+917MbfCYOpafHnw0hQCGq2EEvWrRILsBlwxVbd+hy16zZ23XzzSIoe1vZqzkBClEFD1ipGl3xe9xxInffLQJBGjas9zTOOqu3zVbtCVCIKnbEuG1GxZYcvVzcFWDGDBF8DOU\/\/+mNxTVRvT22iiFQ2iwUotLQp5t49uzZ6QZyFAk4TIBC5PDh2EvDRXVZfx7LnoN9EiiDAIWoDOop58QN53Hj+ZTDOYwEnCVAIXL2aHoWhq\/ewZcVovfss8+iSls4jgScJUAhcvBo8OWESinRt6JA\/4svvhDcQVD4jwRqSIBC5NCh3u39GVspJfikN24\/gfeE8CHL\/v37y9lnny1z5851aLVcCglkR4BClB3LVJk2btzof0OFUsq\/YTwEaOXKlYJbliql5KmnnvKfCW3atEmmTp2aag4OIoGiCKSdh0KUllxG47q7uwX3u8FN3Lu6uvxbe0yZMkXw\/V0QJbwsGzp0aEazMQ0JuEmAQlTyuSxZskQGDRokw4YNk87OTv\/WHo\/zA58lnwqnL5oAhaho4tZ8uJ3Hli1bBM+MJk2aZHnZJYFmEKAQNeOcM9klk5BAXgQoRHmRZV4SIIHYBChEsVExkARIIC8CFKK8yDIvCZBAbAJ7hCj2CAaSAAmQQMYEKEQZA2U6EiCB5AQoRMmZcQQJkEDGBChEGQNluggCdJFACAEKUQgYmkmABIojQCEqjjVnIgESCCFAIQoBQzMJkEBxBLITouLWzJlIgARqRoBCVLMD5XZIoIoEKERVPDWumQRqRoBCVLMDrfd2uLu6EqAQ1fVkuS8SqBABClGFDotLJYG6EqAQ1fVkuS8SqBABh4SoQtS4VBIggUwJUIgyxclkJEACaQhQiNJQ4xgSIIFMCVCIMsXJZI4T4PIcJUAhcvRguCwSaBIBClGTTpt7JQFHCVCIHD0YLosEmkSgTkLUpHPjXkmgVgQoRLU6Tm6GBKpJgEJUzXPjqkmgVgQoRLU6Tm4mbwLMnw8BClE+XJmVBEggAQEKUQJYDCUBEsiHAIUoH67MSgIkkIAAhciAxSYJkEA5BChE5XDnrCRAAgYBCpEBg00SIIFyCFCIyuHOWZtKgPsOJEAhCsRCIwmQQJEEKERF0uZcJEACgQQoRIFYaCQBEiiSAIUoS9rMRQIkkIoAhSgVNg4iARLIkgCFKEuazEUCJJCKAIUoFTYOIoGyCNRzXgpRPc+VuyKBShGgEFXquLhYEqgnAQpRPc+VuyKBShGgEDl1XFwMCTSTAIWomefOXZOAUwQoRE4dBxdDAs0kQCFq5rlz180l4OTOKUROHgsXRQLNIvB\/AAAA\/\/9GO5jKAAAABklEQVQDABp\/8XprHLsmAAAAAElFTkSuQmCC","height":259,"width":431}}
+%---
+%[output:0b591199]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACuCAYAAACSuwChAAAQAElEQVR4Aeyda6gWVRfH15yyLK1IrbQLoUKkpV0+FIbR7YNhRCL1JaJSs4tFSUZGVJyoD1F9KOxC9JJmRSAZZRAVGBRSJCXyWhbVe9BCtItmF1PTPO\/857Rru5uZM7Nnz8yemb+4z9577bXWXvu351nneWbmmdPTz38kQAIkUDOBHuE\/EiABEqiZABNRzRvA6UmABESYiCo8CsaNG5c6mxpHbVNM53E+BtOJGzdlcf20uaAfNw4ZxlRBP66ocbOGrilDP0mOMRSM6yVOpsYxpoqSxdVKh7UdASYiO27WVjiI44xNeV9fnwxW4EfXQV8V+NPHVBvyNB19XOkNVsNG+ddryHVbfUy1bXTgE3bwgRp9swwmhy1sVK3a6OvF9KOP6W3Ys9gTYCKyZ+etJV48eJHEBQg5xlHQNnUgw5gpT+pDFzZx45BjPG6sKbI2rKEJrJmIKt6luAMbL1bIKw6l1dOBJ7jqi0Qfcl3Gth8ECiciP5bRvijwojFLVav0\/cUKLipG1OhXxQZzmaWquds8DxORp7uLF5hZPA01c1jmCxh9rFF3AJlZTB1dv+o2YjFL1TG0cT4mohp2FQcyXmyYGjX6aPtSEFMZsWCdZjHn0ccxhj5qVVRsqFXBGNqo9QJbJUeNvj7Otj8EmIj82QtGYhBA4kACkRg5xvRiqLDbMAJMRA3bsCzh4gUa9wKGLeQYR0EbMr1AhjFdltaGLmzidCDHeNxYU2RtWEMTWDMR1bRLeIGmHeQYiytZw1X+TR+QKx9op40rPVNH9dV4nB\/oQK50bGv4gC\/Yo0YfbbNAjvEkOcb1MaWraoyhbZY4O1MHfdiz2BNgIrJnl9vSPKiT+pAnFX1S6Oh9s41xswymM9i47k\/X1eWqbY7r\/bg27NLkSePKRo2r2pTrfeioArlqmzXGVDHH9L7SYW1HoP5EZBc3rUiABFpEgImoRZvJpZBAUwkwETV15xg3CbSIABNRizaTS0kiQLnvBJiIfN8hxkcCHSDARNSBTeYSScB3AkxEMTuE+0LiSoxqoki3T1LSddA29SBTxRxDP20M4yjQQe2ywGdcyTOHbp9ml6aXNqb7hJ7eN9sYR4mTZ5HpOvCjF30Mbdsx2La5tCARlbM9+j0iqo2DKMts0FM2qNE37SDDmF4gU3poJ40pnTprPTbVRsxZYoKeskGNfpwd5BhXBX2lh7aSo0ZfjcXVSeNJ8jgfg8ngC7HoBTJlh7bNmLJvc81ElGN3cRDhYBqsQE93iz5sdFlaG7qwKaqTZl\/mGOJPK4OtDbHB3tRDH3IUtKGnCvqQq37RGr6SfGIsrqTNCX3403XQhxwF7bgxXdbmNhORxe7ioEkqFu5qNcGLQC9mMPqYaps6Zj+JDeSmblV9zI349fnQhxwy1OijnVQwDr20kmRLeToBJqJ0PqWN4mDGga0XyDChqtFGgY4uM\/vQsSnKD3yrApnyhbaSo4Zc1WjbFNNezWHjq0KbXFNhTaqY683lqEPKTEQ1bTYOVBykeoHMDAcy6Ci52VfyqmvEYRY9zizxwD6vTRa\/RXX0uBAf+nl8wkaVvLZ55mmTLhORxW7i4EoqFu4STTAHDmhTAXJVMIY26ioL4jKLmh\/xJBVdB\/aqX0WN+RAX5kKNPtp5CuySSh4\/1N2fABPR\/jwy9XAAJ5VMDjIo4WDHHKYqZHrBOPqoXRf4RRyqoJ9lDuglFdjDH8bRblpB3EkF62raenyJl4lIJPNe4EDDQZhmgHHo6TroQ67L0tp59dN8FRlTcSB2lCK+lK3yqfpJNeaDrj6OPuQoaMeN6bK8beUXtW6LPuZDrcvztGELH7oN+pCjoB03psva3GYiSthdHBhmwQGToL6fGHq6LfpKAXK0IUNbL5BhDEWXqzbkNkXZmzXmi5Ppc5jj+pht2\/SJvvKlt8340Fd6aENXFfTVWFoNPdigTtOzGYNP+NYLZMoX2jZjyr7NNRNRzO7igIkrMaqJIt1eV4Jc9dHWS5Jc6ahxvcaY3jfbGE8q0DXHIEPBC8YcQ1\/JoWNT4COuKF8YU23U6KuCvl6UHLUuN9vmeFrfHFO+kuRqXNXQ04uSq9p2TNm3tWYiauvOFlwXXjBIOmaBvKDrTppz0ekEmIjS+XR6FEnHLJ0GwsWXRoCJqDS0dEwCJJCVABNRVlLUIwESKI0AE5EDtHRBAiRQjAATUTF+tCYBEnBAgInIAUS6IAESKEaAiagYP1qTQDUEWj4LE1HLN5jLI4EmEGAiasIuMUYSaDkBJqKWbzCXRwJNIMBE5MMuMQYS6DgBJqKOHwBcPgn4QICJyIddYAwk0HECTEQdPwC4\/K4Q8HudTER+7w+jI4FOEGAi6sQ2c5Ek4DcBJiK\/94fRkUAnCDARtWKbuQgSaDYBJqJm7x+jJ4FWEGAiasU2chEk0GwCTETN3j9GTwJVESh1HiaiUvHSOQmQQBYCTERZKFGHBEigVAJMRKXipXMSIIEsBJiIslBqvw5XSAK1EmAiqhU\/JycBEgABJiJQYCEBEqiVABNRrfg5OQl0h0DaSpmI0uhwjARIoBICTESVYOYkJEACaQSYiNLocIwESKASAkxElWBu\/yRcIQkUIcBEVIQebUmABJwQYCJygpFOSIAEihBgIipCj7YkQAJOCGRKRE5mohMSqIDAmHVjZMb\/Zsjpn59ewWycwhUBJiJXJOmndgJX9F0hmydtltfGv1Z7LAwgHwEmony8qO0xgSAIPI6OoaURYCJKo8Ox6gg4mGnZ2GUy6r+j5NT1pzrwRhdVEuipcjLORQJlEtjbv1fGDBkjn078VNZOWFvmVPTtmAATkWOgdFcfgXnfzpM5I+fUFwBntibARGSNjoa+EViydYnMHTXXt7AYTwYC1SSiDIFQhQSKEtjTv0eG9Qwr6ob2NRBgIqoBOqcsh8DQnqHlOKbX0gkwEZWOmBNUReDZT5+tairO45gAE5FjoHRXD4EtW7bIlVdeWc\/knLUwASaiwgjpwAcC11xzjfT08HD2YS9sYuDO2VCjjXcE3nnnHe9iYkDZCTARZWdFTc8IfPfdd3LRRRdJEAQybNgw2bp1q2cRMpysBBqSiLIuh3pdILB06VIZMmSInHjiiYKPZP39\/fLbb7\/JqFGjZM2aNV1A0Lo1MhE1ZEsfe+yxhkTqPsyNGzfK1KlTo3c+l156qVx99dWyZ88e2bVrV9T+5ZdfojEkpBUrVkhvb691EGE+k9Bd6NvaBQ0tCDARWUCrygQvQJyADYJA7rvvPjnnnHOqmtqLeS6++OIowUyePFnuuOMOQaJ54403\/hXb4YcfLjt27Ig+niEJPfzwwzJz5sx\/6WUR9PWJhNPJ999n0aaOKwJMRK5IOvKj\/+bHR419+\/ZFL0D81scJ2cMOO8zRTP67+eijj6K1\/\/zzzzJjxozUgA899NAoGR100EEC\/SeeeEKOPfbYVBtjMPxYNyDZsEFk8+aBdjh16G+gzZ\/lEWAiKo9tZs+fffZZ9Js\/CAJZuHBh9OLDb36cgNWdDB8+XBYsWNCZy9Q333yzfPXVVzqCQdt\/\/PGHIBkdeOCBct5558nQoUMHtentlZC\/yLRpIn\/+KdG\/yy+PKjniCIkKemFuQ8VSAgEmohKgZnWJ8xw433HSSSdFyQcfPXAOJM0eHz3wLinMWeFVojTN5LG3335b1q1bl6yQY0S9zo87LodRBtUvv\/xSHnzwQbn22mszaO+vAo6wA1ucRwqCIDzns+tvpffffz9MPEFUPvxQpLdXQv4iP\/wgcsYZA2rffjtQ6z9vuUXvse2SABORS5o5feHKj7oClNNUNm2S8CpRPqv58+dHL765c+eG50Em5zNO0N69W+Too0W2bElQsBQ\/9dRTkeUHH3wQ1Xl\/vPnmmzJ9+vQwyfSGH7nWyCGHHBKd2A6CQGbPnh0mnv6oTJmS3XPHTtFlB+NAsyuJyAEqv1zg9Ed41TpMLCKPPBIf26pVEp4nERk9+ji57bbbBFfe8G7hm2++iV6ESITXXXddvHFG6cEHS3Rid\/TojAYZ1R5\/\/PGMmslqWCvuMzojfJuDr3\/g\/BtkX3\/9dbJRyohlTkzxyCFFgIlIkWhojWR0ww0i4SmRaAX33CNh0pEoQYVXuWXZMrxb2SRxL2x8NHz99dflxx9\/FNt\/998\/YHn77QO1y58fhp+bcMWsiM9zzz03Mn\/55Zdl1qxZUZs\/\/CPQ419IjCgvgfDqtTz6qMjq1QOWeDOBBIVL0VOnDsiSfv4Qnhi56qqrxPZq3F13iYwcKYIEmDRHXjk+jiEB4TzP4sWL85rH6uOdEN4Bxg5SWDsBJqLat8BdAOGnLytnb731VnQ1DifCszrYuVPCcy4D2upS90Cv+E+cH5o3b57ghPWZZ55Z2OGW8ATWEbj8VdhTugOO2hNgIrJn55XlrvCiUPhJJrzSZBcWktD5558ffqQLEh28+OKucFyij4Hbt4ssXSpy\/fUSXi4fSEpDhiSa5hp46aWX5AZ83sxllayMd1bPPfdcsgJHaifQU3sEDMAJARcfjZCINoWX447TrsXjoxs+0gRBICtX\/ic8yS2yd6\/ImDEDYT\/zzD\/1Tz9J+BFvoO\/i54UXXujCjeB2Bds7rZ0EQCeDEmAiGhRRMxTUjXhFo8XdyGeffXZ002QQBHL88ceHV8W+DxNQvyxenH4jzfDhEn7Ek9C2WBTqfNVNN91UzBGtG0OAiSjjVvmshotew4a5i\/DVV18V3DSJE7y7d++WI488MrPz3l4JbSV8x7RJtm\/fntmuLzyzrr5X9+uvvwr6l6vbmzN7iVccO3Zs\/ACl3hBgIvJmK+wDefJJkRtvtLcvw\/KTT4JMCQz39gRBIJMmTRIkICQ\/PNJj\/PjxzsLCiW9nzuioFAJMRKVgrdZpb2+QeFNjtZH8Mxs+4iGpBAFi++eOS5wUD4JARowYIfg+3apVq6KPferb8\/CA79jBFuembG+43PzXpbzVq1dH39yHXxZ\/CTAR+bs3uSILX9u59KtSRkK58847ZeTIkeEVt0DwVMW94dnubdu2yWDfq7O54RJ3jwdBIOodFW4FqGqthefpsAMmooZv\/hdffCEnnHCCt6t499135ayzzhI8OWD9+vXy9NNPywEHHJA5Xly1S7vhcuPGjeHJ8Z4oyeF7e\/Pnz5c\/wzP3c+bMiWS4FSDzZFSsjUBPbTNzYicE8Bvf53MgKj58v23ChAlWa8YNl3gkCD7WKQcPPPBAlGhOO+00+f3336OPd+PGjQtPko+JEh1OfOPdGN5VKRvW\/hJgIvJ3bzJFtmjRIrkL37PIpF290vLlywXPlS4680MPPRQ9XygIgsjVvffeK\/iIB9\/4Zv0pp5wSPU4W54aQgOK+WxcZ8oeXBJiIqtoWh\/Pg4V\/qnIurm\/4chhfrCo\/kiB3IIbzgggtkw4YN0bsefGUDDz875phjondDeLhcDldU9YwAE5FnG5IUDh7yFQSB4Dc\/7rHBn87Bb\/6VK1cmdXbU3AAABHlJREFUmXgh758+XXBj0QpHX7HAX+7Ad8fwOFis\/+677\/ZinQyiGAEmomL8SrXeuXOn4MHwQRAIzn\/ghYff\/CeffHKp8zp1Pm+eyAsvyAHhOxdXfvOc7HY1J\/2US4CJqFy+1t5xox8uceOh+UhA+olaa6dVGz7\/vMgll4g4\/AIrlvAk7uBEg8Ug0NwuE5Gne4cb\/fQvn3oaZnpYfz3uVXbvTtfLMYqPZHzAWQ5gDVFlImrIRjUyzNWrRXbsEHH1fJAQwhFz5gj+SkfY5P8WEehp0Vq4FN8ILFoksm2bWP+5kbj1LF8eJ6Ws4QSYiBqzgQ0LFHdP4+\/v4E98bN\/esOAZbtUEmIiqJt6V+fDQbKwVT\/Xfuxet4qWvT+Soo4r7oQfvCDARebclLQlo3z6R2bNF3ntPxNXzgGbNElmypCWAuAydABORToNttwRwE6Ojx71GgV12mQhukIw6\/FECgdpcMhHVhp4T5yJw660i+ONpOO+Uy5DKTSDARNSEXWKMIupZuKomk1YRYCJq1Xa2eDELFohMmSKycKHItGktXmg3l8ZE1J19b\/ZKR40SwR9uGzFi4L6k0aObvR5Gvx8BJqL9cLDTCAIffyyCZ1L38PBtxH5lCJI7mQESVTwkEAQir7wiglr4r+kEmIiavoNdjn\/mTPl8\/XqZOHFilyl4tXbbYJiIbMnRzgsCeA722rVrwzdG4TskLyJiEDYEmIhsqNHGKwL4Nj6e2RQETEZebUyOYJiIcsCiqt8EkIz8jpDRJRFgIkoiQ\/m\/CFBAAmURYCIqiyz9kgAJZCbARJQZFRVJgATKIsBEVBZZ+iUBEshM4O9ElNmCiiRAAiTgmAATkWOgdEcCJJCfABNRfma0IAEScEyAicgxULpLIcAhEkggwESUAIZiEiCB6ggwEVXHmjORAAkkEGAiSgBDMQmQQHUE3CWi6mLmTCRAAi0jwETUsg3lckigiQSYiJq4a4yZBFpGgImoZRva7uVwdW0lwETU1p3lukigQQSYiBq0WQyVBNpKgImorTvLdZFAgwh4lIgaRI2hkgAJOCXAROQUJ52RAAnYEGAisqFGGxIgAacEmIic4qQzzwkwPE8JMBF5ujEMiwS6RICJqEu7zbWSgKcEmIg83RiGRQJdItCmRNSlfeNaSaBVBJiIWrWdXAwJNJMAE1Ez941Rk0CrCDARtWo7uZiyCdB\/OQSYiMrhSq8kQAI5CDAR5YBFVRIggXIIMBGVw5VeSYAEchBgItJgsUkCJFAPASaierhzVhIgAY0AE5EGg00SIIF6CDAR1cOds3aVANcdS4CJKBYLhSRAAlUSYCKqkjbnIgESiCXARBSLhUISIIEqCTARuaRNXyRAAlYEmIissNGIBEjAJQEmIpc06YsESMCKABORFTYakUBdBNo5LxNRO\/eVqyKBRhFgImrUdjFYEmgnASaidu4rV0UCjSLAROTVdjEYEugmASaibu47V00CXhFgIvJqOxgMCXSTABNRN\/edq+4uAS9XzkTk5bYwKBLoFoH\/AwAA\/\/85SdR1AAAABklEQVQDAHV6aImKpQxtAAAAAElFTkSuQmCC","height":259,"width":431}}
+%---
+%[output:515b35f3]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACtCAYAAAAUL3IPAAAQAElEQVR4AeydeaxVxR3Hf+eB9YHGrbY0igsPjUpTSkURCEJaSUys6GuDWG3EJe51iTVItNq+xsYGoYj6R8W6oLYWFYpLSLRCoIqtomLaiKVGERVUIoIIKiJK53suwxtOzjnvLHP2L3HuzPzmN7+Z+cy9X889y31t2\/mPBEiABAom0Cb8RwIkQAIFE6AQFbwBHJ4ESECEQlThd0FHR4cEJSwLbciDUli7btN5nBjePugLW1BCO1JQO+y6Hblfgo+Z4IM6cqbyE6AQlX+PQme4cuVK8UuhnWI2Bn2g\/eywYT7IzWFg80umD8p+PrChDckbFzadtJ\/OtZ15+QlQiMq\/R7WdIUQlrmjAH\/1qC6WhC6MQNXTj4yzb78MPMYA9ThzTN21\/MxbL1SeQWoiqj6DaK8AH2puKWhHmocUJOep+c4Ed7UFtaDeT1w990e61s15dAhSi6u6dO3N8KL3Jbajoi3ctqPstBXaKkR+ZatooRNXct9xnbX7wIQCom5OADXXkOuk6cp3Q5u2r25g3lwCFqLl7b33lEBhvMgdJLEJmEKOMsRDTMLFYUQIUoopunI1pB32Q8eFGm40xdIwsYiI25onYKDNVlwCFqLp7F2nm+JD6Jd1Zf5BNH9h0u5nDDj\/kpt3Pptvhi3bUkfsltOnk1w6bbvfLMQbs2k\/n2oa6N6GNqTwEKETl2YvYM9EfwKCOaA9KZh+vj7etpzr6mz7eMtrDkvbvyQft2tebo81MaDfr3jLamcpDoHghKg8LzoQESKAgAhSigsBzWBIggW4CFKJuFiyRAAkURIBCVBB4DpsnAY5VdgIUorLvEOdHAg0gQCFqwCZziSRQdgIUIp8d8t5zous+roEm3Qd5kBPazOT1S9pmxkEMs26jjJh+KU5s9A\/zR7tfQh8\/O2xo80thbfBHOxLKZopq8\/ZBP53MNpS1HTnqOqFuJm1vSl4DIcpmq7z3naCON0qU0eAHf51Q9\/aDTbfrHDbth7K2I0c9Spv2yTrHnLzJnGPY+FH8vLFR1zFR9ibdFpQHjRlkD4oTZkcs77xg031QNttRRxty044ybGhrSqIQxdhp\/QbBmyQswc8Mizr8TVtYGb7o4+cT1ubnX4QNcwxLSeaEeHky0eMh984XNr\/k9TPr8PfOH3XYTb+mlilECXYeb6CglCBcoV3wQTCTdzJmmy57fbz1IDam3dsn6zrGxvzNcVCHHTbkqKMclNAOv7AU1DfMjnhh7U1ooxAVtMt48+GNbSbYMB2do4wEH23TOexIZhvqcZLui5g6waZjoKztyGHXOcoNSrGWCm46xeGl+yCP0y\/W5ErqTCEqaGP0mw1vOJ1g804HNrR77aiHtaE9y4SxvSlonmnngXGCYoe1JR3XjIlxUY8TC310itNX90Eep1+cuZXVl0KUYGfwJglKCcIFdsEYeFP6OYS1+fnbtmFe3qTHwNyCkvYpIsd8MS+MjRx1lOMk9AtKceLQd1cCFKJdeUSq4Q0clCIFiOCENzvG8HMNa\/PzT2rD+BhLJ9SjxIJfUIrSv8w+QeuCHZySzD1pvyRjlbUPhUgk8t7gDYM3XFgHtMPP9EEddtMWVg7zD2sLi5mkTY+FuSMliZG2j56DX5ywNj\/\/nmxYo1\/MIHtP8cx2HcO0+Y1ltjepTCEK2G28SbwJb6YA913M8DP7oq4dYEcZNpTNBBvakEy7LsOOpOtmDntQMv3MMsYz6yjDZsaBzUxmWxZljJVFXB0T68MYyLXNVo6YiG0m2HR8lP3avHb4wKb7NSGnEPnsMt4EfsnHNdBk9jedYNd1lM0UZNc+aNdlb442v+T1M+vwN+sow4akPwywmUnb4ZMmIaZff6\/dWzf7hLWF+Xn7mXWzHBbDbDPL6G8msw3loDbTjjJ8m5QoRE3a7RhrxYcBouNNsMcIQ9cdBJiFE6AQhfNpdCtEx5saDYSLz4wAhSgztAxMAiQQlQCFKCop+pEACWRGgEJkAS1DkAAJpCNAIUrHj71JgAQsEKAQWYDIECRAAukIUIjS8WNvEsiHQM1HoRDVfIO5PBKoAgEKURV2iXMkgZoToBDVfIO5PBKoAgEKURl2iXMggYYToBA1\/A3A5ZNAGQhQiMqwC5wDCTScAIWo4W8ALr8pBMq9TgpRufeHsyOBRhCgEDVim7lIEig3AQpRufeHsyOBRhCgENVim7kIEqg2AQpRtfePsyeBWhCgENViG7kIEqg2AQpRtfePsyeBvAhkOg6FKFO8DE4CJBCFAIUoCiX6kAAJZEqAQpQpXgYnARKIQoBCFIVS\/X24QhIolACFqFD8HJwESAAEKESgwEQCJFAoAQpRofg5OAk0h0DYSilEYXTYRgIkkAsBClEumDkICZBAGAEKURgdtpEACeRCgEKUC+b6D8IVkkAaAhSiNPTYlwRIwAoBCpEVjAxCAiSQhgCFKA099iUBErBCIJIQWRmJQUiABEgggACFKAAMzSRAAvkRoBDlx7rWIy1fvly6urqkV69e4jiO9OnTp9D1rlmzRl5++WWZNGlSofPg4NEIUIiicWq019VXt5Y\/b14r\/+orkSlTRI45RpToiAwb9mM55ZRTZMuWLbJ161bZvn27m7\/77rsS+V9Ex7vuukva2trUuE5oGjZsmFx00UVy2223yXHHHRcxOt2KItBW1MAct1oEDj20NV91sCO9e4u8957IjBmiREdk6dL58uabb8r1118vkydPlmXLlsmKFStkwIABrU4WXy+44AL58MMP1bjbQxOOiF566SX54osv1PyWWpwBQ2VBgEKUBdUaxly1SkRpgOAg53e\/E7njDpHjjxd1VCIyaNAgmTNnjrS3t8u0adPk6KOPlsMPP1yuuOIKsflv8+bN8uSTT8puu+0mX+GwLELwM844wxWsQw45JII3XYoiQCEqinyFxh0\/vjXZBQtw9COycaPIhg2toyH1LUxee+01Ga+ceuNQqeXqvk6fPl2JlVIrt5b+BWJy4oknCnKci4oScfbs2fLxxx\/LBx98IEuWLInShT4FEMhHiApYGIe0R2DECJFf\/lJkyBCRn\/5U5OabRfr2jRZ\/1apnZe7caL5hXtdcc40MHz5crlYnrI7HoViYs9GG81X77ruv+xVtzJgxRguLZSJAISrTbpR4LiedlGxyK1eKOlpK1tfsNXXqVJk\/f77gKOvxxx83m3osP\/\/88+55q08++cTt32MHOuROgEKUO\/LqDfjKKyJjxyabtzqdI7jatmlTsv7o9fbbb7tf\/3BCHCfBYYuTcNXsGHWJ7\/3331dX+6bIvffeG6c7fXMgQCHKAXLVh1AHIqmW0NkpcvDByUMcdthhctRRR8mRRx4pRxxxRECgcPO6devcE+hr166V8847L9yZrbkToBDljrx6Ay5ePD31pK+6StSVLpG\/\/S1eKJwEv\/jii6Wzs1Muu+yyeJ0N7\/32209wSX+uOmGFK26O4xitPRePW7asZyd6JCZAIUqMrjkdFy68OvVi\/\/MfkW9\/W+Sdd+KFgnDcfvvt8thjj8ktt9wSr7PH+4ADDlDnq8a7N0TeeOON8umnn+7igdsDVr71lvxTXRacp46gbl+zRn6zapWcs2KF63ctTni5Jb7YJkAhsk2U8QIJfPSRyJdfivzlL+Lef4SDEp3GjbvbFYn7779f8LiIqH+43P6R6vTss8\/K+vXrlSX9f7jzG1Fw8yVuBXjwwQfdR0FwF\/iee+4pHQMGyMi995af7L+\/XH7ggfLbQw+VWeorIfr8vqMDGVMGBCoiRBmsvCQh8X9ha1NRJ2Tlv\/8V2WsvayFtB\/rVr0R+\/vPue5BwHxLSjBlj5bTTTpOnn37azR3HkZPUpTp8pRo5cqTgEryNueBmSMTBIykQujPPPFOGDh0qBx10EMyB6d4dYhTowIZUBChEqfCl74z\/I++zzz7y9ddfpw92wgmizuqKLFqUPtaOCPfcc4+cddZZgpO9juPIe3i2Y0dblAzfflQ3mTOn5b11ayv3vg4ceIicfvrp8sADD7hXyHD\/Dy63t7e3uw\/Sev3T1J977jl55plnYoUYFPXGqVhR6awJUIg0iYLyCy+80P3w4U5hPBeVeBo4Err77lb3P\/xBBCdlWrVUr+eff77g7uT91VcViMPB6vLX7rvvHjmm+rYjaU6tYNw78DxJ5BF7dhw1apSsUud+evakR14EKER5kQ4ZZ9y4ce7zUDNmzFDnTmJczcGZXxxuXHll60hInWB1h1HnPURd8nafTv37311TnBecl3EcRyZMmOAeqeG8Cp5kdxzHPVqBYOr666+\/7hsa54KUu1qXiDrt4usTxbh69Wq57rrrorhG8sFT+bgpEkehng6sFkiAQlQgfO\/QeHIdX9Ecx3FvvPO267p74naPPVqfcJxgufVW3dSd46vEtm3iPpOhLl13N4SX+vXrJzgKwdHPww8\/vNN55syZSlS2y+DBg92vSt76TscdhW98wxHcCLmjmiqDMJ599tmpYujOL774olyFewm0gXkpCFCISrEN3ZNwHMf9wF9++eXu0dFTTz21s\/GRRx5xba\/gE46TL1GeQN+8WdQlJ7ffkCFDdsbyFhzHUaeXjhLc8AcR8rbrOn5zCPfhXKmOwhzHEZxv0XX4oK\/jtNYwZAgs6ZPjtI7EMGaaaLNmzXJ\/JylNDPbNhgCFKBuuqaP2VUc0X6rvN7ihD6KERxTwa4Pb1FHOCTgpHXMECARuCjxQXZI2u44dO9YVqc8\/\/1xdcFNX3MzGkPKt6igMMUePHu32Rx3u+NEyPBOGss2EIxn8yFmamOeee677EyJpYrBvNgSaIkTZ0Ms4Kn5WY9OmTYIb+vAjX6vUCVac1E46bFdXl3t3seM4rng4jiMLFixwj8BwdSpJXNwUCEFCbFxiRxmX3ZPE6qkPYuO5sTA\/nM9aqc6OY124J+mhhx5y3fv37+\/eFOlW+FI6AhSi0m1JPhPauHGj1YEgRDgashrUJ9jSpUvVVbiVbovjdAuq47TKe6hzZzhinDJliiuyOKqEMx7vwL1DKDOVjwCFqHx7ksuM9srgpsdzzjkn87njqGjgwIHuOCjjxP2rr74q+GkQnEC\/9NJL3R9j27BhgytEuAfKcVrnrNxOfCklAQpRKbelmpPK64fH8NyZ47SOgPD8GG4zuPPOO91HNTo6OgTnvSBK+DoLsUKSHP5xiOQEKETJ2VW6J24TsP1VCl998MP2WYM59dRT3fNaEBicZMezaU888YRAfHBlbeLEie5jGxCprOfC+HYIUIjscKxUlD+NGiUb162TM37wA+vzXrx4sfWYZkCIj1lnuR4EKET12MdYqzh\/yRLZV12B+3Ob\/e2\/7777Ys0lrjMeTn3hhRfidqN\/yQnYfyeWfMFJp1e7fuqISL71LevLyvqICFe\/8JiG9YkzYKEEKESF4i9wcHVEJBn8rS\/cV5Tlqq699toswzN2QQQoRAWBL3zYjI6IslzXwoUL5aabbspyCMYuiACFBHJlfAAABVVJREFUqCDwhQ27bZsIfiYEj8SPHl3YNJIMjMvySfpVpk+DJ0ohatrm42n9mTNF8BXnRz+yvno8WIv7d2wHxjN2tmMyXnkIUIjKsxf5zOR73xP53\/9EVq8W+eEPrY+JGwuPPfZYwRP5NoPj50lwv5DNmIxVHgIUovLsRT4zGT68e5yRI7vLlkoQIdzr07t3b8GNhZbCCh7lGDRokK1wjFMyAhSivDakLOPMmtU9kwxP\/EKMcE+R4zgydeq\/useMWcJvMOEH7\/EMmeM4MXvTvSoEKERV2akKztNxWg+b\/vWvI6SzM94Curq63J8qwVP0I0aMkEsuucR9rMP2YynxZkXvrAhQiLIiy7g7CeCPpD76qMh3vysyYcJO8y4F\/NjkxImixEfkZz\/bIhAiHFXhxDf+4sYNN9zg\/kkhPCOX5jeZhP9KSYBCVMptqeekli8XwS\/cjhkj0tnZWuPatSLf\/764v\/OP3\/vHRb3Zs9tbjcbrvHnz5OSTT5ZFixa1ToSroy2jmUWXQHVf2qo7dc68igTmzxf5xz9EHn1UZNIkkX79RP7979YfXPz1r8NXhL95NgY\/6N+nT6tD374iNv4eXPiwbM2BAIUoB8gcwp9Akt9ma\/vjH0WdMBKZO1fks89EevUSwU2a\/kPQWhECFKKKbFTdpnnzzSK\/+EXCVU2fLvLGGy0Rwne53r0TBmK3shCgEJVlJ3qcR70ccGP33nunWNPkySLTprUCrF8vMn68SP\/+rTpfK0eAQlS5LavHhHFqB9+qUq1G\/6HEb35TZM6c1t3iqQKyc1EEKERFkee49gjgpDWibd2KV6YKEqAQVXDTOGUPAdwToC7ru\/cAeJpYjUWgMGcKUWHomz3w8OHqOr5NBHiAN4OfvrU5RcYKJkAhCmbDlgwJfOc7d2UYnaGrRoBCVLUdq8l8hw4dWpOVcBk2CFCIbFCsRoxSzXLcuHGlmg8nUywBClGx\/Bs5+pYtW2Tw4MGNXDsX7U+AQuTPhdYMCbS3t4vjOBmOwNBVI0AhqtqOcb4kUGICSadGIUpKjv1IgASsEaAQWUPJQCRAAkkJUIiSkmM\/EiABawQoRNZQ1j8QV0gCWRGgEGVFlnFJgAQiE6AQRUZFRxIggawIUIiyIsu4JEACkQnsFKLIPehIAiRAApYJUIgsA2U4EiCB+AQoRPGZsQcJkIBlAhQiy0AZLoQAm0gggACFKAAMzSRAAvkRoBDlx5ojkQAJBBCgEAWAoZkESCA\/AvaEKL85cyQSIIGaEaAQ1WxDuRwSqCIBClEVd41zJoGaEaAQ1WxD670crq6uBChEdd1ZrosEKkSAQlShzeJUSaCuBChEdd1ZrosEKkSgREJUIWqcKgmQgFUCFCKrOBmMBEggCQEKURJq7EMCJGCVAIXIKk4GKzkBTq+kBChEJd0YTosEmkSAQtSk3eZaSaCkBChEJd0YTosEmkSgTkLUpH3jWkmgVgQoRLXaTi6GBKpJgEJUzX3jrEmgVgQoRLXaTi4mawKMnw0BClE2XBmVBEggBgEKUQxYdCUBEsiGAIUoG66MSgIkEIMAhciAxSIJkEAxBChExXDnqCRAAgYBCpEBg0USIIFiCFCIiuHOUZtKgOv2JUAh8sVCIwmQQJ4EKER50uZYJEACvgQoRL5YaCQBEsiTAIXIJm3GIgESSESAQpQIGzuRAAnYJEAhskmTsUiABBIRoBAlwsZOJFAUgXqOSyGq575yVSRQKQIUokptFydLAvUkQCGq575yVSRQKQIUolJtFydDAs0kQCFq5r5z1SRQKgIUolJtBydDAs0kQCFq5r5z1c0lUMqV\/x8AAP\/\/1iArZgAAAAZJREFUAwCxZ02HaD+4\/wAAAABJRU5ErkJggg==","height":259,"width":431}}
+%---
+%[output:8d14c52f]
+%   data: {"dataType":"image","outputData":{"dataUri":"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAASIAAACtCAYAAAAUL3IPAAAQAElEQVR4AezdC\/xtRVUH8Nk89CKooCKghBe1TFG5EAmlIqBAYVYGWuAjtFJTjCStDKtLaVoaaVn2ILNEKs2ih5U91ehBYmZmmSlcHsoNLCEwRXl0vxvXZe4+++zz2uf8z\/n\/534+687Mmpk1a9ae+e01j33+u93R8e\/QQw\/tyC1ZxQLFAsUC\/Vhgt1T+FQsUCxQLrLEFOoHo8ssvTw9+8IPXWMXSfLFAscB6t0AnEAUICZu03g1T+tefBYqkYoFRFugEIh7RMBoluOQXCxQLFAuMa4FOIBpXSClXLFAsUCwwiwVGAlFzSSY9S4OlbrFAsUCxQNMCnUAEdNqWZvghqITFAsUCxQKzWqATiGYVXuoXCxQLFAuMY4ECRONYqZQpFigWmKsFChDN1bxFeC8WKELWvQU6gcj+kP2gJrFKzpOehciatn5X3TxvWHzadqMeucMoyvQZamsceeOWG0fWtGUWpcM82yF7GE1rl656zba6ys6Sp52on8eDF2FXXpTpI+wEomgAIKFmGg8tStlov8+wD93ZoI36kN1nX4usyS2QP1e1m2m8vsh4yeWL4\/Ulf55yZtWzE4gIZ4y8A9L4o3h5\/qg4maPKTJM\/TO4w\/jRtlDrFAn1YwJxqG5d48vpoY5gMbQzLWxS\/E4imUYLRcspl5HzxOm\/Hf21xPLQju\/7eTTwIr0mRJ4y8PB48YfDzMI8r06TIb\/LHSUddIVJHmBNeUM4XD35bGPnCoGa54EcY+dIRFw5LB18YpDySFk5D6uaUy8j54sPycn4z3qwX+cEX5hT5k4a5DPG8fqSFQXn+pPGQEWFeH09aGCSNIi2UzinniQflZcSDHyEeko4w4nkaD+EFSefUKxARDF1zwtO4MOeL48lrEr58lMelEV5eRxo\/SDrPHxZXXp4QRbxZXzrylWmS\/DbK68iXRnlcGuGRK5TOCU9ek\/CVi1AcSUdZcbyc8CJ\/3FCdNhl448rIyzXlkYOnjFA6J7y2vODLa5L6zXzp4AtzkteUMSqtTi5DHC+vJ40fJJ3nj4qrp4x64jnhyQuSbua38aJ8HnaVa+ZpA0998QgjLk88JzzlhDlfvFcg0sgkRIG28jk\/j7eVxRunjHLzIu23EYNHm\/Ij3hWOW47sYWWH8ZvtKkdOky+NL18c5XHpedIkbU1SdpTOfcrK2+pL7jhy+ipD\/1xWHpfXN3UCkcYNyCCNi+OLt5H8nKKMOjlfPPJGhcrmNKr8KuTn\/RHPdZbOKc8Tlxf2lO6D5iFzlF7azCkvn\/PF87zJ44M1wn5kBw2WWg4O\/UIT8ZyCv4gwb1d8VJvK5BTl22zfCUQqqhQUaeEwirJ5GGVznjglI29YqIyyOQ0r2xdfW9olTygt3ieR2STyo708Dz8neXl6VeP60SR9GccGyo1D5JOnrFBaHInnJB9\/WYl+ub7ii9J1mrbp16TQt8kfCURRsSsMJdvKyMOPUHwWapPTxpuljbWoO6wPw\/h09DDb8tt4yrdRyBDKF6ovlF4kabetvWF8Zbvy5A+jaesNk9fFH6ct9m4rhyevTb68Nv4o3rj1usp15Q1rP+pEmJdrBSIFUV4w0sImhaGE0+Tl7TTjTZnS05Rp1ok0eaFz8ITBF0p3UdRvhsPq4g8r28yT7mo78nN5wVNPPM8Tx5PXB5HXJUd+G9GhyccjS5jnSeMj8WF58tso6ggjXzyXI44X+eOG6qibE15eX7orP8o2y6mDNyw\/z4sybaFyZAVJT1pOnagvlM5lSOMj\/DyNh\/CG5Q0AUVSISirmvOALg5QJCl6EwRcGL0I8JC1EeVwa4QVFWoguv\/xyQYp8Yc3Y8d848R3FdtYVn5S0MYxClvyIR4iXU\/CFTb40Psrj0ggvp+AJUZ4njpdTkzcqrW6UiRCvSfKGkbLNPLygPA9PWojEgyIt7CLlm\/l4OTXzm2llmzxp\/JzwmjQqP8rn5cSDHyFeEJ64EOVxaRQ8YVDOb4t3lRuWF3LkiyPxnPCCcr74ABBFwY0cAl7EQBvZDqXvxQKLssBIIFqrCXnNNdektaL3ve99Ca1V+6XdtXv2fdt+FcfRosAnb2ckEOWFFxU3GF72spelY489tlCxwTKMgQ2lw+mnn147AYua79pZUyDibVGiSYDo0ksvTa997WvTRRdd1AudffbZdTN9yuxLt2Fyis79PPth9g1+sfNddmYLc6+eLAv8bwCI7IsAiCDp0KeNF3mThCFnVJ2jjz46HXPMMb0QWdoT9iVz3nLoWnTu5\/l3Pati57tsHLYw7hZJA0CkceATJB3Uxou8ScK+5EzS5oEHHpie\/exnJ+Ek9dayLF2LzvN\/AsXO87fxqBZagWhUpUXlX3XVVWn79u0T0a233pra6H73u1865ZRT2mSN5LXJC96k+kX5qN8MLUuvvPLKhG677bb0pCc9qY5Lo6jfFjZl5em28uPwchnNeNSnV9AonZsymumQOUnYlJGnh8kJfYVtOucy2uLD5Hbx2+Tg5c+cPk1qk7n77rvX41n9LmqrO4yn3dtvv31R03uXdpYaiE488cT0hCc8IT3jGc8Ym66++urURh72S17yktormkSesm3ygid\/Gor6efj+978\/vfjFL06PeMQjanr0ox+dTj755CQM3iO3PDKddtpprfbIZTXj0+ioTlNOnpZPF8ue0I+uXTrn9dviZE5KuRw2zIl+OZEtPUrnJ556UiInl53HyZmU8voR10b+zMOOeXjEEUcMPHOesvEccoaFk+h40kknJXNuF4RYUGKpgeiCCy5Ib33rW9P5558\/Nh100EGpjQ444IB07rnn1hvgk8hTtk1e8ORPQ1E\/D2+55Zb0oQ99KD3qFY9LR77hxAF62POPSpv22JRe\/vKXt9ojl9WMT6PjOeeck3gLw4jMZz3rWcnbeVydm3o102ROSiGDnurmk2\/btm1pW0ZXfeaWdPzxx4\/U+eoPb0v7779\/61jSnnYmJfWaFM\/84Ge+Lj3oRW8boAc85aW1rs1n\/upXv7oez015zfQkOpprW7duXRD07NpMJxDZVN61+GJTj3\/849NjHvOYdPjhh49NmzZtSm201157pYc\/\/OFjy8nbbJMXvLzcJPGo3wxZeN8jDkj7tdGWA9Ld7na3oX1oysrTk+im7H3ve9904YUXJm\/JYfSa17wmWfLSaVydc53y+Kc\/\/emEtDspqRf0gQ98IO31uOemvZ98bk37PfW8tN9T76R7n\/CCdNsNn0pbtmyp7bj3A++d9j74XgO03w47ew4hsy2cVEfl2+SwgbY27f+gtGn\/QwboHg89utZV\/Zzsa+233361zdrkBi+vI+7ZDiNzzZyjz6KpE4hsKgOjoEUrV9pbOwtYyjrGNaHvecYbU5NMdvl9aKitPu6NnXHGGbU6n7vkzemz73rVAOEroC3hFVsvSx974SUDhC+fvHnfZdOGtm666Kx0w5tOGyB8+crlupxwwgn18lyY80fF1+KOEP1HUScQqQyMggogscjGoj0POSK10R6HHNmbIQARUFulO15xB2mVwrW6IzTOQBkJRLmQvgGJvFx+iW9sC7jDYhO50F33evq0Bfsu6wibCIjCIwIgSHpZO7ZIvUpbxQLFArNZYCQQAZsg4INma7LULhYYzwKWbOuBxuvtxi7VCUQACPAENU2F3+SVdLFAHxYAQCc88+x18bHpqA1i86wPm62yjE4gKkCzyo92tXUHRLde9cH6CL55YrdK6d5OF1f7cY7UvhOIhiH1MP7I1hZcwGAOimvtkRYuWJ3S3BQW2HPIqd2q8PfoOF00j9AUZll3VTqBaJV7C2jcF4l7Fe5buHErDJ5r\/Mqtcj+L7qtpAQBkxYFWswf9at0KRIyENCVs0ioYD8C4m\/LAFx2WDt161ADd\/2kPTld88OO6WKhYoFhgjS3QCkSABtFN2CT8VaG9D9svtdN9lqcLRZNigS9ZwEv\/S9GxAuVzGqvSEhZqBaLQEwBFvITFAsUC\/VnA3AoAGSW1WU5anQjJCgqe\/FWiASDSEaQTwmEkv1CxQLHA9BYI8BAOk2L+yUfiKOJC9fCCgoe\/SjQARDqCdEI4jOQXKhYoFlisBcxHoJO3iheU83eNL3dqAIiWW93V1c7meRetbs\/mq\/ltN25Pt9947crSNNYBNEEAphmfRuay1xkAouj0qHDZO7ZM+gGg\/CpBXB\/Iw+Oe8vT0yU9+cmy1yeyisQUtacGDDz44HXLYUcnPYLT9PMaq8OjvY1P9GcfUgCcndSItnpM5Ki\/nrWp8AIh0bBxa1Q6vhd4Aw1WCrt\/2ueojl42tGnmjgG3UZwVjN7ZGBU3cC990flqln9kYpqufN+nLjM252ZfctZYzAERrrdB6bn\/PIbeE9+i4fdtmD54TYDv3sXunN558z\/TGk3el5x6+V5LfVneVeMCoz5\/BWCtZ+rFKdl8LXQeAiLuHKCMcRvILra0Fjjhwz9RGRx64x9oq1lPrPL\/1QD2ZY12LGQCicP30OuJtofxCxQLzsgAAGrX8zPfYljm+6svkeT3jXO4AEOWZ4m0eEX6hYoF5WgAQWV4O+0Sn7bOdZeT5lEg\/umxljnXl9513zvOeOc3ftu9bjV3kdQIRA7V5Q\/i7SCmJYoE5WaD985xhn+0sI3\/5PiW67KNXzelpTS+2E4imF1tqFgsUC4yygBc6GlVuI+QXINoIT7n0ceksAIBitbF0yq2BQp1AxFAMlusljZ\/zSnzlLVA6sIIWMBfb1B7Gbyu7LLwBINKJnCjalsYvVCxQLNCvBfK5NiyuRXkcAiHCW2UaACKdG4dWudNF92KBtbaAOQZAUK4LPsITojwurU4eiiuD8jzpVaEBIFoVxYuexQKrbgEAEjSqLwAmSB3lhcGTXnbq0m8kEEVHm2GX0JJXLFAs0K8FgE4QyeajEE+YU+TlvGWPdwKRDuko0pFmiFeoWGBcC7ik2EZd9b943efTF67\/3MpSV99myTMXzU8UcsTxg6Qjb9nDTiBqU14nV6mDbX0ovMVbAAAN+2TjjDPOGFDIh6J+PuOKrZelj73wkpUl+uuH\/gx0soNhnkV2Hg+eED8o0sIgeRFf9nBiIFr2DhX91sYCo1rt+sUAvxbQrG\/i+vmMYT+tsUp8\/Wj2r6R3tUABol3tUVJztsAkvxYAjNbqpzv6bFc\/5mzWlRffCURcu1iGRVxafOV7Xjqw9BawnFsPtPSGXgIFO4GoCToACC2B3kWFdW4BADRsT2mZf\/KjTbfyMyCjB2snEEX1EhYLLNoCgMjPZwz7Fcq2X6ZcRp79L\/3osp8Xflf+RsjrBCLeTzHSRhgGy9vHtj2lVeKtl1\/LnPcI6QSiACFhk+atWJFfLLDeLRBzar33c5z+dQIRj2gYjSN8XmW47V00r3aL3DlaYIOJBkIxtzZY11u72wlErTVGMBkYDSsmr42GlW\/yAdCoTcxJ\/0ZYs42SLhYoFlisBQaAKECCGhFvC+U3SblAefFmfqSjTB5G07BCqwAAEABJREFU3qgQENn86+tvhI1qr+QXCyzSAuYNijYjnod5PMqtejgARAEOOhbxtlB+ToyjXPDE8SI9TQh0br311pRTyNmzp78RlsueVzx0XnQ4S38WretGay\/mx7RzRD0yprVb29gw36aVN2u9ASBqCtTh4ImjSI8dNgqSEdTI2iXpG6RXvvKV6eqrr95J27dv36XMsMT1118\/LGsX\/rXXXrtTdt5On\/G+dV5E39ZK510ezjpPAJKgvKt4bfMDT15edtp427i\/4IILkjk3rcxZ6nUCUd7xiDOE+CyNkhHUJcs3OmeeeWY66KCDdtK+++47VtP77LPPWOX233\/\/nbLzdvqM963zIvq2VjqP9dA2YCHzJbqdx4M3adg27s21s88+e1JRvZTvBKJeWmgIaRpRehgY+Wp58+bNadOmTbtQQ2Rrcq+99mrlN5lN2fNKN9ttS4+r87jlZu1Lm45N3ri6jFuuKX\/7zbela2++fWWp2Z9J0ubGJOUnKds2Nsw1c24SOX2VXTgQ9aV4kbO+LeBDUZPirHfflE575w1j0HKWob9+6M84TyzApxmqG7xmXHrVqTcgYqTcsxHHaxoIP+dJt5XLy5T4xrOAiWtpvko\/9zFMV\/3YeE9wsh53AhGAABRInOg8Lp2TMvKReJ6HJ40vHiSNX6hYoGkBYNTnz3GslSz9aPatpHe1QCcQKQookDjK49JNko\/a+MGTHxS8EhYLXHPNNanQ\/GywzCNsJBCF5yLUkQjFF0elpfVsgQP32T0dceAe9dFx289oFN6xqQ8bOJo\/aJ+RU35NhlqnVkCn6blI46+JtqXRdWkBk+OUh9y97pv9lGF7LaP4cfTcdeteI6eeeqogPfBFh6VDtx41QPd\/2oPr\/Cg37KdI\/MSHgquoM72XiTqBaJkULbqsbwsAIz10wjTtXo66ZIy6dU++cnsftl9qp\/vITlHuiAP33OGxDVL8xId2lZ2G1NXYonQOO2tzmagA0TI9jaLLWlqgtL2GFihAtIbGL00XCxQL3GmBTiCK\/aDYExIi\/Durl\/+LBYoFigVmt8BQIAI4qNlEAaGmRUq6WKBYYFYLtAIRAAI4bSRv1kbXoH5psligWGCJLTAARIAGAA3TWZ4yw\/ILv1igWKBYYFILDADRpAJK+WKBYoFigVktUIBoVguW+sUCX7JACaa3QAGi6W1XahYLFAv0ZIECRD0ZsogpFigWmN4CrUBkM7qLpm+u1CwWKBYoFhi0wAAQORUbhwZFrW9O6V2xQLHA\/CwwAETza6pILhYoFigWaLdAAaJ2uxRusUCxwAItUIBogcYuTRULdFpgA2cWINrAD790vVhgWSxQgGhZnkTRo1hgA1tgAIi6ju3zvA1ss9L1YoFigZ4tMABE4xzdK9OzHutfXOlhsUCxwFALDADR0JIlo1igWKBYYE4WGAlE+XIsj89JnyK2WKBYYANaoBOIAI9lGGKbZoi3HmjUH\/VbD30sfdgIFljdPnYCUVu3gBGAastbRR4QetnLXtb5B+xOP\/30pNwq9q\/oXCywChaYGIhWoVOT6PjJT34yXXrppanrj+jJn0RmKVssUCwwmQU2PBCFuUb9Eb0oV8JigWKB\/i3QCUT5MizilmXi\/atSJHZboOQWC6xfC3QCEdDRdSESR3lculCxQLFAscAsFugEIp5PkzSGJyxULFAsUCzQhwU6gaitASBUPKI2yxRescDKW2DNOjAxEK2ZpqXhYoFigXVrgQJE6\/bRlo4VC6yOBTqByBKsjSzPVqeLRdNigWKBZbdAJxABnDbqo1MBcH3IKjLGskApVCywtBboBKJ5aQ2EAuDE59VOkVssUCywGhYYACLAMA5N2z2ygVDUF8eL9LzCL1z\/uXTd2z+RhPNqo2+5dC06923VQXnFzoM2WTRnAIgAQ04Uakvjz5t8aNqkaPO2G7en22+8doAiP8IvXvf5GnyE173j8iQ08CI\/wu0335auvfn2AYr8a665pv7wdZowZBSdU9pe7LzLOFq2sRH6TBtOW28AiHJBPBUglPOk8XNe3\/GDDz44HX300emMM84Y+CoeT3s3XXRWuuFNpw0Qvnxf1Auv2HpZ+tgLL0nCtnSUO+vdN6XT3nnDAOGrp91jjz12QJ9xeOqSQbeic7FzPmaWbWzQx9wzB43ZRVEnEC1KiWY7jPDa1742XXTRRYWKDcoYWPAYMPeac3Le6aUEIp0GRsccc0wqVGxQxsBix4C5Zw4ukjqBKJZhlmI54U+rpLpkRX1xvEiXcHktUDQrFpiXBTqBSKNAokn4sxB5AAiJzyKr1C0WKBZYfQsMABFwQLomHEbyZyEAhGaRUeoupwXuuOOOdNttty2ncutIq\/Vk5wEgAg7I8xIOI\/mFigVyC3zmM59Jb3vb29JJJ52Ufu\/3fi\/PKvEeLbAe7bwTiNrsxBtq4xfe\/Czwd3\/3d+mv\/uqv5tfAHCT\/zd\/8TXra056WnvKUp6Qbb7wxveUtb0mnnXbaHFrqT2Sxc3+27ENSJxDxhoBRUB8NzlvGtm3b0hVXXDHvZuYm\/7\/\/+7\/Tm9\/85nTzzTfPrY0+BP\/P\/\/xP+ou\/+ItkefCBD3wgHXTQQem9731veuELX5ge+MAH9tHEXGWsip1zI6yinXP9u+KdQKQiMApaBUD6yEc+kn7\/93+f6jvpi1\/8YrrwwgvTqaeemn7jN34jSe\/MXIOIyfuP\/\/iP6cwzz6yXMT\/zMz+T\/vd\/\/7fW5Kijjkpc7\/\/4j\/+o08v6n79+Qu9rrrkmff3Xf3268sor06c+9alaXfr\/zu\/8TvrP\/\/zPOr1W\/62qndnv137t19IP\/dAPpde85jXJ\/GPDZbUz3Wal3SYRwCAIIE1Sb5Fln\/zkJ6fv\/d7vrZv8whe+kH76p386\/ezP\/my66aab6vBP\/\/RP07\/8y7\/U+Wvxn8nxK7\/yK7Ve3\/\/9359+6Zd+KV1\/\/fXp6U9\/ejK5DzzwwPTVX\/3VyXJnLfRraxPYfPu3f3u970N\/ZR760Iem\/fffP3lLH3LIIWm\/\/fZLv\/iLv7hziXbdddele9\/73oreRQuM0XMV7fyt3\/qt6Zu+6ZvSZz\/72fTYxz423XDDDfXYeP\/735+W0c59PdLdJhEEgBAwmqRen2UtWX7913+9BpZhcnk\/Nkvvdre7pd133z395V\/+ZfKALRm+7uu+Lv31X\/\/1sKpz55vUf\/7nf16\/6R7xiEekQw89NJ133nnpUY96VDJxKPCkJz2p1tHyR3qtCaCw+0tf+tL0Ez\/xE+lzn\/tc2muvvdIJJ5yQ\/uiP\/ijttttu6cQTT0wmy4\/+6I\/uXKLd\/\/73XzPVV8XOPN\/nPOc56Tu\/8ztrW8XL86yzzkpeqq9+9avT8573vHq8fP7zn186O9dK9\/DfSCACPEEACPXQ7tQiAMstt9xST4ZciGXAt33btyUPdvPmzelP\/uRP6jJPfOIT0\/3ud78akJT3Hc1ll11WeyHSi6aPf\/zj6e53v3vtTUTbe+65Z6L7P\/zDP9QfRAKlTZs2pQ9\/+MNRpA4N0nkuKz\/2sY\/Venz5l3957ZUBRqBzz3veMz3+8Y9PQNyywfd5wuOOOy5de+21yb6c76eAk754RrXCO\/6j71oc5S+rndkCYPPMd5inBnHL8q\/8yq9MbjTzgt71rnclHp38qqp2bvzz5JfNznTsgzqBCAABnqA+GpxVhsHuDRFvWxumL3nJS9Ib3\/jG9H3f933pK77iK9Lhhx+eTFqD0RJin332SSaZth\/ykIekAw44IP3bv\/2b5FzoTW96U+IZxGDKGzFR2yYnzwhA2WvhgXzN13xN7RXdeuuttafx4he\/OD3ucY9LTntyeX3F\/\/Vf\/zW96EUvqm3IVr\/7u79be5I\/\/uM\/Xu+pAXSAo8yjH\/3o9IxnPKNePrAvD9NmtReAeEw2Oh9\/\/PGJ7L70zOWsop1tkvMsLcmdMAL9H\/zBH0x\/+7d\/W78c2etDH\/pQ+vSnP72zq\/e5z33qcQ3A1sLOOxWZY6QTiADQ2G0vsKC9lGc\/+9n12\/iwww6r93ysn+2tVFWVvMG3bNlSTyTAlb9l9thjjxokvvZrv7YXjS1Z7PGYfCHwMY95TK1TPpgi70EPelC9GW2yB09oGbnvvvvW3pK0ic+rO\/LII9Mv\/MIvJP01WJ\/whCfI7p3e+c53pmc961m1J1RVVfqyL\/uyZFnAe\/QmBjj2hEyS7\/qu70rnnHNOvWTQb+DDc3J8T9cjjjhip87yvBhmVXgV7cxr\/O3f\/u1kvyz6f4973KM+YfQi\/Od\/\/ueazRvyEsLzIjUW2LnO\/NJ\/973vfWvgN37naecvNbfwYACIeEGIJsJhJH9R5Dje4PcATE4ejQdjktjctWwwwXN9TGQP2ia1\/QsurUmjjDcMz0R8WgI+jqq1Q69jjjkm\/eEf\/mHtUg8bTNrifvNsfu7nfm6XfS5LS0vOzTuWlcqZ+DbZeUBOUIDsLDrzwrxR2ZEt6MyWvDaT3JL2AQ94gKZ3El0Atn0ggM6O4rxN+1iuGfA6\/\/3f\/732OL\/qq74qnX\/++bXX1ofOFFk1O9M56JJLLqlPvl7\/+tfXXmXweby2CIA0+3txGj9sy3u3N2Qs8YbVAWh\/\/\/d\/n7yUpOdhZ3LXkgaAiBeEKCUcRvLnTR4AT8CEt6H3Yz\/2Y\/XJl4fyzd\/8zfU9FuDCnbVEM5FDJxP5mc98ZqqqKlnG2Vj1Non8SUPtGDTqefufe+65iddlXwc5MXLUamPcwGoOJvVQVVXJUtI+ir5dfPHF6Vd\/9VfT93zP9yQnU7wO5Ux8g9XAlJ6GDGQEKI7bsZ8DHGyKOlpnzx\/+4R+urzrYjwLOcfwebVVVVffxE5\/4RP02BvixJ6SMZcVb3\/rWuj9eCE7OAFQfOpO\/Knamq+sYgF48yFUMnrplLtvH+JFvzCq\/fft2yeSFxiOyye65A\/irrrqqXpY\/97nPTQ972MOSPTqF+7AzOctEA0A0b+W8JYCI5VWzLZt2v\/zLv5xOOeWU+gTJgPYWsPzyZubyn3766ekP\/uAPkhMnb0veEkBworBt27YU\/0zkWSdFyAI0z3\/+8+vJiGeQaM9JXFVVWMlbShkndiZQDKbm5FYYUOmn\/ZZ\/+qd\/Sv\/3f\/+XLI3cE5HfB\/FanLzwenhhllr0pRdg\/pZv+ZZkH4se\/\/Vf\/5UsJ93opnuzfZv9lhQ8JgDvTR5lACdQcyIZvGnDXGcyBu2cls7O9ERvf\/vb68ucvHBpBJwtpY1nYzY2qOU9\/OEPr6888Oql2VX5Sy+9tL4Qai9IPXtJ7hPZq5vFI9bGMtMAEA1bijX503bKBIb8L3\/5y3dZmpgAeN7OTmsO3XGszcPxFnaXwvIh7fhnv8EmH6DxluAdcXU9rD4mw44m6vs8OYC4JGkiA0b5Ji5Pg1cjHcTrsB8AHC1rDKb8PpA+cLktwwwqQMnLs6kLHELONCFgNwnirWufAXi73ClON29meod8b2WeEDCkC915OCHDslZ9S7KqqrOFsQUAABAASURBVBKPcuvWrYmnGTJmCbt09uyXzc7swmPhyVjqNvvugMGJYmzOV1WV2Fg\/8S1bPSP19t577\/oy67vf\/e7kmZAn5Gl78RkXQOqCCy6o9+2aY42M9UQDQNRciulszou0cFriYnpL8wgMdnIAkc1db92rr746GYhcU2DjITnSFJrYyniQJrC9DvXtywRQSE9LlmCWeb6VEkoDIh5DyOQFAEdLx+AJTep73ete9Q1jm48upv3Zn\/1ZvYTkNXC\/HckDTuVnJe37yJQn+I53vKO+OR73fMg2MUwc+SaE0NJKHmIvyytAxKY\/9VM\/lX7zN38z8Tqd5PBcbaQCKeWRZYF64tOQyex+lEk3SudlsjPPkXdj+ewi6nd8x3fsfJEaq8bDN37jN9YXOp2KAR\/22bJli6AmG\/yAxvjG8HzMLS8uXrJ6QIi9PY9Z7Ez+KtEAEOXK84IYKudJ4+e8SeLcbW9o3o96TmYAjEnMq3Ey5JTGg1XGxDGB\/XwlAJM+++yz670fdUwMcqYhk8FyJD\/B8uYx2BwNm5g\/8AM\/kAwcrnO0of8Gjjdj8ISWFkKDSGgQAgJehX0uG8\/6OKv3QzbvCpDbCOUhspF2gYq2gBSvEpBz9+1VsJWb0OrnBNSlH\/nIRybAacLYU\/M5jP7z3uTPQvTh6foy3zULy9FROi+DnS2neJPGiudoD5Bn6ebze97zntokxq\/+SHjhuAdm7HrJeukAHMtZfXftgaenrOejnMOXqqrqS62ekbyNRp1ANE9jACNr4It3bNbeuZF3R31XwlvYw7SsMNkt1exreHN7g77qVa+q19Z96GaZyPU1oeMNFnItAR29ett5g1uWRB69zjzzzPozjZjYPCflvcXpqiyvz8R2QubUC8jh90HelvYP3IsC2oCSV+gI3qmYjXBvWm9X3qSJxLbszfukA5AEUuwrjYAO78+k6WOpqw17U7xD3pDfIfe8eY6jdKbPIu0M3P\/4j\/84GWMf\/OAH6xNQe38AkY0CJPbdd9\/klLY5ZoCNH5+3pPJysAdHpu0FLy1LX2Pbfo+xYUzJYwt93ci0JkBkYngAPBEur88xAILJ4mLiMTuOwr01eT72Zkw2+y3KT\/uwDIj3vve9u1wUI8uENtBs7Ob7QvIMPGDpzWZiWxaaTPJ4Z1xplysdxwNOy64f+ZEfSSazMlVV7bzRnab8Z0OeLZqDnjiAyFaOfQG2pYO4W9ps57SFJ0J\/tjOppO2rue9jw\/qpT31qfVGSvD4IINsDYwtxS1Seom\/+2ApQRzv2+UbpPG870xFIWObzAnnkbOnggfdjo95LybOnt+dg+eskku54QQ5bgBgv26GFrQZleaVOUW+\/\/fZ6bBhTxlbUK2FKnUAUyzATNSf8WYznLe2Bm7QmseXZW97ylvqokvvOy+D+8iK0481hmWTSSY9LzUHGO+HhRH0TxJvLBHGKYV\/EpI18oWNZkxpAesPRlUdRVVUyia3pAanvx0zufKKpPysBSrdxTZY2WZY3Nv95HsftOKK3dLW3xsbu+TjNsbT0tgbmmzdvrt\/4wNJGqXtFVVW1iZ6IFxMUILMXua4H8B7yC6WA0DNmS3YcpXNVzdfOvN2tOzbggYoxCUgAvxfTb\/3Wb9U39NlSPDxN48aLLZZjDMWePD9eaVVV9aVa1zmAmHzL5T48TLLWI3UC0bAOA6VheePwvSE8uChrLwVI2FANXjMERk1eWxr4GOzeRJYYNhalvd0Msnww8MAMJstEa3UDDNBY85NtsJnUBpcB5Yid1wSwTCJl9AP4zOpem8jeyjaH7TE4NfGG5TU4teLp5CCqbWR549jXaYw9ImnLLXmWiE7B3Gex4a6v9tpswgOKvt7K9tN4V9pjZ8sbm96WKPb7PNf3ve999bUMngGv0kTXt1E6s4G+9GHnO+64IwGekEkuj8cLj320gYc8U\/YyFjx7AG6\/TP\/OO++8+kNlv\/LA+1GeF2U\/SDxI34CTl0nwSthugU4gAji8nzZqFzcetw1UbJhW1XRvZuBjTW+pZI3OywFClmL2JACRpUmbdsCI9+VnONQziX\/+53++vglr0NqUNAjVNXF5Rm94wxvqr8\/x+iDg5o0JcEwIk9a+j8nKQ\/MmtkRz6tVsz2T2NufdyPP2tvRVT5rO9mQQsAS6VTW9nXlmLl86rXRHCahY0gBDHmtMOhPZYQLbA3J68Dx5HUL59DMWRums3KzEcz355JOTky324s3aQ6uqqv7KHZCzMeBR1q12AKo\/sQR+z3veU+8b0UWfvbR4dvqk7zad5RWa3AKdQDS5uNE1HIs\/5znPGV1wjBIGOc\/HcsDAsSFqbQ44DG6DyATxxos1flOsgWftbo\/KxHJS5KTExLXccYnSBG7WmzZNZ5vaNi5DhmWTdkxuG9omrWUNEDT4Y0mlXNTJQ3Wdlr3yla+s75yYaAA2LzNLHCCHnS0\/\/cAcMNGeC6pO5HgWJjNgAvomqLgPZE1kz0ZfvDRCFx4nG5vEfescbQjpw4uxvKcvT81mvEMKLwFeKIB+wQteUP8GkJvnyrqFrj7Kl8DSyLaCsUKWMd3HaSi5G5EWDkQGrA3MPoxtIAMYkwNw2ADP3WttVNWdl8ps0PJ48HIySVzQiyWb0C8PCgEYd7wvfbULhCwDHeVLI94cwKyquzwVYGTyOjI2eYEUIApPRz39t2mKZ8Jb9vA0eFfqKzMtWXryDIChdtjZpyjsDDTow6uwDOOV8RDsidgPYjOAagmkPh2cOrm6YanLqzLJ1XHBk+fUh87aaSPLJ0BiC0A+3ZzGAQ7LVGPAETub8aJf97rX1UfpVXXX87DkdXBy5ZVXErGTZvHkdwopkfE2q9faTiZiDF6byk6FvMkcgRrgJklKqf4TNia1pVbuEcQA9MZu9sUkaq7ttWFSN0GtWbcrHTp7Y+blHPtKX3zxxfXvJYkDId8c8SCkg+hh89mEtk9hD8vSLWxhIgMCp2G+dQOcJlnUnyXkvfAugbC9Dssr3sQwmZaPNqa9FGze\/+RP\/mR9MZLn5KYxL5Vn58TItQOnUl4O3\/3d3z3zySKgdPDR9nzpCwB5x+JBnrvrDIAIWPq8xtLMSVeUyUPl2ZgXlPNLvB8LdHpE9og0I2wS\/iLIyY+3VQxek9BmroFush9\/\/PHJiZUbq7FE86arqrveZoCGDB5FPtkBjfq+o+q7LzY6eQiWWPkE0SZQsUTjHWgXgFgutE0CHqRJwNMBqN7kYQsT2QkPsCBnWgJwLkaaaJaq5AA8Fxzt4SAeEPvxKu2tWHrx1rwUlAcyvAZelHRVVfXPigAcSyD7jDbg9dMyWJ\/7Ak1eiV+JBCrabhIQ5DnmLydlXCh0IgmILC95RPbn5BVarAU6gcjgGUaLUtMksPFskhi83my8IIMHEAEl4GIiGIiWDt5azUFu2WaS2JMI3Q08p0dkBq+vkLtv89nEdcrmVCxkG\/Qmh4mNx6PxsyaWhAEEQp4FAA39fLU\/j4lsf8SfA7JcdBLEO+NFACL6IeBpCcgLcxJpCcbe+PI9pwAr5fCqqqo\/O+G18e54VtEX+ZMSz9DRv3YAoJcSGVVVJXuCPGP7WXg5sSEgco0h59PTSwuQAXt7X7OCei6\/xMe3wAAQ8XxGVR+nzCgZ4+Yfd9xxyRvYT1EAHoPPqRYAcpxtf8FmIW8iH+TAyZs+2vG1vlM14BO8eYe8LVcVtmzZkuwLGfja5BWZTIAIj95OYEwW+0I+A7H\/YsnhkwB1kE1zZcWnITZxL4pXxWaAz+Qmy54YT8sS7Bu+4RsSIMqfM8\/MC8Gpkxvu6jcnLVDCs5wkE1VVlUx08VnIssmnN4DGTXVLPMs64EOutoGJi5TSOdk\/c4XB8o0nKk\/oMq3nEPqJO0yRP4wKfz4WGAAizRiAXaTMoshblMvPqzAR7EEYkDwMb0V7RbwdAOVNboB5a5oolg\/hjhuk3pqzTORJ+8zz4enweOxnARueDjkmDqD86Ec\/Kpn002mNJSdvw2RzTYBnVReY8T8gxC5uOPNogI7J7doCWxLPRo7mX\/GKV9Q\/W2rJC\/zlVdWux9x4TbJ8dOoIzJp5s6adaLKnpejmzZvrX6x0agecyWYnp2\/uW+krXhDgB+6egY12+1mO8o0b4BPlSrh2FmgFomHLseAvUl0uPwCpqqreC7L0ssloT8jb161iXgdPx5vcJrOB6P6Qia\/+IvXN2zKx6epejyWPZaG3sDImLU\/JskUaWU7y9PTB\/kVV3bXPJX8W0jZgsW\/FOyTfkbb2ABSbkV9VVf27S5ZgdKM3cJcXx9zNnzGV1wc5ZgeETri8RAIgyXYx0vIuf54+\/wDo8pF6xoO+SiPAz9M0VowHy0+Az5OyLAdSyhVaWwsMABGwGaXSOGVGyZgk35vORLFEi3q8CYPMjVZejst\/bvO6XOakxkSPsmsZ8oZMZGQiWG6FPu6euJGsb8GbV2ipZTLmdjEJeZX53hldfGLDo\/TZjb03eyfK8DrcteGh9q0nj8enIS6k8qq8WHhrsdFP19x20b4b+bxHaXo5gaQ\/8PEbQMaO2+VR11ixL8QW6hRaDgsMANFyqLWrFvYnvPnsqVhO8CrsoVj327hW2oCzJKiq6b0IcvomE9lSgu72YexvAR\/tWGrwSKpq\/jqbyIA7llraRzwjkzLuxwBMly1Nah6dvS1LIHz17Xvpj7rTEjk8kzg1tE\/mJbJ169bkObITUHK\/6\/Wvf319zcFzdkqobN6u0zIb+O490ZcnB4DsB1l+AVCXMQFbXq\/El8sCKwFEVXXnqYglBABiQhfhDFwTTHpZyVLChDIRgACwdM1g0fq6vwRMLH\/ytp2Yuf8DjPAth0xuXoN0VVWJvu7ZzGJrnpa2LantgQGe8FKcZjldBIraRFVVJUtt+36WW05MgY37TfKD3FGynwmE8Gz284hsqFvSz6IzeYUWY4GVACKmsMRxQ9ba3tLLxMZfBTKJfPxoD2it9LVR61qDZUzuVfjJDqeP4eXwPu0dxSbwLPoCXuDhBQJ8\/CyJT1FcS6CHvSrygYXPbPw+lHQQMKS3DX1eko+C\/ZaPTXx\/dcTGuysEbmlHHUuvPnQPeSVcjAVWBoi88QzGqpr\/MmYxpl9sK1U13l8PsZTkmVTVdHbm+djLc3nRpvu2bdvqHxGzYe+WuVNEYJT33r4Oz6zJxwMqcbzOK\/NzHLwnYOnqhkMJ4yKXt9TxolyrBVYGiFq1L8yJLGCz2f6am84mvdvfftrEBJ9IUEvh8Hwcj\/upWft3TqecdNn45sHyVsR5MXGtgih62TdzadXSEA+Jo\/Cc8CzD7P8AIJv9gAq\/0GpboADRaj+\/ibW3DLJ3wmOx1LH8mVjIlyrE0ksSsPB4fPBq6eXCIeCRl5NNZyd47n\/lfCdkwMsdMSCDLOXo6neO8rIlvv4sUIBo\/T3ThfTI6aXLgMDMHhOvxkax43SgFEs0f2UkNqUp5md\/Lf2am84A0nLLFQf7Vk7UeEju+lRiHgJQAAAB9ElEQVTVdMtE7RVaDQsUIOrzOa1jWZZePKDoYmy8u9xoHwift+P+DjCJJZoTuSirjFNEx+p+boNMvCDlbOy7zOgmvWVY5JVwfVugANH6fr699I5Xc+SRRyY3rUOgjWQb2zwZd6Twnby5G+WDZHtPlmg2rB00yA9yo9zej2P54JVwY1ugANHGfv5j9d7ejf0e+0px01lF3o1NZkDkSoC7SJZnlm3KKxNk+RZxR\/I+QLZEC14JN7YFChBt7Oc\/Vu95OYcddlhCPojlzURFnpLPbVxWxOPtuIRoQ9rekB+pA07ufsWX\/lV15wVVx+\/qFJrEAuuzbAGi9flce+2VpZXfVrKHI\/TZR4CKe0E+v\/HVu0Z5O47b\/dSIfSKXEX3W4ru1ctTOQoXaLFCAqM0qhTdgAT+d4TeffOEObGxIW275HMQ+kCWbJVlVVcmxuxMvv30UP79RVeXka8CohbHTAgWIdpqiRLosYGN68+bNye9W84jcbvb74Or4eRC3mwGVtEuMTr94UNKFigVGWaAA0SgLLTR\/eRuzMe3ekI1pWvKI\/HIAvjtE\/t4bAJJXqFhgUgsUIJrUYhu4vL0gH6e6N8QD8lc+Cvhs4AHRY9cLEPVozPUuyo+q+fkOntB672vp32ItUIBosfZe+dYsxVa+Exu7A0vZ+\/8HAAD\/\/zOhjTwAAAAGSURBVAMA8q3HOZATsvAAAAAASUVORK5CYII=","height":259,"width":431}}
 %---

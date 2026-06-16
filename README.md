@@ -6,6 +6,8 @@
 
 > Clone the repo → run one setup command → RDKit is ready to use in MATLAB
 
+[![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=ynoda714/EasyMolKit-matlab)
+
 ## Why EasyMolKit?
 
 In the Chemoinformatics field, Python + RDKit is the de-facto standard toolchain.
@@ -187,7 +189,7 @@ EasyMolKit provides progressive learning content under `examples/`.
 | **L1 Foundation** | All users | None | Learn one API concept at a time (6 modules, 5–15 min each) | ✅ v1.0.0 |
 | **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
 | **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | ✅ v1.2.0 |
-| **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | 🔜 v1.3.0 |
+| **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | ✅ v1.3.0 |
 
 *L1–L3 run entirely on MATLAB Online Basic (free tier).*
 
@@ -231,9 +233,27 @@ EasyMolKit provides progressive learning content under `examples/`.
 
 ### Layer 4: Research
 
-> 🔜 **Not yet released.** Detailed module lists will be published when available.
+| # | Title | Required Toolbox | Desktop | Online |
+|---|---|---|:---:|:---:|
+| R01 | Large-scale Similarity Screening (GPU) | Parallel Computing (GPU) | ✔ | △ (CPU only) |
+| R02 | PK/PD Simulation | SimBiology | ✔ | ✔ |
+| R03 | Forensic Chemometrics | Statistics and ML + Parallel Computing | ✔ | ✔ |
+| R04 | Protein-Ligand Analysis † | Bioinformatics Toolbox | ✔ | ✔ |
+| R05 | Molecular Language Model: SMILES Generation | Deep Learning Toolbox | ✔ | ✔ |
+| R06 | REINFORCE Molecular Design | Deep Learning + Reinforcement Learning | ✔ | ✔ |
+| R07 | Metabolomics † | Bioinformatics Toolbox + SimBiology | ✔ | ✔ |
+| R08 | Protein-Ligand Docking Simulation ‡ | None (Track 1: meeko + vina + pdbfixer) | ✕ | ✔ |
+| R09 | GNN Molecular Property Prediction § | Deep Learning Toolbox | ✔ | ✔ |
+| R10 | ChemBERTa Transfer Learning § | Deep Learning Toolbox | ✔ | ✔ |
+
+> **†** Requires `emk.setup.installExtra("biopython")` before first run (Track 1 add-on; independent of MATLAB licensing).
 >
-> L4 Research (R01–R10) is planned for **v1.3.0**.
+> **‡ MATLAB Online only** (not supported on Windows Desktop: vina has no Windows PyPI wheel; pdbfixer's openmm dependency is blocked by Smart App Control).
+> Setup: in `main_rdkit.m`, set `cfg.optionalLibraries.meeko/vina/pdbfixer = true`, then run `installOnline(Config=cfg)`.
+>
+> **§** Requires the PyTorch + HuggingFace stack. Install in order:
+> `emk.setup.installExtra("torch")` → `emk.setup.installExtra("torch_geometric")` → `emk.setup.installExtra("transformers")` → `emk.setup.installExtra("datasets")`.
+> R10 requires R09's torch environment as a prerequisite.
 
 ## Directory Structure
 
