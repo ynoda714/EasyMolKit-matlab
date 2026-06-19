@@ -51,23 +51,31 @@ RDKit の機能を通常の MATLAB 関数として提供します — Python の
 %    git clone https://github.com/ynoda714/EasyMolKit-matlab.git
 %    cd EasyMolKit-matlab
 
-% 2. MATLAB で開き、初回セットアップを実行（1 回だけ）
-addpath(genpath("src"));
-emk.setup.install();          % Desktop
-% emk.setup.installOnline();  % MATLAB Online
-
-% 3. 試してみよう
-mol = emk.mol.fromSmiles("CCO");          % エタノール
-mw  = emk.descriptor.molWeight(mol);      % 分子量
-fp  = emk.fingerprint.morgan(mol);        % Morgan フィンガープリント
-
-% 4. 分子間の類似度を比較
-mol2  = emk.mol.fromSmiles("CCCO");       % プロパノール
-fp2   = emk.fingerprint.morgan(mol2);
-score = emk.similarity.tanimoto(fp, fp2); % Tanimoto 係数
+% 2. main_rdkit.m を MATLAB で開き、各セクションを Ctrl+Enter で実行:
+%
+%   Section 0a  — パスセットアップ & 設定      (必要に応じて cfg.useCase.* を編集)
+%   Section 0b  — Python + RDKit セットアップ  (初回のみ; 約 2〜5 分)
+%   Section 1   — 分子操作の基礎
+%   Section 2   — 記述子計算
+%   Section 3   — フィンガープリント & 類似度
 ```
 
+> ⚠️ **Ctrl+Enter（セクション実行）** を使用してください — **F5（ファイル全体実行）** は初回セットアップ時に失敗します。
+
 詳細は [docs/quickstart.md](../quickstart.md) を参照してください。
+
+### 企業 PC・制限付きネットワーク環境
+
+**企業 PC** をご利用の場合、IT セキュリティポリシーによってローカル Python の配備がブロックされる可能性があります:
+
+| 問題 | 症状 | 対処法 |
+|---|---|---|
+| プロキシサーバー | `pip install` タイムアウト / SSL エラー | `main_rdkit.m` Section 0a で `cfg.python.proxy = "http://proxy.example.com:8080"` を設定 |
+| Windows Defender / Smart App Control | Embedded Python 展開時に隔離・ブロック | `python_env/` をセキュリティソフトの除外対象に追加、または MATLAB Online を使用 |
+| IT ポリシー（実行ファイルダウンロード禁止） | セットアップのダウンロード手順で失敗 | **MATLAB Online** を使用（ローカル Python 配備が不要） |
+| ウイルス対策ソフトによる隔離 | 展開後に Python バイナリが消える | `python_env/` を除外対象に追加、または MATLAB Online を使用 |
+
+> 💡 **企業環境での推奨**: [MATLAB Online](https://matlab.mathworks.com/open/github/v1?repo=ynoda714/EasyMolKit-matlab) をご利用ください — ローカル Python インストールが不要で、L1〜L3 チュートリアルはすべて無料の Basic プランで動作します。
 
 ## 追加ライブラリ（Track 1 & Track 2）
 

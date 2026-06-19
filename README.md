@@ -51,23 +51,32 @@ users can access RDKit functionality as standard MATLAB functions — no Python 
 %    git clone https://github.com/ynoda/EasyMolKit.git
 %    cd EasyMolKit
 
-% 2. Open in MATLAB and run the one-time setup
-addpath(genpath("src"));
-emk.setup.install();          % Desktop
-% emk.setup.installOnline();  % MATLAB Online
-
-% 3. Try it out
-mol = emk.mol.fromSmiles("CCO");          % Ethanol
-mw  = emk.descriptor.molWeight(mol);      % Molecular weight
-fp  = emk.fingerprint.morgan(mol);        % Morgan fingerprint
-
-% 4. Compare similarity between molecules
-mol2  = emk.mol.fromSmiles("CCCO");       % Propanol
-fp2   = emk.fingerprint.morgan(mol2);
-score = emk.similarity.tanimoto(fp, fp2); % Tanimoto coefficient
+% 2. Open main_rdkit.m in MATLAB, then run each section with Ctrl+Enter:
+%
+%   Section 0a  — Path setup & config         (edit cfg.useCase.* here if needed)
+%   Section 0b  — Python + RDKit setup        (first time only; ~2-5 min)
+%   Section 1   — Basic molecule operations
+%   Section 2   — Descriptor calculation
+%   Section 3   — Fingerprints & similarity
 ```
 
+> ⚠️ Use **Ctrl+Enter (Run Section)**, not **F5 (Run File)**.
+> Running all sections at once will fail on first setup.
+
 For more details, see [docs/quickstart.md](docs/quickstart.md).
+
+### Corporate / Restricted Network Environments
+
+If you are on a **corporate PC**, local Python deployment may be blocked by IT policy:
+
+| Issue | Symptom | Solution |
+|---|---|---|
+| Proxy server | `pip install` times out / SSL error | Set `cfg.python.proxy = "http://proxy.example.com:8080"` in Section 0a of `main_rdkit.m` |
+| Windows Defender / Smart App Control | Embedded Python extraction is quarantined | Whitelist the `python_env/` directory, or use MATLAB Online |
+| IT policy (executable downloads blocked) | Setup fails at the download step | Use **MATLAB Online** — no local Python deployment needed |
+| Antivirus quarantine | Python binaries disappear after extraction | Whitelist `python_env/`, or use MATLAB Online |
+
+> 💡 **Recommended for corporate environments**: Use [MATLAB Online](https://matlab.mathworks.com/open/github/v1?repo=ynoda714/EasyMolKit-matlab) — no local Python installation is needed, and all L1–L3 tutorials run on the free Basic tier.
 
 ## Additional Libraries (Track 1 & Track 2)
 

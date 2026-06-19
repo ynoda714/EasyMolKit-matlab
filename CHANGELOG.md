@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] - 2026-06-19
+
+### Changed
+
+- **README / README.ja.md**: Rewrote Quick Start to center on `main_rdkit.m` section-by-section execution
+  - Now guides users to open `main_rdkit.m` and run Section 0a (path & config) then Section 0b (Python setup) with Ctrl+Enter
+  - Removed the standalone `emk.setup.install()` code snippet that bypassed the `cfg.useCase.*` configuration in Section 0a
+  - Added explicit warning to use Ctrl+Enter (Run Section), not F5 (Run File)
+- **README / README.ja.md**: Added "Corporate / Restricted Network Environments" guidance under Quick Start
+  - Proxy configuration via `cfg.python.proxy` in Section 0a of `main_rdkit.m`
+  - Windows Defender / Smart App Control may quarantine Embedded Python extraction; whitelist `python_env/` as workaround
+  - IT policy blocking executable downloads — MATLAB Online recommended as an alternative
+  - Antivirus quarantine of Python binaries — whitelist `python_env/` or use MATLAB Online
+
+---
+
 ## [1.3.0] - 2026-06-16
 
 ### Added
