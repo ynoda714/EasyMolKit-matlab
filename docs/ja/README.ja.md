@@ -1,6 +1,6 @@
 # EasyMolKit
 
-🇬🇧 [English](../../README.md)
+🇬🇧 [English](../en/README.md)
 
 **MATLAB から RDKit を簡単に使えるケモインフォマティクス統合環境**
 
@@ -26,8 +26,8 @@ RDKit の機能を通常の MATLAB 関数として提供します — Python の
 - **ゼロ設定**: `emk.setup.install()` を 1 回呼ぶだけで Python + RDKit を自動配備
 - **MATLAB ネイティブ**: 結果は `table` / `struct` / `double` で返却 — ワークスペースで即利用可能
 - **Desktop & Online 対応**: Windows Desktop および MATLAB Online をサポート（macOS / Linux Desktop は未検証）
-- **RDKit ラッパー群**: 分子解析・記述子計算・フィンガープリント・類似度検索をすべて MATLAB 関数として提供
-- **将来拡張**: PyMOL Open-Source による 3D 構造可視化を将来のリリースで予定
+- **豊富な API**: 15 モジュール 76 関数 — 記述子・フィンガープリント・スキャフォルド・フィルター・クラスタリング・3D コンフォーマーなど
+- **再現可能研究**: `repro/` に環境ロック付きで 6 本の論文再現実験（RP00〜RP05）を収録
 
 ## 対象ユーザー
 
@@ -111,206 +111,35 @@ T = emk.setup.validate()
 
 GPL ライセンスや技術的制約により、Open Babel・MDAnalysis・PyMOL は Embedded Python に
 バンドルできません。**別途 CPython 3.10+ 環境**にインストールし、`emk.setup.useExternal()` で接続します。
+セットアップ手順の詳細は [docs/quickstart.md — Track 2](../quickstart.md) を参照してください。
 
-> ⚠️ **重要な制約**: `emk.setup.useExternal()` は Python がロードされる **前**に呼び出してください。
-> 一度ロードされると同一セッション内で変更できません（MATLAB `pyenv` の制限）。
-> Track 2 使用時はスクリプト先頭の `addpath` 直後に呼び出してください。
-
-#### Step 1: 外部 Python 環境のセットアップ
-
-ライブラリごとに独立した環境を推奨します。例:
-
-**MDAnalysis（MD トラジェクトリ解析）**
-```powershell
-python -m venv C:\envs\mdenv
-C:\envs\mdenv\Scripts\pip install MDAnalysis
-```
-
-**Open Babel（化学ファイル形式変換 & 3D 座標生成）**
-```
-1. https://github.com/openbabel/openbabel/releases から Windows インストーラー（Python バインディング付き）をダウンロード
-2. CPython 3.10+ 環境にインストール（python_env/ には使用不可）
-3. 以下と同様に useExternal() を呼び出す
-```
-
-**PyMOL OSS（3D 可視化）**
-```powershell
-python -m venv C:\envs\pymolenv
-C:\envs\pymolenv\Scripts\pip install pymol-open-source
-```
-
-#### Step 2: MATLAB セッション開始時に接続
-
-```matlab
-addpath(genpath("src"));
-
-% Python がロードされる前に useExternal() を呼び出す
-emk.setup.useExternal("C:\envs\mdenv\python.exe")
-
-% 以降は通常どおり emk.* 関数を使用
-mol = emk.mol.fromSmiles("CCO");
-```
-
-> 毎回呼び出すのを省略するには `config/settings.json` に設定してください:
->
-> ```json
-> {
->   "python": {
->     "external_path": "C:\\envs\\mdenv\\python.exe"
->   }
-> }
-> ```
-
-#### Step 3: 接続確認
-
-```matlab
-T = emk.setup.validate()
-
-emk.setup.recipe("openbabel")
-emk.setup.recipe("mdanalysis")
-emk.setup.recipe("pymol")
-```
-
-#### Track 2 利用可能ライブラリ
-
-| ライブラリ | 用途 | pip コマンド | ライセンス |
-|---|---|---|---|
-| **openbabel** | 化学ファイル変換（110 以上の形式）& 3D 座標生成 | Windows インストーラー必須（上記参照） | GPLv2 |
-| **mdanalysis** | MD トラジェクトリ解析（GROMACS / AMBER / NAMD 等） | `pip install MDAnalysis` | GPLv2+ |
-| **pymol** | 3D 分子可視化（PyMOL Open-Source） | `pip install pymol-open-source` | Python-2.0/BSD |
-
-> ⚠️ **GPL ライセンスに関する注意**: Open Babel と MDAnalysis は GPLv2 / GPLv2+ ライブラリです。
-> EasyMolKit 本体（MIT）には影響しませんが、これらを利用するスクリプトは GPL 条件に
-> 従う場合があります。商用利用前に [docs/compliance.md](../compliance.md) を確認してください。
-
-## チュートリアル & サンプル（4 層構造）
+## チュートリアル & サンプル
 
 EasyMolKit は `examples/` 配下に段階的な学習コンテンツを提供します。
 
-| 層 | 対象者 | 必要ツールボックス | コンテンツ | リリース状況 |
-|---|---|---|---|---|
-| **L1 Foundation** | 全ユーザー | なし | API を 1 概念ずつ学ぶ（6 モジュール、各 5〜15 分） | ✅ v1.0.0 |
-| **L2 Application Stories** | Foundation 修了後 | なし | 複数機能を組み合わせた実践ワークフロー（7 モジュール、各 20〜40 分） | ✅ v1.1.0 |
-| **L3 Analytics** | 全ユーザー | 要統計 ML 等 | QSAR・クラスタリング・MS 解析・最適化など（A01〜A10、各 30〜60 分） | ✅ v1.2.0 |
-| **L4 Research** | 全ユーザー | 要並列計算等 | 研究レベルの応用（R01〜R10、各 30〜90 分） | ✅ v1.3.0 |
-| **再現可能研究** | 研究者 | コンテンツ別 | 論文再現（RP00〜RP05、6 本、環境ロック付き） | ✅ v1.4.0 |
+| 層 | 対象者 | コンテンツ | リリース |
+|---|---|---|---|
+| **L1 Foundation** | 全ユーザー | API を 1 概念ずつ学ぶ（6 モジュール、各 5〜15 分） | ✅ v1.0.0 |
+| **L2 Application Stories** | Foundation 修了後 | 複数機能を組み合わせた実践ワークフロー（7 モジュール、各 20〜40 分） | ✅ v1.1.0 |
+| **L3 Analytics** | 全ユーザー | QSAR・クラスタリング・MS 解析・最適化など（A01〜A10、各 30〜60 分） | ✅ v1.2.0 |
+| **L4 Research** | 全ユーザー | 研究レベルの応用（R01〜R10、各 30〜90 分） | ✅ v1.3.0 |
 
 *L1〜L3 は MATLAB Online Basic（無料枠）で完全動作します。*
 
-### Layer 1: Foundation（Base MATLAB のみ）
+モジュール別のツールボックス要件・プラットフォーム対応は [docs/ja/tutorials.ja.md](tutorials.ja.md) を参照してください。
 
-| # | タイトル | 必要Toolbox | 学習内容 | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| F01 | SMILES で分子を描く | なし | 分子表現、SMILES 構文 | ✔ | ✔ |
-| F02 | 分子物性を計算する | なし | MW / LogP / TPSA の意味と計算 | ✔ | ✔ |
-| F03 | フィンガープリント入門 | なし | ビットベクトル表現、Morgan vs MACCS | ✔ | ✔ |
-| F04 | 類似度で分子を比較する | なし | Tanimoto / Dice 類似度の定量化 | ✔ | ✔ |
-| F05 | 部分構造検索 | なし | SMARTS パターンマッチング | ✔ | ✔ |
-| F06 | ファイルから分子を読み込む | なし | SDF / SMILES ファイル操作 | ✔ | ✔ |
+## 再現可能研究
 
-### Layer 2: Application Stories（Base MATLAB のみ）
+`repro/` には公開論文の MATLAB 再現実験を収録しています。各エントリに環境ロックスナップショットと成功基準を定義しています。
 
-| # | タイトル | 必要Toolbox | ドメイン | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| S01 | カフェインの仲間を探す | なし | 身近な化学 | ✔ | ✔ |
-| S02 | 創薬フィルター：リピンスキーの Rule of Five | なし | 薬理学 | ✔ | ✔ |
-| S03 | 危険化合物の構造アラート | なし | 安全性 | ✔ | ✔ |
-| S04 | バーチャルスクリーニング入門 | なし | 創薬 | ✔ | ✔ |
-| S05 | 未知化合物同定チャレンジ | なし | 法科学 | ✔ | ✔ |
-| S06 | PubChem で化合物を検索する | なし | データベース | ✔ | ✔ |
-| S07 | ChEMBL の活性データを解析する | なし | 創薬 | ✔ | ✔ |
-
-### Layer 3: Analytics
-
-| # | タイトル | 必要Toolbox | 内容 | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| A01 | PCA による化学空間マッピング | Statistics and Machine Learning Toolbox | 次元削減・化学空間可視化 | ✔ | ✔ |
-| A02 | 分子クラスタリング | Statistics and Machine Learning Toolbox | 階層クラスタリング・構造類似性 | ✔ | ✔ |
-| A03 | QSAR 回帰 | Statistics and Machine Learning Toolbox | LogP 予測・回帰モデル評価 | ✔ | ✔ |
-| A04 | 薬物分類 | Statistics and Machine Learning Toolbox | SVM / ランダムフォレスト・ROC 曲線 | ✔ | ✔ |
-| A05 | ニューラルネットワーク物性予測 | Deep Learning Toolbox | フィードフォワード NN・物性回帰 | ✔ | ✔ |
-| A06 | 用量反応カーブフィット | Curve Fitting Toolbox | Hill 式・EC50 推定 | ✔ | ✔ |
-| A07 | Scaffold 分析と R グループ分解 | Statistics and Machine Learning Toolbox | 創薬化学分析 | ✔ | ✔ |
-| A08 | 質量分析×ケモインフォマティクス | Signal Processing Toolbox + Statistics and Machine Learning Toolbox | 同位体パターンマッチング・MS アノテーション | ✔ | ✔ |
-| A09 | PFAS・環境スクリーニング | Optimization Toolbox + Statistics and Machine Learning Toolbox | SMARTS スクリーニング・Pareto 最適化 | ✔ | ✔ |
-| A10 | リード最適化 | Optimization Toolbox | 多目的最適化・Derringer-Suich 法 | ✔ | ✔ |
-
-### Layer 4: Research
-
-| # | タイトル | 必要ツールボックス | Desktop | Online |
-|---|---|---|:---:|:---:|
-| R01 | 大規模類似度スクリーニング（GPU）| Parallel Computing Toolbox (GPU) | ✔ | △（CPU Only）|
-| R02 | PK/PD シミュレーション | SimBiology | ✔ | ✔ |
-| R03 | 法科学ケモメトリクス | Statistics and Machine Learning Toolbox + Parallel Computing Toolbox | ✔ | ✔ |
-| R04 | タンパク質-リガンド解析 † | Bioinformatics Toolbox | ✔ | ✔ |
-| R05 | 分子言語モデル：SMILES 生成 | Deep Learning Toolbox | ✔ | ✔ |
-| R06 | REINFORCE 分子設計 | Deep Learning Toolbox + Reinforcement Learning Toolbox | ✔ | ✔ |
-| R07 | メタボロミクス † | Bioinformatics Toolbox + SimBiology | ✔ | ✔ |
-| R08 | タンパク質-リガンド ドッキングシミュレーション ‡ | なし（Track 1: meeko + vina + pdbfixer）| ✕ | ✔ |
-| R09 | GNN 分子性質予測 § | Deep Learning Toolbox | ✔ | ✔ |
-| R10 | ChemBERTa 転移学習 § | Deep Learning Toolbox | ✔ | ✔ |
-
-> **†** 初回実行前に `emk.setup.installExtra("biopython")` が必要です（Track 1 追加ライブラリ。MATLAB ライセンスとは別要件）。
->
-> **‡ MATLAB Online 限定**（Windows Desktop 非対応: vina は Windows PyPI ホイールなし・pdbfixer の openmm は Smart App Control でブロック）。
-> セットアップ: `main_rdkit.m` で `cfg.optionalLibraries.meeko/vina/pdbfixer = true` に設定 → `installOnline(Config=cfg)` で一括導入。
->
-> **§** PyTorch + HuggingFace スタックが必要です。以下の順でインストールしてください:
-> `emk.setup.installExtra("torch")` → `emk.setup.installExtra("torch_geometric")` → `emk.setup.installExtra("transformers")` → `emk.setup.installExtra("datasets")`。
-> R10 は R09 の torch 環境が前提です。
-
-## ディレクトリ構成
-
-```
-EasyMolKit/
-├─ main_rdkit.m               # RDKit セットアップ & 基本操作（セクション実行）
-├─ config/
-│   └─ settings.example.json  # 設定テンプレート
-├─ examples/
-│   ├─ japanese/              # 配布教材（日本語版、plain-text Live Code）
-│   │   ├─ foundation/        #   L1: API 基礎（Base MATLAB のみ）
-│   │   ├─ stories/           #   L2: 応用ストーリー（Base MATLAB のみ）
-│   │   ├─ analytics/         #   L3: 統計 & ML 統合（A01〜A10）
-│   │   └─ research/          #   L4: 研究レベル（R01〜R10）
-│   └─ english/               # 配布教材（英語版、コメントのみ異なる）
-│       ├─ foundation/
-│       ├─ stories/
-│       ├─ analytics/
-│       └─ research/
-├─ repro/                     # 再現可能研究（Phase 3）
-│   ├─ rp00_esol/             #   RP00: Delaney (2004) ESOL パイロット
-│   ├─ rp01_esol/             #   RP01: ESOL 拡張（L05 記述子）
-│   ├─ rp02_bbbp/             #   RP02: MoleculeNet BBBP ベースライン
-│   ├─ rp03_gnn/              #   RP03: GNN on BBBP（Yang et al. 2019）
-│   ├─ rp04_chemberta/        #   RP04: ChemBERTa（Chithrananda et al. 2020）
-│   └─ rp05_shap/             #   RP05: SHAP 説明可能 AI on BBBP
-├─ src/
-│   ├─ +emk/                  # メインパッケージ
-│   │   ├─ +setup/            # Python 環境セットアップ（RF02 snapshot/lockfile 含む）
-│   │   ├─ +mol/              # 分子オブジェクト操作
-│   │   ├─ +descriptor/       # 記述子計算（QED / SA Score / BCUT 含む）
-│   │   ├─ +fingerprint/      # フィンガープリント生成
-│   │   ├─ +similarity/       # 類似度計算
-│   │   ├─ +scaffold/         # Scaffold 分析（Generic Murcko / BRICS / R-group）
-│   │   ├─ +dataset/          # ベンチマークデータセット（ESOL / FreeSolv / BBBP / Tox21）
-│   │   ├─ +filter/           # 分子フィルタリング（Lipinski / Veber / PAINS / REOS）
-│   │   ├─ +cluster/          # クラスタリング（Butina 球面排除法）
-│   │   ├─ +diversity/        # 多様性サブセット選択（MaxMin）
-│   │   ├─ +conformer/        # 3D コンフォーマー生成・最適化
-│   │   ├─ +shape/            # 3D 形状類似度比較
-│   │   ├─ +repro/            # 再現結果検証（RF03）
-│   │   ├─ +io/               # ファイル入出力
-│   │   ├─ +viz/              # 可視化（将来 PyMOL 連携）
-│   │   └─ +util/             # パッケージユーティリティ
-│   ├─ config/                # 設定ローダー
-│   └─ util/                  # ログヘルパー & 共通ユーティリティ
-├─ result/                    # 実行成果物（Git 非追跡）
-├─ tests/
-│   ├─ unit/                  # matlab.unittest クラスベーステスト
-│   └─ smoke/                 # スモークテスト
-├─ data/                      # キュレーション済みサンプルデータ
-└─ docs/                      # ドキュメント
-```
+| ID | 論文 | 手法 | 結果 |
+|---|---|---|---|
+| RP00 | Delaney (2004) ESOL | 物理化学記述子による線形回帰 | CV RMSE=1.017, R²=0.762 |
+| RP01 | Delaney (2004) ESOL 拡張 | 線形回帰 + TPSA / QED / SA Score | CV RMSE=0.584, R²=0.906 |
+| RP02 | Wu et al. (2018) MoleculeNet BBBP | Morgan FP (ECFP4) + Random Forest | ROC-AUC CV=0.883 |
+| RP03 | Yang et al. (2019) GNN on BBBP | Graph Convolutional Network | ROC-AUC CV=0.915 |
+| RP04 | Chithrananda et al. (2020) ChemBERTa | 凍結 CLS 埋め込み + ロジスティック回帰 | ROC-AUC CV=0.927 |
+| RP05 | SHAP 説明可能 AI on BBBP | shap.LinearExplainer + LR モデル | ROC-AUC CV=0.909, Spearman ρ=0.902 |
 
 ## API 概要
 
@@ -336,16 +165,27 @@ EasyMolKit/
 > 描画には **1 分子あたり 0.5〜2 秒**かかります。MATLAB Online では
 > プロセス間通信のオーバーヘッドがさらに加わります（構造上の制約であり改善不可）。
 
-全 API の詳細は [docs/function_reference.md](../function_reference.md) または [docs/function_catalog.ja.md](../function_catalog.ja.md) を参照してください。
+全 API の詳細は [docs/function_reference.md](../function_reference.md) を参照してください。
 
-## 主要な規約
+## ディレクトリ構成
 
-- ロジックはすべて `src/` 配下に配置（`main_<feature>.m` エントリポイントを除く）
-- `.m` ファイルは英語のみ（コメント・ログ・エラーメッセージ）
-- `string` 型（`"..."` リテラル）を優先; R2025b 以降が必要
-- `py.rdkit.*` を直接呼び出さない — 必ず `emk.*` ラッパー経由
-- 出力はすべて `logInfo` / `logWarn` / `logError` を使用（`fprintf` は禁止）
-- 実行成果物は `result/runs/<YYYYMMDD_HHMMSS>/` に保存（Git 非追跡）
+```
+EasyMolKit/
+├─ main_rdkit.m               # RDKit セットアップ & 基本操作（セクション実行）
+├─ config/
+│   └─ settings.example.json  # 設定テンプレート
+├─ examples/
+│   ├─ japanese/              # 配布教材（日本語版、plain-text Live Code）
+│   └─ english/               # 配布教材（英語版、コメントのみ異なる）
+├─ repro/                     # 再現可能研究（RP00〜RP05）
+├─ src/
+│   └─ +emk/                  # メインパッケージ（15 モジュール、76 関数）
+├─ tests/
+│   ├─ unit/                  # matlab.unittest クラスベーステスト
+│   └─ smoke/                 # スモークテスト
+├─ data/                      # キュレーション済みサンプルデータ
+└─ docs/                      # ドキュメント
+```
 
 ## ライセンス
 
@@ -357,7 +197,6 @@ EasyMolKit: [MIT License](../../LICENSE)
 |---|---|---|
 | RDKit | BSD-3-Clause | ケモインフォマティクスコア |
 | Python (CPython) | PSF License | ランタイム環境 |
-| PyMOL Open-Source | Python/BSD-like | 3D 可視化（将来リリース） |
 
 詳細は [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) および [docs/compliance.md](../compliance.md) を参照してください。
 
@@ -379,10 +218,18 @@ EasyMolKit: [MIT License](../../LICENSE)
 
 | ファイル | 説明 |
 |---|---|
-| [docs/quickstart.md](../quickstart.md) | セットアップ手順 & FAQ |
+| [docs/quickstart.md](../quickstart.md) | セットアップ手順・Track 2 設定・FAQ |
+| [docs/ja/tutorials.ja.md](tutorials.ja.md) | チュートリアル全覧（F01〜R10、RP00〜RP05） |
 | [docs/function_reference.md](../function_reference.md) | 全関数シグネチャリファレンス |
-| [docs/function_catalog.ja.md](../function_catalog.ja.md) | コンパクト関数カタログ（日本語） |
-| [docs/test_catalog.ja.md](../test_catalog.ja.md) | テストクラスカタログ（日本語） |
+| [docs/function_catalog.ja.md](../function_catalog.ja.md) | コンパクト関数カタログ（76 関数） |
 | [docs/python_integration.md](../python_integration.md) | Python 連携アーキテクチャ |
 | [docs/platform_support.md](../platform_support.md) | Desktop / Online プラットフォーム対応 |
 | [docs/compliance.md](../compliance.md) | ライセンス & コンプライアンス |
+
+### 英語版ドキュメント
+
+| ファイル | 説明 |
+|---|---|
+| [docs/en/README.md](../en/README.md) | Repository overview (English) |
+| [docs/en/tutorials.md](../en/tutorials.md) | Full tutorial listing (English) |
+| [docs/function_catalog.md](../function_catalog.md) | Compact function catalog (English) |

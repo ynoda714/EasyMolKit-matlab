@@ -163,6 +163,77 @@ A: Check the latest timestamped folder under `result/runs/`.
 
 ---
 
+## Track 2: External CPython Environment
+
+Open Babel, MDAnalysis, and PyMOL cannot be bundled with Embedded Python due to GPL licensing
+or technical constraints. Install them in a **separate CPython 3.10+ environment** and connect
+via `emk.setup.useExternal()`.
+
+> ⚠️ **Important constraint**: `emk.setup.useExternal()` must be called **before Python is loaded**
+> in the MATLAB session. Once loaded, it cannot be changed within the same session (MATLAB `pyenv`
+> limitation). Call it immediately after `addpath` at the top of your script.
+
+### Step 1: Set up an external Python environment
+
+We recommend separate environments for each library.
+
+**MDAnalysis (MD trajectory analysis)**
+```powershell
+python -m venv C:\envs\mdenv
+C:\envs\mdenv\Scripts\pip install MDAnalysis
+```
+
+**Open Babel (chemical file format conversion & 3D coordinate generation)**
+```
+1. Download the Windows installer (with Python bindings) from
+   https://github.com/openbabel/openbabel/releases
+2. Install into a CPython 3.10+ environment (python_env/ cannot be used)
+3. Follow Step 2 below to connect
+```
+
+**PyMOL OSS (3D visualization)**
+```powershell
+python -m venv C:\envs\pymolenv
+C:\envs\pymolenv\Scripts\pip install pymol-open-source
+```
+
+### Step 2: Connect at the start of a MATLAB session
+
+```matlab
+addpath(genpath("src"));
+
+% Call useExternal() before Python is loaded
+emk.setup.useExternal("C:\envs\mdenv\python.exe")
+
+% Use emk.* functions normally from here
+mol = emk.mol.fromSmiles("CCO");
+```
+
+> To persist the setting across sessions, add it to `config/settings.json`:
+> ```json
+> { "python": { "external_path": "C:\\envs\\mdenv\\python.exe" } }
+> ```
+
+### Step 3: Verify the connection
+
+```matlab
+T = emk.setup.validate()
+emk.setup.recipe("mdanalysis")   % detailed instructions per library
+```
+
+### Available Track 2 libraries
+
+| Library | Purpose | License |
+|---|---|---|
+| **openbabel** | Chemical file conversion (110+ formats) & 3D coordinate generation | GPLv2 |
+| **mdanalysis** | MD trajectory analysis (GROMACS / AMBER / NAMD, etc.) | GPLv2+ |
+| **pymol** | 3D molecular visualization (PyMOL Open-Source) | Python-2.0/BSD |
+
+> ⚠️ Open Babel and MDAnalysis are GPLv2 / GPLv2+ libraries. Scripts that use them may be subject
+> to GPL conditions. See [docs/compliance.md](compliance.md) before commercial use.
+
+---
+
 ## Log Output Format
 
 ```

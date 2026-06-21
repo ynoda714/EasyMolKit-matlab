@@ -26,8 +26,8 @@ users can access RDKit functionality as standard MATLAB functions — no Python 
 - **Zero configuration**: One call to `emk.setup.install()` automatically deploys Python + RDKit
 - **MATLAB native**: Results are returned as MATLAB `table` / `struct` / `double` — immediately usable in your workspace
 - **Desktop & Online**: Supports Windows Desktop and MATLAB Online (macOS / Linux Desktop untested)
-- **RDKit wrappers**: Molecular analysis, descriptor calculation, fingerprints, and similarity search — all as MATLAB functions
-- **Future-ready**: 3D structure visualization via PyMOL Open-Source planned for a future release
+- **Rich API**: 76 functions across 15 modules — descriptors, fingerprints, scaffolds, filters, clustering, 3D conformers, and more
+- **Reproducible research**: 6 published papers reproduced with locked environments under `repro/`
 
 ## Target Users
 
@@ -110,213 +110,41 @@ T = emk.setup.validate()
 
 ### Track 2: Libraries that require an external CPython environment
 
-Open Babel, MDAnalysis, and PyMOL cannot be bundled with Embedded Python due to GPL licensing
-or technical constraints. Install them in a **separate CPython 3.10+ environment** and connect
-via `emk.setup.useExternal()`.
+Open Babel, MDAnalysis, and PyMOL require a **separate CPython 3.10+ environment** due to GPL
+licensing or technical constraints. Connect via `emk.setup.useExternal()` — which must be called
+**before Python is loaded** in the MATLAB session.
 
-> ⚠️ **Important constraint**: `emk.setup.useExternal()` must be called **before Python is loaded**
-> in the MATLAB session. Once loaded, it cannot be changed within the same session (MATLAB `pyenv`
-> limitation). When using Track 2, call it immediately after `addpath` at the top of your script.
+For step-by-step setup instructions, see [docs/quickstart.md — Track 2](docs/quickstart.md).
 
-#### Step 1: Set up an external Python environment
-
-We recommend separate environments for each library. Examples:
-
-**MDAnalysis (MD trajectory analysis)**
-```powershell
-# Run in PowerShell / Command Prompt
-python -m venv C:\envs\mdenv
-C:\envs\mdenv\Scripts\pip install MDAnalysis
-```
-
-**Open Babel (chemical file format conversion & 3D coordinate generation)**
-```
-1. Download the Windows installer (with Python bindings) from
-   https://github.com/openbabel/openbabel/releases
-2. Install into a CPython 3.10+ environment (python_env/ cannot be used)
-3. Follow the same steps below to call useExternal()
-```
-
-**PyMOL OSS (3D visualization)**
-```powershell
-python -m venv C:\envs\pymolenv
-C:\envs\pymolenv\Scripts\pip install pymol-open-source
-```
-
-#### Step 2: Connect at the start of a MATLAB session
-
-```matlab
-addpath(genpath("src"));
-
-% Call useExternal() here — before Python is loaded
-emk.setup.useExternal("C:\envs\mdenv\python.exe")
-
-% Use emk.* functions normally from here
-mol = emk.mol.fromSmiles("CCO");
-```
-
-> To avoid calling this every session, add it to `config/settings.json` for automatic loading:
->
-> ```json
-> {
->   "python": {
->     "external_path": "C:\\envs\\mdenv\\python.exe"
->   }
-> }
-> ```
-
-#### Step 3: Verify the connection
-
-```matlab
-% Confirm the library is accessible from the connected environment
-T = emk.setup.validate()
-
-% Review detailed instructions for each library
-emk.setup.recipe("openbabel")
-emk.setup.recipe("mdanalysis")
-emk.setup.recipe("pymol")
-```
-
-#### Track 2 available libraries
-
-| Library | Purpose | pip command | License |
-|---|---|---|---|
-| **openbabel** | Chemical file conversion (110+ formats) & 3D coordinate generation | Windows installer required (see above) | GPLv2 |
-| **mdanalysis** | MD trajectory analysis (GROMACS / AMBER / NAMD, etc.) | `pip install MDAnalysis` | GPLv2+ |
-| **pymol** | 3D molecular visualization (PyMOL Open-Source) | `pip install pymol-open-source` | Python-2.0/BSD |
-
-> ⚠️ **GPL license notice**: Open Babel and MDAnalysis are GPLv2 / GPLv2+ libraries.
-> EasyMolKit itself (MIT) is not affected, but scripts that use these libraries may be subject
-> to GPL conditions. Review [docs/compliance.md](docs/compliance.md) before commercial use.
-
-## Tutorials & Examples (4-Layer Structure)
+## Tutorials & Examples
 
 EasyMolKit provides progressive learning content under `examples/`.
 
-| Layer | Audience | Required Toolbox | Content | Release |
-|---|---|---|---|---|
-| **L1 Foundation** | All users | None | Learn one API concept at a time (6 modules, 5–15 min each) | ✅ v1.0.0 |
-| **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
-| **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | ✅ v1.2.0 |
-| **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | ✅ v1.3.0 |
-| **Reproducible Research** | Researchers | Varies | Paper reproductions with locked environments (RP00–RP05, 6 papers) | ✅ v1.4.0 |
+| Layer | Audience | Content | Release |
+|---|---|---|---|
+| **L1 Foundation** | All users | One API concept at a time (6 modules, 5–15 min each) | ✅ v1.0.0 |
+| **L2 Application Stories** | After Foundation | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
+| **L3 Analytics** | All users | QSAR, clustering, MS analysis, optimization (A01–A10, 30–60 min each) | ✅ v1.2.0 |
+| **L4 Research** | All users | Research-level applications (R01–R10, 30–90 min each) | ✅ v1.3.0 |
 
 *L1–L3 run entirely on MATLAB Online Basic (free tier).*
 
-### Layer 1: Foundation (Base MATLAB only)
+For the full per-module listing with Toolbox requirements and platform support,
+see [docs/tutorials.md](docs/tutorials.md).
 
-| # | Title | Required Toolbox | What You Learn | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| F01 | Drawing Molecules with SMILES | None | Molecular representation, SMILES syntax | ✔ | ✔ |
-| F02 | Calculating Molecular Properties | None | MW / LogP / TPSA — meaning and calculation | ✔ | ✔ |
-| F03 | Introduction to Fingerprints | None | Bit vector representation, Morgan vs MACCS | ✔ | ✔ |
-| F04 | Comparing Molecules by Similarity | None | Quantifying Tanimoto / Dice similarity | ✔ | ✔ |
-| F05 | Substructure Search | None | SMARTS pattern matching | ✔ | ✔ |
-| F06 | Reading Molecules from Files | None | SDF / SMILES file operations | ✔ | ✔ |
+## Reproducible Research
 
-### Layer 2: Application Stories (Base MATLAB only)
+`repro/` contains MATLAB reproductions of published Chemoinformatics papers, each with a
+locked environment snapshot and defined success criteria.
 
-| # | Title | Required Toolbox | Domain | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| S01 | Find Relatives of Caffeine | None | Everyday chemistry | ✔ | ✔ |
-| S02 | Drug Filters: Lipinski's Rule of Five | None | Pharmacology | ✔ | ✔ |
-| S03 | Structural Alerts for Hazardous Compounds | None | Safety | ✔ | ✔ |
-| S04 | Introduction to Virtual Screening | None | Drug discovery | ✔ | ✔ |
-| S05 | Unknown Compound Identification Challenge | None | Forensics | ✔ | ✔ |
-| S06 | Search Compounds on PubChem | None | Databases | ✔ | ✔ |
-| S07 | Analyze ChEMBL Activity Data | None | Drug discovery | ✔ | ✔ |
-
-### Layer 3: Analytics
-
-| # | Title | Required Toolbox | Topic | Desktop | Online |
-|---|---|---|---|:---:|:---:|
-| A01 | Chemical Space Mapping by PCA | Statistics and ML | Dimensionality reduction | ✔ | ✔ |
-| A02 | Molecular Clustering | Statistics and ML | Structural similarity | ✔ | ✔ |
-| A03 | QSAR Regression | Statistics and ML | Property prediction | ✔ | ✔ |
-| A04 | Drug Classification | Statistics and ML | ML classification | ✔ | ✔ |
-| A05 | Neural Network Property Prediction | Deep Learning | Neural networks | ✔ | ✔ |
-| A06 | Dose-Response Curve Fitting | Curve Fitting | Pharmacology | ✔ | ✔ |
-| A07 | Scaffold Analysis & R-Group Decomposition | Statistics and ML | Medicinal chemistry | ✔ | ✔ |
-| A08 | Mass Spectrometry × Cheminformatics | Signal Processing + Stats | MS analysis | ✔ | ✔ |
-| A09 | PFAS & Environmental Screening | Optimization + Stats (optional) | Environmental | ✔ | ✔ |
-| A10 | Lead Optimization | Optimization (optional) | Drug discovery | ✔ | ✔ |
-
-### Layer 4: Research
-
-| # | Title | Required Toolbox | Desktop | Online |
-|---|---|---|:---:|:---:|
-| R01 | Large-scale Similarity Screening (GPU) | Parallel Computing (GPU) | ✔ | △ (CPU only) |
-| R02 | PK/PD Simulation | SimBiology | ✔ | ✔ |
-| R03 | Forensic Chemometrics | Statistics and ML + Parallel Computing | ✔ | ✔ |
-| R04 | Protein-Ligand Analysis † | Bioinformatics Toolbox | ✔ | ✔ |
-| R05 | Molecular Language Model: SMILES Generation | Deep Learning Toolbox | ✔ | ✔ |
-| R06 | REINFORCE Molecular Design | Deep Learning + Reinforcement Learning | ✔ | ✔ |
-| R07 | Metabolomics † | Bioinformatics Toolbox + SimBiology | ✔ | ✔ |
-| R08 | Protein-Ligand Docking Simulation ‡ | None (Track 1: meeko + vina + pdbfixer) | ✕ | ✔ |
-| R09 | GNN Molecular Property Prediction § | Deep Learning Toolbox | ✔ | ✔ |
-| R10 | ChemBERTa Transfer Learning § | Deep Learning Toolbox | ✔ | ✔ |
-
-> **†** Requires `emk.setup.installExtra("biopython")` before first run (Track 1 add-on; independent of MATLAB licensing).
->
-> **‡ MATLAB Online only** (not supported on Windows Desktop: vina has no Windows PyPI wheel; pdbfixer's openmm dependency is blocked by Smart App Control).
-> Setup: in `main_rdkit.m`, set `cfg.optionalLibraries.meeko/vina/pdbfixer = true`, then run `installOnline(Config=cfg)`.
->
-> **§** Requires the PyTorch + HuggingFace stack. Install in order:
-> `emk.setup.installExtra("torch")` → `emk.setup.installExtra("torch_geometric")` → `emk.setup.installExtra("transformers")` → `emk.setup.installExtra("datasets")`.
-> R10 requires R09's torch environment as a prerequisite.
-
-## Directory Structure
-
-```
-EasyMolKit/
-├─ main_rdkit.m               # RDKit setup & basic operations (run section by section)
-├─ config/
-│   └─ settings.example.json  # Configuration template
-├─ examples/
-│   ├─ japanese/              # Distribution materials — Japanese (plain-text Live Code)
-│   │   ├─ foundation/        #   L1: API basics (Base MATLAB only)
-│   │   ├─ stories/           #   L2: Application stories (Base MATLAB only)
-│   │   ├─ analytics/         #   L3: Statistics & ML integration (free toolboxes)
-│   │   └─ research/          #   L4: Research level (Campus License)
-│   └─ english/               # Distribution materials — English (comments differ only)
-│       ├─ foundation/
-│       ├─ stories/
-│       ├─ analytics/
-│       └─ research/
-├─ repro/                     # Reproducible research (Phase 3)
-│   ├─ rp00_esol/             #   RP00: Delaney (2004) ESOL pilot
-│   ├─ rp01_esol/             #   RP01: ESOL extended (L05 descriptors)
-│   ├─ rp02_bbbp/             #   RP02: MoleculeNet BBBP baseline
-│   ├─ rp03_gnn/              #   RP03: GNN on BBBP (Yang et al. 2019)
-│   ├─ rp04_chemberta/        #   RP04: ChemBERTa (Chithrananda et al. 2020)
-│   └─ rp05_shap/             #   RP05: SHAP explainability on BBBP
-├─ src/
-│   ├─ +emk/                  # Main package
-│   │   ├─ +setup/            # Python environment setup (+ RF02 snapshot/lockfile)
-│   │   ├─ +mol/              # Molecular object operations
-│   │   ├─ +descriptor/       # Descriptor calculation (+ QED / SA Score / BCUT)
-│   │   ├─ +fingerprint/      # Fingerprint generation
-│   │   ├─ +similarity/       # Similarity calculation
-│   │   ├─ +scaffold/         # Scaffold analysis (Generic Murcko / BRICS / R-group)
-│   │   ├─ +dataset/          # Benchmark dataset loaders (ESOL / FreeSolv / BBBP / Tox21)
-│   │   ├─ +filter/           # Molecular filtering (Lipinski / Veber / PAINS / REOS)
-│   │   ├─ +cluster/          # Clustering (Butina sphere-exclusion)
-│   │   ├─ +diversity/        # Diverse subset selection (MaxMin)
-│   │   ├─ +conformer/        # 3D conformer generation and optimization
-│   │   ├─ +shape/            # 3D shape comparison
-│   │   ├─ +repro/            # Reproduction result verification (RF03)
-│   │   ├─ +io/               # File I/O
-│   │   ├─ +viz/              # Visualization (future PyMOL integration)
-│   │   └─ +util/             # Package-level utilities
-│   ├─ config/                # Configuration loader
-│   └─ util/                  # Log helpers & common utilities
-├─ result/                    # Run artifacts (not tracked by Git)
-├─ tests/
-│   ├─ unit/                  # matlab.unittest class-based tests
-│   └─ smoke/                 # Smoke tests
-├─ data/                      # Curated sample data
-└─ docs/                      # Documentation
-```
+| ID | Paper | Method | Result |
+|---|---|---|---|
+| RP00 | Delaney (2004) ESOL | Linear regression on physicochemical descriptors | CV RMSE=1.017, R²=0.762 |
+| RP01 | Delaney (2004) ESOL extended | Linear regression + TPSA / QED / SA Score | CV RMSE=0.584, R²=0.906 |
+| RP02 | Wu et al. (2018) MoleculeNet BBBP | Morgan FP (ECFP4) + Random Forest | ROC-AUC CV=0.883 |
+| RP03 | Yang et al. (2019) GNN on BBBP | Graph Convolutional Network | ROC-AUC CV=0.915 |
+| RP04 | Chithrananda et al. (2020) ChemBERTa | Frozen CLS embedding + Logistic Regression | ROC-AUC CV=0.927 |
+| RP05 | SHAP explainability on BBBP | shap.LinearExplainer + LR model | ROC-AUC CV=0.909, Spearman ρ=0.902 |
 
 ## API Overview
 
@@ -345,14 +173,25 @@ EasyMolKit/
 
 For full API details, see [docs/function_reference.md](docs/function_reference.md).
 
-## Key Conventions
+## Directory Structure
 
-- All logic lives under `src/` — no `.m` files in the project root (except `main_<feature>.m` entry points)
-- `.m` files use English only (comments, logs, error messages)
-- Prefer `string` type (`"..."` literals); requires R2025b+
-- Never call `py.rdkit.*` directly — always go through `emk.*` wrappers
-- Use `logInfo` / `logWarn` / `logError` for all output (`fprintf` is prohibited)
-- Run artifacts are saved to `result/runs/<YYYYMMDD_HHMMSS>/` (not tracked by Git)
+```
+EasyMolKit/
+├─ main_rdkit.m               # RDKit setup & basic operations (run section by section)
+├─ config/
+│   └─ settings.example.json  # Configuration template
+├─ examples/
+│   ├─ japanese/              # Distribution materials — Japanese (plain-text Live Code)
+│   └─ english/               # Distribution materials — English (comments differ only)
+├─ repro/                     # Reproducible research (RP00–RP05)
+├─ src/
+│   └─ +emk/                  # Main package (15 modules, 76 functions)
+├─ tests/
+│   ├─ unit/                  # matlab.unittest class-based tests
+│   └─ smoke/                 # Smoke tests
+├─ data/                      # Curated sample data
+└─ docs/                      # Documentation
+```
 
 ## License
 
@@ -364,7 +203,6 @@ EasyMolKit: [MIT License](LICENSE)
 |---|---|---|
 | RDKit | BSD-3-Clause | Chemoinformatics core |
 | Python (CPython) | PSF License | Runtime environment |
-| PyMOL Open-Source | Python/BSD-like | 3D visualization (future release) |
 
 For details, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/compliance.md](docs/compliance.md).
 
@@ -386,10 +224,10 @@ This software is provided for research and educational purposes.
 
 | File | Description |
 |---|---|
-| [docs/quickstart.md](docs/quickstart.md) | Setup steps & FAQ |
+| [docs/quickstart.md](docs/quickstart.md) | Setup steps, Track 2 setup & FAQ |
+| [docs/tutorials.md](docs/tutorials.md) | Full tutorial listing (F01–R10, RP00–RP05) |
 | [docs/function_reference.md](docs/function_reference.md) | Full function signature reference |
-| [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (76 functions, all modules) |
-| [docs/test_catalog.md](docs/test_catalog.md) | Test class catalog (31 classes, unit + smoke) |
+| [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (76 functions) |
 | [docs/python_integration.md](docs/python_integration.md) | Python integration architecture |
 | [docs/platform_support.md](docs/platform_support.md) | Desktop / Online platform support |
 | [docs/compliance.md](docs/compliance.md) | License & compliance |
@@ -399,5 +237,5 @@ This software is provided for research and educational purposes.
 | File | Description |
 |---|---|
 | [docs/ja/README.ja.md](docs/ja/README.ja.md) | このリポジトリの概要（日本語版） |
+| [docs/ja/tutorials.ja.md](docs/ja/tutorials.ja.md) | チュートリアル一覧（日本語版） |
 | [docs/function_catalog.ja.md](docs/function_catalog.ja.md) | コンパクト関数カタログ（日本語版） |
-| [docs/test_catalog.ja.md](docs/test_catalog.ja.md) | テストクラスカタログ（日本語版） |
