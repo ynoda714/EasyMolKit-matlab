@@ -27,6 +27,8 @@ This project uses or references the following third-party resources:
 | PyTorch Geometric (PyG) | MIT | Graph neural network framework for R08; installed via `installExtra("torch_geometric")` |
 | torch_scatter / torch_sparse / torch_cluster | MIT | PyG companion packages required for message passing and sparse ops; installed alongside torch_geometric |
 | HuggingFace Transformers | Apache-2.0 | Transformer model framework for R09 (ChemBERTa); installed via `installExtra("transformers")` |
+| shap | MIT | SHAP feature attribution for repro/ scripts (RP05+); not installed by default |
+| scikit-learn | BSD-3-Clause | ML models for repro/ scripts (RP05+); not installed by default |
 
 ## Data Sources
 

@@ -47,8 +47,16 @@ SMILES / SDF ─→ emk.mol.fromSmiles() ──→ mol (py.rdkit obj)
 | emk.io | [algorithms/io.md](algorithms/io.md) | readSdf, writeSdf, readSmilesList |
 | emk.viz | [algorithms/viz.md](algorithms/viz.md) | draw2d |
 | emk.util / src/util / src/config | [algorithms/util.md](algorithms/util.md) | pyToMatlab, isOnline, emkLoadConfig, logHelpers, makeRunDir |
-| emk.filter | [algorithms/filter.md](algorithms/filter.md) | lipinski |
+| emk.filter | [algorithms/filter.md](algorithms/filter.md) | lipinski, veber, pains, reos |
+| emk.scaffold | [algorithms/scaffold.md](algorithms/scaffold.md) | genericMurcko, brics, rgroup |
+| emk.dataset | [algorithms/dataset.md](algorithms/dataset.md) | esol, freesolv, bbbp, tox21 |
+| emk.cluster | [algorithms/cluster.md](algorithms/cluster.md) | butina |
+| emk.diversity | [algorithms/cluster.md](algorithms/cluster.md) | pick |
+| emk.conformer | [algorithms/conformer.md](algorithms/conformer.md) | embed, optimize |
+| emk.shape | [algorithms/conformer.md](algorithms/conformer.md) | compare |
 | emk.db | [algorithms/db.md](algorithms/db.md) | searchPubchem, searchChembl |
+| emk.repro | [algorithms/repro_selection.md](algorithms/repro_selection.md) | verify (RF03 numerical criteria) |
+| emk.setup (RF02) | — | snapshot, lockfile, verifyLock |
 
 ---
 

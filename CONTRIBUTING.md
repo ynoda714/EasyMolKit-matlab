@@ -46,6 +46,62 @@ runner = matlab.unittest.TestRunner.withNoPlugins;
 results = runner.run(suite);
 ```
 
+## Submitting a Reproduction (RF04)
+
+Reproducing a published cheminformatics result is one of the most valuable contributions.
+
+### Required Components
+
+Each reproduction must include:
+
+1. **RF01 README** — follow the standard template at `repro/TEMPLATE.en.md`.
+   - Overview, Environment, Data, Script, Result, Verification, Discussion sections
+   - Descriptor definitions table (tool + version + definition for every descriptor used)
+
+2. **RF02 Lock** — capture and save a version lock with `emk.setup.snapshot()`:
+   ```matlab
+   snap = emk.setup.snapshot();
+   emk.setup.lockfile(snap, fullfile(runDir, "lock_snapshot.json"));
+   ```
+   The lock records MATLAB, Python, RDKit, and Toolbox versions.
+
+3. **RF03 Verification** — report pass/fail against numerical criteria:
+   ```matlab
+   crit.rmse_cv = struct("upper", 1.20);
+   crit.r2_cv   = struct("lower", 0.75);
+   met.rmse_cv  = rmseCV;
+   met.r2_cv    = r2CV;
+   result = emk.repro.verify(met, crit);
+   ```
+   Save the result in `metrics.json` with `rf03_pass` and `rf03_criteria` fields.
+
+4. **Script** — place the reproduction script in `repro/rp<XX>_<name>/`.
+   The script must be a plain `.m` file with `%% Section` markers (no interactive input).
+
+### Directory Structure
+
+```
+repro/
+  rp<XX>_<name>/
+    README.md           (RF01 -- based on repro/TEMPLATE.en.md)
+    rp<XX>_<name>.m     (reproduction script)
+    lock_template.json  (RF02 schema)
+    result/             (.gitignore managed -- not committed)
+```
+
+### Automated Checks
+
+Before submitting a pull request, verify:
+- [ ] `repro/<folder>/README.md` contains all RF01 sections
+- [ ] `lock_snapshot.json` exists in at least one `result/runs/<ts>/` folder
+- [ ] `metrics.json` contains `rf03_pass` (true/false)
+- [ ] All unit tests pass: `testsuite("tests/unit")`
+
+### Community Labels
+
+- **`Good First Reproduction`**: lightweight Tier A papers (e.g., linear regression, descriptor calculation)
+- **`Good First Issue`**: doc fixes, test additions, descriptor additions, dataset additions
+
 ## Code of Conduct
 
 Please be respectful and constructive in all interactions.

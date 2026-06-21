@@ -95,3 +95,71 @@ NaN を含む行が `Pass_Ro5 = true` になる可能性についてユーザー
 **★★ NaN テスト (TC-8) の重要性**:
 `test_lipinski_nanMW_treatedAsNoViolation` は「NaN が false negative になる既知の動作」を
 テストで文書化する役割を持つ。ユーザーへの `logWarn` 出力を確認することも含める。
+
+---
+
+## 10.2 `veber`
+
+**設計意図**: Veber 経口バイオアベイラビリティ基準を MATLAB table に適用する。RDKit 不要の純粋 MATLAB 実装。
+
+**アルゴリズム概要**:
+1. `istable(tbl)` + 必須列（`NumRotatableBonds`, `TPSA`）の存在確認
+2. `NumRotatableBonds > 10` または `TPSA > 140` で各1違反
+3. `Violations_Veber` (double, 0-2) と `Pass_Veber` (logical) を追加
+
+**Veber 閾値**:
+
+| 記述子 | 閾値 | 違反条件 |
+|---|---|---|
+| NumRotatableBonds | 10 | > 10 |
+| TPSA | 140 Å² | > 140 |
+
+**引用文献**:
+- Veber, D.F. et al. (2002). Molecular Properties That Influence the Oral Bioavailability of Drug Candidates. *J. Med. Chem.* 45(12):2615-2623. DOI: 10.1021/jm020017n
+
+---
+
+## 10.3 `pains`
+
+**設計意図**: Pan-Assay Interference Compounds (PAINS) アラートを RDKit FilterCatalog を使って検出する。ハイスループットスクリーニング(HTS)での false positive 排除に使用。
+
+**アルゴリズム概要**:
+1. `istable(tbl)` + `SMILES` 列の存在確認
+2. `FilterCatalog(FilterCatalogParams.FilterCatalogs.PAINS)` を構築（セッション内で再利用可能）
+3. 各行の SMILES を再パース → `catalog.GetMatches(mol)` でアラートリストを取得
+4. `NumPainsAlerts` (double), `PainsAlerts` (string, カンマ区切り名), `HasPains` (logical) を追加
+
+**実装上の注意**:
+- SMILES の再パースは `emk.mol.fromSmiles` を直接呼ばず `Chem.MolFromSmiles` で行う（パース失敗時は NaN/false 扱い）
+- FilterCatalog は PAINS-A, PAINS-B, PAINS-C の 3 セットを統合したもの（約 480 構造アラート）
+
+**引用文献**:
+- Baell, J.B. & Holloway, G.A. (2010). New Substructure Filters for Removal of Pan Assay Interference Compounds (PAINS) from Screening Libraries. *J. Med. Chem.* 53(7):2719-2740. DOI: 10.1021/jm901137j
+- RDKit FilterCatalog: `rdkit.Chem.FilterCatalog`
+
+---
+
+## 10.4 `reos`
+
+**設計意図**: REOS (Rapid Elimination Of Swill) フィルタを MATLAB table に適用する。RDKit 不要の純粋 MATLAB 実装。Lipinski Ro5 より厳格な薬物らしさスクリーニング。
+
+**アルゴリズム概要**:
+1. `istable(tbl)` + 必須列（`MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`, `NumRotatableBonds`, `HeavyAtomCount`）の存在確認
+2. 各列が指定範囲外なら1違反をカウント
+3. `Violations_REOS` (double, 0-6) と `Pass_REOS` (logical) を追加
+
+**REOS 閾値（6/7 基準; FormalCharge 除く）**:
+
+| 記述子 | 範囲 | 違反条件 |
+|---|---|---|
+| MolWt | [200, 500] | < 200 または > 500 |
+| LogP | [-5, 5] | < -5 または > 5 |
+| NumHDonors | [0, 5] | < 0 または > 5 |
+| NumHAcceptors | [0, 10] | < 0 または > 10 |
+| NumRotatableBonds | [0, 8] | < 0 または > 8 |
+| HeavyAtomCount | [15, 50] | < 15 または > 50 |
+
+**FormalCharge 除外の理由**: `emk.descriptor.calculate` のデフォルト記述子セットに含まれないため。必要な場合はユーザーが列を手動追加すること。
+
+**引用文献**:
+- Walters, W.P. & Murcko, M.A. (2002). Prediction of 'drug-likeness'. *Adv. Drug Deliv. Rev.* 54(3):255-271. DOI: 10.1016/S0169-409X(02)00003-0

@@ -162,6 +162,8 @@
 | PyTorch (CPU-only) | BSD-3-Clause | ✅ | ライセンス表示・名称使用制限 |
 | PyTorch Geometric + scatter/sparse/cluster | MIT | ✅ | ライセンス表示 |
 | HuggingFace Transformers | Apache-2.0 | ✅ | ライセンス表示・変更表示 |
+| shap | MIT | ✅ | ライセンス表示（repro/ 専用、デフォルト非インストール）|
+| scikit-learn | BSD-3-Clause | ✅ | ライセンス表示・名称使用制限（repro/ 専用）|
 | Open Babel | **GPLv2** | ⚠️ Track 2 のみ | Track 2（ユーザー導入）。EasyMolKit 本体に含めない |
 | MDAnalysis | **GPLv2+** | ⚠️ Track 2 のみ | Track 2（ユーザー導入）。EasyMolKit 本体に含めない |
 | meeko | **LGPL-2.1** | ✅ 動的リンク安全 | ライセンス表示。動的 import は copyleft 汚染なし（§2.7 CL-7）|
@@ -279,3 +281,4 @@ EasyMolKit uses the following third-party open-source software:
 | CL-7 | PyTorch ライセンス確認 | **✅ 確認済み**: BSD-3-Clause（Meta Platforms, Inc.）。`pip install torch` で CPU-only wheel を取得。MIT 互換あり。名称使用制限あり（BSD-3 同等）。参照: https://github.com/pytorch/pytorch/blob/main/LICENSE | ✅ 確認済み |
 | CL-8 | PyTorch Geometric ライセンス確認 | **✅ 確認済み**: MIT（Matthias Fey）。companion パッケージ（torch_scatter/sparse/cluster）も MIT。MIT 互換あり。参照: https://github.com/pyg-team/pytorch_geometric/blob/master/LICENSE | ✅ 確認済み |
 | CL-9 | HuggingFace Transformers ライセンス確認 | **✅ 確認済み**: Apache-2.0（Hugging Face, Inc.）。MIT との互換性あり（特許免除条項を含むが再配布制限なし）。変更ファイルへの変更表示義務あり。参照: https://github.com/huggingface/transformers/blob/main/LICENSE | ✅ 確認済み |
+| CL-10 | shap / scikit-learn ライセンス確認 | **✅ 確認済み**: shap = MIT（SHAP LLC）、scikit-learn = BSD-3-Clause（scikit-learn developers）。両方 Permissive。依存パッケージ（numba/llvmlite: BSD-2-Clause、joblib/threadpoolctl: BSD-3-Clause、slicer/cloudpickle: MIT/BSD-3）も全て Permissive。repro/ スクリプト専用（デフォルトインストール対象外）のため本体 MIT への影響なし。参照: https://github.com/shap/shap/blob/master/LICENSE / https://github.com/scikit-learn/scikit-learn/blob/main/COPYING | ✅ 確認済み |
