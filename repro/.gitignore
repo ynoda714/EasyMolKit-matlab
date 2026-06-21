@@ -1,0 +1,2 @@
+# Ignore generated result directories within each repro
+*/result/

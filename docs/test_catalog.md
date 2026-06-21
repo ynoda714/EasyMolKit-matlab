@@ -1,7 +1,7 @@
 # Test Catalog — EasyMolKit
 
-> 25 unit test classes + 2 smoke scripts.
-> Japanese version → [test_catalog.ja.md](test_catalog.ja.md)
+> 30 unit test classes + 2 smoke scripts.
+> Japanese version → [../test_catalog.md](../test_catalog.md)
 
 ## Running Tests
 
@@ -23,13 +23,17 @@ run("tests/smoke/test_m2_smoke.m");
 
 ---
 
-## Unit Tests (`tests/unit/`) — 25 classes
+## Unit Tests (`tests/unit/`) — 30 classes
 
 | Class | Target Module | Scope |
 |---|---|---|
+| `TestCluster` | `emk.cluster` | Butina sphere-exclusion clustering, threshold, validation |
+| `TestConformer` | `emk.conformer` / `emk.shape` | embed/optimize/compare: validation, integration, seed reproducibility |
+| `TestDataset` | `emk.dataset` | ESOL / FreeSolv / BBBP / Tox21 validation, download guards |
 | `TestDb` | `emk.db` | PubChem / ChEMBL search, fetch, error handling |
-| `TestDescriptor` | `emk.descriptor` | 10 standard descriptors, batch, NaN for invalid mol |
-| `TestFilter` | `emk.filter` | Lipinski Ro5: violation count, pass/fail, edge cases |
+| `TestDescriptor` | `emk.descriptor` | 10 standard descriptors + qed / saScore / bcut(1×8) / fragmentCount; batch, NaN for invalid mol |
+| `TestDiversity` | `emk.diversity` | MaxMin diversity selection, Seed reproducibility, validation |
+| `TestFilter` | `emk.filter` | Lipinski / Veber / REOS / PAINS: violation count, pass/fail, edge cases |
 | `TestFingerprint` | `emk.fingerprint` | Morgan (radius, nBits), MACCS, `toArray` type/shape |
 | `TestInitPython` | `emk.setup.initPython` | Platform detection, idempotent `pyenv` configuration |
 | `TestInstall` | `emk.setup.install` | Embedded Python deployment, path length guard |
@@ -46,6 +50,7 @@ run("tests/smoke/test_m2_smoke.m");
 | `TestPubchemFetch` | `emk.db.pubchemFetch` | Extended fetch, all NameSpace types, not-found error |
 | `TestRdkitModule` | `emk` (general) | RDKit availability check, version string |
 | `TestRecipe` | `emk.setup.recipe` | Output for all known library names, unknownLibrary error |
+| `TestScaffold` | `emk.scaffold` | genericMurcko / brics / rgroup: validation, SMARTS matching |
 | `TestSimilarity` | `emk.similarity` | tanimoto, dice, rankBy (N, Metric), matrix symmetry |
 | `TestToTable` | `emk.mol.toTable` | Column names, types, NaN for invalid mol, empty input |
 | `TestUseExternal` | `emk.setup.useExternal` | Path validation, fileNotFound, idempotent skip |

@@ -1,0 +1,62 @@
+{
+  "_usage": "RF02 Version Lock template for RP04 ChemBERTa BBBP Linear Probe. Run rp04_chemberta.m to generate lock_snapshot.json with actual values in result/runs/<ts>/.",
+  "_note": "This file defines the lock schema. Actual values are filled in by emk.setup.lockfile(snap, filePath) after each successful run.",
+  "repro_id": "rp04_chemberta",
+  "paper": {
+    "title": "ChemBERTa: Large-Scale Self-Supervised Pretraining for Molecular Property Prediction",
+    "authors": "Chithrananda, S. et al.",
+    "year": 2020,
+    "doi": "10.48550/arXiv.2010.09885",
+    "journal": "arXiv",
+    "volume": "2010.09885"
+  },
+  "model": {
+    "name": "seyonec/ChemBERTa-zinc-base-v1",
+    "architecture": "RoBERTa-base",
+    "n_params_M": 44.1,
+    "hidden_size": 768,
+    "pretrained_on": "ZINC SMILES",
+    "approach": "frozen CLS embedding (768-dim) + StandardScaler + LogisticRegression (linear probe)"
+  },
+  "dataset": {
+    "name": "BBBP (MoleculeNet / Wu et al. 2018 / DeepChem)",
+    "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
+    "n_molecules_valid": 2039,
+    "cache_path": "data/benchmark/bbbp.csv",
+    "sha256": "FILL_IN_AFTER_FIRST_RUN"
+  },
+  "split": {
+    "method": "random 5-fold stratified CV",
+    "note": "Paper uses scaffold split. This repro uses random split consistent with RP02/RP03.",
+    "seed": 42
+  },
+  "hyperparams": {
+    "batch_size": 32,
+    "max_len": 128,
+    "C": 1.0,
+    "seed": 42,
+    "approach": "frozen_CLS_embedding + LR"
+  },
+  "run_date": "YYYY-MM-DD",
+  "environment": {
+    "matlab": "R20XXx",
+    "python": "3.10.x",
+    "transformers": "5.7.0",
+    "scikit_learn": "1.7.2",
+    "commit": "xxxxxxx"
+  },
+  "rf03_criteria": {
+    "auc_cv": {"lower": 0.85}
+  },
+  "results": {
+    "auc_cv": null,
+    "auc_cv_std": null,
+    "fold_aucs": null,
+    "comparison": {
+      "rp02_ecfp4_lr": 0.8826,
+      "rp03_gcn": 0.9151,
+      "rp04_chemberta": null
+    }
+  },
+  "rf03_pass": null
+}

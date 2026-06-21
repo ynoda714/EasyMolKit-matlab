@@ -1,12 +1,12 @@
 # Function Catalog — EasyMolKit
 
-> Compact reference for all 51 public functions across all modules.
+> Compact reference for all 76 public functions across all modules.
 > Full signatures and error IDs → [function_reference.md](function_reference.md)
 > Japanese version → [function_catalog.ja.md](function_catalog.ja.md)
 
 ---
 
-## emk.setup (9 functions)
+## emk.setup (12 functions)
 
 | Function | Summary |
 |---|---|
@@ -19,6 +19,10 @@
 | `validate(Libraries=string.empty)` | Returns install-status table for all or specified libraries; never throws |
 | `recipe(name)` | Print installation recipe and license info to Command Window |
 | `installTrack2(name, BasePython="")` | Create venv for a Track 2 library and write `settings.json` |
+| `snapshot()` | Return RF02 environment snapshot struct (matlab/python/rdkit/toolboxes/timestamp) |
+| `lockfile(snap, filePath)` | Save snapshot struct to a pretty-printed RF02 lock JSON file |
+| `lockfile(filePath)` | Load an RF02 lock JSON file and return the struct |
+| `verifyLock(lockRef)` | Compare current environment to a saved lock → `.pass` `.details` `.warnings` |
 
 ---
 
@@ -37,7 +41,28 @@
 
 ---
 
-## emk.descriptor (6 functions)
+## emk.scaffold (3 functions)
+
+| Function | Summary |
+|---|---|
+| `genericMurcko(mol)` | Generic Murcko scaffold (all atoms C, all bonds single) → Mol |
+| `brics(mol)` | BRICS fragment decomposition → `string(1,N)` SMILES array (non-deterministic order) |
+| `rgroup(mols, coreSmiles)` | R-group decomposition → `[table, unmatchedIdx]` (Core, R1, R2… columns) |
+
+---
+
+## emk.dataset (4 functions)
+
+| Function | Summary |
+|---|---|
+| `esol(CacheDir="", ForceDownload=false)` | ESOL aqueous solubility dataset → table (~1128 compounds, `logS` column) |
+| `freesolv(CacheDir="", ForceDownload=false)` | FreeSolv solvation free energy → table (~643 compounds) |
+| `bbbp(CacheDir="", ForceDownload=false)` | BBBP blood-brain barrier permeability → table (~2050 compounds, `BBB` logical) |
+| `tox21(CacheDir="", ForceDownload=false)` | Tox21 toxicity → table (~7831 compounds, 12 double endpoint columns) |
+
+---
+
+## emk.descriptor (10 functions)
 
 | Function | Summary |
 |---|---|
@@ -47,6 +72,10 @@
 | `mordred(mol, descriptorNames=[])` | ~1800 Mordred 2D descriptors → struct; requires `installExtra("mordred")` |
 | `mordredBatch(mols, descriptorNames=[])` | Batch Mordred computation → table; requires `installExtra("mordred")` |
 | `mordredNames()` | Returns sorted `string(1×N)` list of ~1800 available Mordred descriptor names |
+| `qed(mol)` | QED score ∈ [0,1] — drug-likeness composite (8-property desirability function) |
+| `saScore(mol)` | SA Score ∈ [1,10] — synthetic accessibility (lower = easier to synthesise) |
+| `bcut(mol)` | BCUT2D descriptors → `double(1,8)` (MWHI/MWLOW/CHGHI/CHGLO/LOGPHI/LOGPLOW/MRHI/MRLOW) |
+| `fragmentCount(mol)` | Ring and functional group fragment counts → struct (11 fields) |
 
 **Standard descriptors** (`all10`): `MolWt`, `ExactMolWt`, `LogP`, `TPSA`, `NumHAcceptors`, `NumHDonors`,
 `NumRotatableBonds`, `RingCount`, `FractionCSP3`, `HeavyAtomCount`. `MolFormula` available on explicit request.
@@ -74,13 +103,52 @@
 
 ---
 
-## emk.filter (1 function)
+## emk.filter (4 functions)
 
 | Function | Summary |
 |---|---|
 | `lipinski(tbl, MaxViolations=0)` | Add `Violations_Ro5` (double) and `Pass_Ro5` (logical) columns to an input table |
+| `veber(tbl)` | Add `Violations_Veber` (double, 0-2) and `Pass_Veber` (logical) — pure MATLAB |
+| `pains(tbl)` | Add `NumPainsAlerts`, `PainsAlerts`, `HasPains` (logical) — RDKit FilterCatalog |
+| `reos(tbl)` | Add `Violations_REOS` (double, 0-6) and `Pass_REOS` (logical) — pure MATLAB |
 
-Requires columns: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`.
+Lipinski requires: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`  
+Veber requires: `NumRotatableBonds`, `TPSA`  
+PAINS requires: `SMILES`  
+REOS requires: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`, `NumRotatableBonds`, `HeavyAtomCount`
+
+---
+
+## emk.cluster (1 function)
+
+| Function | Summary |
+|---|---|
+| `butina(fps, Threshold=0.2, Metric="tanimoto")` | Butina sphere-exclusion clustering → `cell(1,C)` (each element = 1-based index `double(1,K)`) |
+
+---
+
+## emk.diversity (1 function)
+
+| Function | Summary |
+|---|---|
+| `pick(fps, N, Metric="tanimoto", Seed=-1)` | MaxMin diversity selection → `double(1,N)` 1-based indices |
+
+---
+
+## emk.conformer (2 functions)
+
+| Function | Summary |
+|---|---|
+| `embed(mol, Method="ETKDGv3", RandomSeed=-1)` | ETKDG 3D conformer generation → Mol with conformer |
+| `optimize(mol, ForceField="MMFF94", MaxIter=2000)` | Force-field minimization (MMFF94/UFF) → Mol with optimized 3D coords |
+
+---
+
+## emk.shape (1 function)
+
+| Function | Summary |
+|---|---|
+| `compare(mol1, mol2, Method="protrude")` | 3D shape similarity score ∈ [0,1] (protrude/tanimoto; requires 3D conformers) |
 
 ---
 
@@ -113,6 +181,14 @@ Requires columns: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`.
 | `getChemblActivity(targetId, ActivityType="IC50", MaxRows=50, MinActivity_nM=Inf)` | ChEMBL bioactivity data → 5-column table |
 
 `pubchemFetch` requires `installExtra("pubchempy")`.
+
+---
+
+## emk.repro (1 function)
+
+| Function | Summary |
+|---|---|
+| `verify(metrics, criteria)` | RF03 numerical verification — compare metrics to acceptance criteria → `.pass` `.details` `.report` |
 
 ---
 

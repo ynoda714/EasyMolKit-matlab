@@ -11,6 +11,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-06-21
+
+### Added
+
+**Reproducible Research Framework (Phase 3)**
+
+Six reproductions of published Chemoinformatics papers, each with a locked environment snapshot (RF02),
+defined success criteria (RF03), and a standardised directory layout under `repro/`.
+
+| ID | Paper | Method | Result | RF03 |
+|---|---|---|---|---|
+| RP00 | Delaney (2004) ESOL — aqueous solubility | Linear regression on physicochemical descriptors | CV RMSE=1.017, R²=0.762 | PASS |
+| RP01 | Delaney (2004) ESOL — extended with L05 descriptors | Linear regression + TPSA / QED / SA Score | CV RMSE=0.584, R²=0.906 | PASS |
+| RP02 | Wu et al. (2018) MoleculeNet BBBP baseline | Morgan FP (ECFP4) + Random Forest | ROC-AUC CV=0.883 | PASS |
+| RP03 | Yang et al. (2019) GNN on BBBP | Graph Convolutional Network (Chemprop-style) | ROC-AUC CV=0.915 | PASS |
+| RP04 | Chithrananda et al. (2020) ChemBERTa | Frozen CLS embedding + Logistic Regression | ROC-AUC CV=0.927 | PASS |
+| RP05 | SHAP explainability on BBBP | shap.LinearExplainer + BBBP LR model | ROC-AUC CV=0.909, Spearman ρ=0.902 | PASS |
+
+Each `repro/rp*/` directory contains: `rp*.m` (MATLAB entry), `rp*_core.py` (where required),
+`README.en.md` (context, method, results), and `lock_template.json` (RF02 version snapshot).
+
+**Reproducibility infrastructure (RF01–RF04)**
+- `emk.setup.snapshot()` — capture current environment for RF02 version lock (matlab / python / rdkit / toolboxes / timestamp)
+- `emk.setup.lockfile(snap, path)` / `emk.setup.lockfile(path)` — save / load RF02 lock JSON
+- `emk.setup.verifyLock(lockRef)` — compare current environment to a saved lock → `.pass` `.details` `.warnings`
+- `emk.repro.verify(result, criteria)` — assert reproduction success against RF03 numeric criteria
+- `repro/TEMPLATE.en.md` — standardised template for new reproduction entries
+
+**New `emk.*` modules (M-INFRA library expansion)**
+- `emk.scaffold.genericMurcko(mol)` — Generic Murcko scaffold (all atoms C, all bonds single)
+- `emk.scaffold.brics(mol)` — BRICS fragment decomposition → SMILES string array
+- `emk.scaffold.rgroup(mols, coreSmiles)` — R-group decomposition → `[table, unmatchedIdx]`
+- `emk.dataset.esol()` / `freesolv()` / `bbbp()` / `tox21()` — benchmark dataset loaders with local cache
+- `emk.descriptor.qed(mol)` — QED drug-likeness score ∈ [0,1]
+- `emk.descriptor.saScore(mol)` — SA (Synthetic Accessibility) Score ∈ [1,10]
+- `emk.descriptor.bcut(mol)` — BCUT2D descriptors → `double(1,8)`
+- `emk.descriptor.fragmentCount(mol)` — ring and functional group fragment counts → struct
+- `emk.filter.veber(tbl)` — Veber oral bioavailability filter
+- `emk.filter.pains(tbl)` — PAINS structural alert filter (RDKit FilterCatalog)
+- `emk.filter.reos(tbl)` — REOS medicinal chemistry filter
+- `emk.cluster.butina(fps, cutoff)` — Butina sphere-exclusion clustering
+- `emk.diversity.pick(fps, n)` — MaxMin diverse subset selection
+- `emk.conformer.embed(mol)` / `optimize(mol)` — 3D conformer generation and force-field optimization
+- `emk.shape.compare(mol1, mol2)` — 3D shape similarity (protrude distance)
+
+**Tests**
+- `tests/unit/TestScaffold.m` — `emk.scaffold.*` unit tests
+- `tests/unit/TestDataset.m` — `emk.dataset.*` unit tests
+- `tests/unit/TestCluster.m` — `emk.cluster.*` unit tests
+- `tests/unit/TestDiversity.m` — `emk.diversity.*` unit tests
+- `tests/unit/TestConformer.m` — `emk.conformer.*` unit tests
+
+---
+
 ## [1.3.1] - 2026-06-19
 
 ### Changed
@@ -184,4 +238,4 @@ and the complete `emk.*` API for RDKit-based Chemoinformatics from MATLAB.
 - Requires MATLAB R2025b or later
 - Windows Desktop and MATLAB Online supported; macOS / Linux Desktop untested
 - Layer 2 (Stories) was released in v1.1.0; Layer 3 (Analytics) in v1.2.0
-- Layer 4 (Research) tutorials were released in v1.3.0
+- Layer 4 (Research) tutorials are planned for v1.3.0

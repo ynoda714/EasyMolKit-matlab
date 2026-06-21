@@ -1,0 +1,61 @@
+{
+  "_usage": "RF02 Version Lock template for RP03 GCN BBBP Classification. Run rp03_gnn.m to generate lock_snapshot.json with actual values in result/runs/<ts>/.",
+  "_note": "This file defines the lock schema. Actual values are filled in by emk.setup.lockfile(snap, filePath) after each successful run.",
+  "repro_id": "rp03_gnn",
+  "paper": {
+    "title": "Analyzing Learned Molecular Representations for Property Prediction",
+    "authors": "Yang, K. et al.",
+    "year": 2019,
+    "doi": "10.1021/acs.jcim.9b00237",
+    "journal": "J. Chem. Inf. Model.",
+    "volume": 59,
+    "issue": 8,
+    "pages": "3370-3388"
+  },
+  "model": "3-layer GCNConv + BatchNorm + GlobalMeanPool + 2FC (torch_geometric)",
+  "dataset": {
+    "name": "BBBP (MoleculeNet / Wu et al. 2018 / DeepChem)",
+    "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
+    "n_molecules_valid": 2039,
+    "cache_path": "data/benchmark/bbbp.csv",
+    "sha256": "FILL_IN_AFTER_FIRST_RUN"
+  },
+  "split": {
+    "method": "random 5-fold stratified CV",
+    "note": "Yang et al. use Bemis-Murcko scaffold split. This reproduction uses random split consistent with RP02/RP05.",
+    "seed": 42
+  },
+  "atom_features": {
+    "dim": 25,
+    "components": "atom_type_onehot_12 + degree_onehot_6 + formal_charge_onehot_5 + is_aromatic_1 + H_count_normalized_1"
+  },
+  "hyperparams": {
+    "hidden": 128,
+    "n_layers": 3,
+    "dropout": 0.3,
+    "lr": 0.001,
+    "n_epochs": 150,
+    "patience": 20,
+    "batch_size": 64
+  },
+  "run_date": "YYYY-MM-DD",
+  "environment": {
+    "matlab": "R20XXx",
+    "python": "3.10.x",
+    "rdkit": "20XX.XX.X",
+    "torch": "2.11.0+cpu",
+    "torch_geometric": "2.7.0",
+    "commit": "xxxxxxx"
+  },
+  "rf03_criteria": {
+    "auc_cv": {"lower": 0.85}
+  },
+  "results": {
+    "auc_cv": null,
+    "auc_cv_std": null,
+    "fold_aucs": null,
+    "rp02_baseline_auc": 0.8826,
+    "gnn_vs_baseline": null
+  },
+  "rf03_pass": null
+}

@@ -6,8 +6,10 @@
 ```
 src/+emk/+setup/       src/+emk/+mol/        src/+emk/+descriptor/
 src/+emk/+fingerprint/ src/+emk/+similarity/  src/+emk/+filter/
+src/+emk/+scaffold/    src/+emk/+dataset/     src/+emk/+cluster/
+src/+emk/+diversity/   src/+emk/+conformer/   src/+emk/+shape/
 src/+emk/+io/          src/+emk/+viz/         src/+emk/+util/
-src/config/            src/util/
+src/+emk/+repro/       src/config/            src/util/
 ```
 
 ---
@@ -73,6 +75,23 @@ Creates a venv at `python_env_t2/<name>/` for Track 2 libraries, runs pip instal
 `BasePython`: if omitted, auto-detects `py` / `python` from PATH.  
 On subsequent sessions, `initPython()` auto-detects `external_path` and calls `useExternal()`.  
 Errors: `notDesktop`, `unknownLibrary`, `basePythonNotFound`, `venvFailed`, `installFailed`, `importVerifyFailed`, `settingsWriteFailed`.
+
+### `emk.setup.snapshot()`
+Returns: `struct` — `.matlab` `.python` `.rdkit` `.commit` `.toolboxes` `.timestamp`.
+Captures current environment for RF02 version lock. Never throws (non-throwing design).  
+See also: `emk.setup.lockfile`, `emk.setup.verifyLock`.
+
+### `emk.setup.lockfile(snap, filePath)` / `emk.setup.lockfile(filePath)`
+Save mode (2 args): serialises `snap` struct as pretty-printed JSON to `filePath`.  
+Load mode (1 string arg): reads a lock JSON file and returns the struct.  
+Errors: `invalidInput`, `writeError`, `fileNotFound`.
+
+### `emk.setup.verifyLock(lockRef)`
+Compares the current environment against a saved RF02 lock.
+`lockRef`: a JSON file path (string/char) or lock struct.  
+Returns: `struct` — `.pass` (logical), `.details` (per-field: `.expected .actual .match`), `.warnings` (string).  
+Critical fields: `matlab`, `python`, `rdkit`. Non-critical (warning only): `commit`.  
+Errors: `invalidInput`.
 
 ---
 
@@ -165,6 +184,170 @@ Use as the `descriptorNames` argument to `mordred()` / `mordredBatch()`.
 Requires: `emk.setup.installExtra("mordred")` must be installed.  
 Errors: `libraryNotFound`, `pythonError`.
 
+### `emk.descriptor.qed(mol)`
+Returns: `double` ∈ [0,1] — QED (Quantitative Estimate of Drug-likeness) score. Combines 8
+molecular properties via desirability functions. Score ≥ 0.67 is a common drug-likeness threshold.
+Uses `rdkit.Chem.QED.qed`.  
+Errors: `invalidInput` (non-Mol), `rdkitError`.
+
+### `emk.descriptor.saScore(mol)`
+Returns: `double` ∈ [1,10] — SA (Synthetic Accessibility) Score. Lower is easier to synthesise
+(1-3: easy, 3-6: moderate, 6-10: difficult/impossible). Combines fragment contributions with
+ring/stereo complexity penalties.  
+Requires: `rdkit.Contrib.SA_Score.sascorer` on the Python path (included in standard RDKit).  
+Errors: `invalidInput`, `rdkitError` (including module-not-found).
+
+### `emk.descriptor.bcut(mol)`
+Returns: `double(1,8)` — BCUT2D descriptors. Eigenvalues of the Burden matrix weighted by MW,
+partial charge, LogP, and molar refractivity. Order: `BCUT2D_MWHI`, `BCUT2D_MWLOW`, `BCUT2D_CHGHI`, `BCUT2D_CHGLO`,
+`BCUT2D_LOGPHI`, `BCUT2D_LOGPLOW`, `BCUT2D_MRHI`, `BCUT2D_MRLOW`. Uses `rdMolDescriptors.BCUT2D`.  
+Errors: `invalidInput`, `rdkitError`.
+
+### `emk.descriptor.fragmentCount(mol)`
+Returns: `struct` — Ring system and functional group fragment counts. Fields: `NumRings`,
+`NumAromaticRings`, `NumAliphaticRings`, `NumHeteroRings`, `NumCarbonyl`, `NumAmine`,
+`NumHydroxyl`, `NumHalogen`, `NumNitrile`, `NumSulfonamide`, `NumAmide`.
+Uses `rdMolDescriptors` + `Fragments` (fr_* SMARTS).  
+Errors: `invalidInput`, `rdkitError`.
+
+---
+
+## emk.scaffold
+
+### `emk.scaffold.genericMurcko(mol)`
+Returns: `py.rdkit.Chem.rdchem.Mol` — Generic Murcko scaffold (all atoms set to C, all bonds to
+single). Two-step: `GetScaffoldForMol` then `MakeScaffoldGeneric`. Acyclic molecules return a
+0-atom Mol without error.  
+Note: differs from `emk.mol.scaffold` which preserves atom/bond types.  
+Errors: `invalidInput`, `rdkitError`.
+
+### `emk.scaffold.brics(mol)`
+Returns: `string(1,N)` — BRICS fragment SMILES array (non-deterministic order; frozenset origin).
+Uses `rdkit.Chem.BRICS.BRICSDecompose`.  
+Errors: `invalidInput`, `rdkitError`.
+
+### `emk.scaffold.rgroup(mols, coreSmiles)`
+Returns: `[tbl, unmatchedIdx]` — R-group decomposition result.  
+`tbl`: `table` with columns `Core`, `R1`, `R2`, ... (string SMILES for each R-group).  
+`unmatchedIdx`: `double(1,K)` — 1-based indices of molecules that did not match the core.  
+Recommend using `[*:1]`-style R-mapped cores in `coreSmiles`.  
+Errors: `invalidInput`, `invalidCore`, `noMatch` (all molecules unmatched), `rdkitError`.
+
+---
+
+## emk.dataset
+
+### `emk.dataset.esol(CacheDir="", ForceDownload=false)`
+Returns: `table` — ESOL (Delaney) aqueous solubility dataset (~1128 compounds). Columns: `SMILES`,
+`Name` (string), `logS`, `logS_Delaney`, `MolWt` (double). Downloads `delaney-processed.csv` from
+DeepChem S3; caches to `data/benchmark/esol.csv`.  
+Errors: `invalidInput`, `downloadFailed`, `parseFailed`.
+
+### `emk.dataset.freesolv(CacheDir="", ForceDownload=false)`
+Returns: `table` — FreeSolv hydration free energy dataset (~643 compounds). Columns: `SMILES`,
+`Name` (string), `DeltaG_exp`, `DeltaG_calc`, `DeltaG_exp_sem` (double).  
+Errors: `invalidInput`, `downloadFailed`, `parseFailed`.
+
+### `emk.dataset.bbbp(CacheDir="", ForceDownload=false)`
+Returns: `table` — BBBP blood-brain barrier permeability dataset (~2050 compounds). Columns:
+`SMILES`, `Name` (string), `BBB` (logical, true = permeable).  
+Errors: `invalidInput`, `downloadFailed`, `parseFailed`.
+
+### `emk.dataset.tox21(CacheDir="", ForceDownload=false)`
+Returns: `table` — Tox21 multi-target toxicity dataset (~7831 compounds). Columns: `SMILES`,
+`MolID` (string) + 12 toxicity endpoints (double, 0/1/NaN). Downloads `.csv.gz`, decompresses
+with `gunzip`.  
+Endpoints: `NR_AR`, `NR_AR_LBD`, `NR_AhR`, `NR_Aromatase`, `NR_ER`, `NR_ER_LBD`,
+`NR_PPAR_gamma`, `SR_ARE`, `SR_ATAD5`, `SR_HSE`, `SR_MMP`, `SR_p53`.  
+Errors: `invalidInput`, `downloadFailed`, `parseFailed`.
+
+---
+
+## emk.filter
+
+### `emk.filter.lipinski(tbl, MaxViolations=0)`
+Returns: `table` — Input table with `Violations_Ro5`(double) and `Pass_Ro5`(logical) columns appended.
+Required columns: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`.
+
+Ro5 thresholds: one violation each for MW>500, LogP>5, HBD>5, HBA>10.
+Valid range for `MaxViolations` is [0,4].  
+> NaN descriptors evaluate as `NaN > 500 = false`, so they count as "no violation" (false negative risk).
+> Using `rmmissing(tbl)` as pre-processing is recommended.  
+Errors: `invalidInput` (non-table), `invalidMaxViol` (outside [0,4] / NaN / Inf), `missingColumns`.
+
+### `emk.filter.veber(tbl)`
+Returns: `table` — Input table with `Violations_Veber`(double, 0-2) and `Pass_Veber`(logical) appended.
+Required columns: `NumRotatableBonds`, `TPSA`. Pure MATLAB; no RDKit required.  
+Veber criteria: `NumRotatableBonds > 10` or `TPSA > 140 Å²` counts as one violation each.  
+Errors: `invalidInput`, `missingColumns`.
+
+### `emk.filter.pains(tbl)`
+Returns: `table` — Input table with `NumPainsAlerts`(double), `PainsAlerts`(string, comma-separated),
+and `HasPains`(logical) columns appended. Required column: `SMILES`.
+Uses RDKit `FilterCatalog(PAINS)`.  
+Errors: `invalidInput`, `missingColumns`, `rdkitError`.
+
+### `emk.filter.reos(tbl)`
+Returns: `table` — Input table with `Violations_REOS`(double, 0-6) and `Pass_REOS`(logical) appended.
+Required columns: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`, `NumRotatableBonds`, `HeavyAtomCount`.
+Pure MATLAB; no RDKit required.  
+REOS ranges (6/7 criteria; FormalCharge excluded): MW [200,500], LogP [-5,5], HBD [0,5],
+HBA [0,10], RotBonds [0,8], HeavyAtoms [15,50].  
+Errors: `invalidInput`, `missingColumns`.
+
+---
+
+## emk.cluster
+
+### `emk.cluster.butina(fps, Threshold=0.2, Metric="tanimoto")`
+Returns: `cell(1,C)` — C clusters. Each element is a `double(1,K)` array of 1-based indices
+into `fps`. `clusters{1}` is the largest cluster; the first index in each cluster is the centroid.  
+Butina sphere-exclusion clustering. `Threshold` is a Tanimoto **distance** threshold
+(80% similarity cutoff at default 0.2).  
+`Metric`: `"tanimoto"` only.  
+Errors: `invalidInput`, `invalidThreshold` (outside (0,1]), `invalidMetric`, `rdkitError`.
+
+---
+
+## emk.diversity
+
+### `emk.diversity.pick(fps, N, Metric="tanimoto", Seed=-1)`
+Returns: `double(1,N)` — 1-based indices of N maximally diverse molecules selected from `fps`.  
+MaxMin (Kennard-Stone variant) algorithm via `MaxMinPicker.LazyBitVectorPick`.  
+`Seed=-1`: random start; `Seed≥0`: reproducible.  
+`Metric`: `"tanimoto"` only.  
+Errors: `invalidInput`, `invalidN` (outside [1,M]), `invalidMetric`, `rdkitError`.
+
+---
+
+## emk.conformer
+
+### `emk.conformer.embed(mol, Method="ETKDGv3", RandomSeed=-1)`
+Returns: `py.rdkit.Chem.rdchem.Mol` — Molecule with one 3D conformer (hydrogens removed).
+Pipeline: `AddHs` → `EmbedMolecule(params)` → `RemoveHs`.  
+`Method`: `"ETKDGv3"` (recommended), `"ETKDGv2"`, `"ETKDG"`, `"KDG"`.
+`RandomSeed=-1`: random; `RandomSeed≥0`: reproducible.  
+Errors: `invalidInput`, `invalidMethod`, `embeddingFailed` (RDKit returned -1), `rdkitError`.
+
+### `emk.conformer.optimize(mol, ForceField="MMFF94", MaxIter=2000)`
+Returns: `py.rdkit.Chem.rdchem.Mol` — Force-field minimized molecule.
+Pipeline: `AddHs(addCoords=true)` → minimize → `RemoveHs`.  
+`ForceField`: `"MMFF94"` (recommended for drug-like molecules) or `"UFF"` (fallback for unusual elements).
+Non-convergence (status=1) logs a warning only; FF setup failure (status=-1) raises `optimizeFailed`.  
+Errors: `invalidInput` (non-Mol or no conformer), `invalidForceField`, `optimizeFailed`, `rdkitError`.
+
+---
+
+## emk.shape
+
+### `emk.shape.compare(mol1, mol2, Method="protrude")`
+Returns: `double` ∈ [0,1] — 3D shape similarity score (higher = more similar). Both molecules
+must have at least one 3D conformer (from `emk.conformer.embed`).  
+`Method="protrude"`: `1 - ShapeProtrudeDist(mol1, mol2, allowReordering=false)`.  
+`Method="tanimoto"`: `ShapeTverskyIndex(mol1, mol2, 1.0, 1.0)` (shape Tanimoto).  
+Score is clamped to [0,1] for floating-point safety.  
+Errors: `invalidInput` (non-Mol or no conformer), `invalidMethod`, `rdkitError`.
+
 ---
 
 ## emk.fingerprint
@@ -216,6 +399,23 @@ Valid range for `MaxViolations` is [0,4].
 > NaN descriptors evaluate as `NaN > 500 = false`, so they count as "no violation" (false negative risk).
 > Using `rmmissing(tbl)` as pre-processing is recommended.  
 Errors: `invalidInput` (non-table), `invalidMaxViol` (outside [0,4] / NaN / Inf), `missingColumns`.
+
+### `emk.filter.veber(tbl)`
+Returns: `table` — Appends `Violations_Veber`(double, 0-2) and `Pass_Veber`(logical). Pure MATLAB.
+Required: `NumRotatableBonds`, `TPSA`. Violations: `>10` or `>140 Å²`.  
+Errors: `invalidInput`, `missingColumns`.
+
+### `emk.filter.pains(tbl)`
+Returns: `table` — Appends `NumPainsAlerts`, `PainsAlerts` (string), `HasPains` (logical).
+Required: `SMILES`. Uses RDKit FilterCatalog(PAINS).  
+Errors: `invalidInput`, `missingColumns`, `rdkitError`.
+
+### `emk.filter.reos(tbl)`
+Returns: `table` — Appends `Violations_REOS`(double, 0-6) and `Pass_REOS`(logical). Pure MATLAB.
+Required: `MolWt`, `LogP`, `NumHDonors`, `NumHAcceptors`, `NumRotatableBonds`, `HeavyAtomCount`.
+REOS ranges (6/7; FormalCharge excluded): MW[200,500], LogP[-5,5], HBD[0,5], HBA[0,10],
+RotBonds[0,8], HeavyAtoms[15,50].  
+Errors: `invalidInput`, `missingColumns`.
 
 ---
 
@@ -280,6 +480,17 @@ Returns: `table` (5 columns: `MoleculeChEMBLID` `Name` `SMILES` `ActivityType` s
 Returns only rows where `standard_relation="="` and units are nM. Retains only rows with `Value_nM <= MinActivity_nM` (default: all rows).
 Uses `webread` only.  
 Errors: `invalidInput`, `invalidOptions`, `notFound`, `networkError`.
+
+---
+
+## emk.repro
+
+### `emk.repro.verify(metrics, criteria)`
+Validates reproduction metrics against RF03 acceptance criteria.  
+`metrics`: struct with numeric metric fields (e.g. `metrics.rmse_cv = 1.017`).  
+`criteria`: struct of acceptance bounds; each field is a sub-struct with `"upper"` and/or `"lower"` keys.  
+Returns: `struct` — `.pass` (logical), `.details` (per-metric: `.value .pass .criteria`), `.report` (char, formatted summary).  
+Errors: `invalidInput` (non-struct), `missingMetric` (criteria field absent from metrics).
 
 ---
 

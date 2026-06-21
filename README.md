@@ -199,6 +199,7 @@ EasyMolKit provides progressive learning content under `examples/`.
 | **L2 Application Stories** | After Foundation | None | Practical workflows combining multiple features (7 modules, 20–40 min each) | ✅ v1.1.0 |
 | **L3 Analytics** | All users | Varies (Statistics and ML, etc.) | QSAR, clustering, MS analysis, optimization, and more (A01–A10, 10 modules, 30–60 min each) | ✅ v1.2.0 |
 | **L4 Research** | All users | Varies (Parallel Computing, etc.) | Research-level applications (R01–R10, 30–90 min each) | ✅ v1.3.0 |
+| **Reproducible Research** | Researchers | Varies | Paper reproductions with locked environments (RP00–RP05, 6 papers) | ✅ v1.4.0 |
 
 *L1–L3 run entirely on MATLAB Online Basic (free tier).*
 
@@ -282,14 +283,28 @@ EasyMolKit/
 │       ├─ stories/
 │       ├─ analytics/
 │       └─ research/
+├─ repro/                     # Reproducible research (Phase 3)
+│   ├─ rp00_esol/             #   RP00: Delaney (2004) ESOL pilot
+│   ├─ rp01_esol/             #   RP01: ESOL extended (L05 descriptors)
+│   ├─ rp02_bbbp/             #   RP02: MoleculeNet BBBP baseline
+│   ├─ rp03_gnn/              #   RP03: GNN on BBBP (Yang et al. 2019)
+│   ├─ rp04_chemberta/        #   RP04: ChemBERTa (Chithrananda et al. 2020)
+│   └─ rp05_shap/             #   RP05: SHAP explainability on BBBP
 ├─ src/
 │   ├─ +emk/                  # Main package
-│   │   ├─ +setup/            # Python environment setup
+│   │   ├─ +setup/            # Python environment setup (+ RF02 snapshot/lockfile)
 │   │   ├─ +mol/              # Molecular object operations
-│   │   ├─ +descriptor/       # Descriptor calculation
+│   │   ├─ +descriptor/       # Descriptor calculation (+ QED / SA Score / BCUT)
 │   │   ├─ +fingerprint/      # Fingerprint generation
 │   │   ├─ +similarity/       # Similarity calculation
-│   │   ├─ +filter/           # Molecular filtering (Lipinski, etc.)
+│   │   ├─ +scaffold/         # Scaffold analysis (Generic Murcko / BRICS / R-group)
+│   │   ├─ +dataset/          # Benchmark dataset loaders (ESOL / FreeSolv / BBBP / Tox21)
+│   │   ├─ +filter/           # Molecular filtering (Lipinski / Veber / PAINS / REOS)
+│   │   ├─ +cluster/          # Clustering (Butina sphere-exclusion)
+│   │   ├─ +diversity/        # Diverse subset selection (MaxMin)
+│   │   ├─ +conformer/        # 3D conformer generation and optimization
+│   │   ├─ +shape/            # 3D shape comparison
+│   │   ├─ +repro/            # Reproduction result verification (RF03)
 │   │   ├─ +io/               # File I/O
 │   │   ├─ +viz/              # Visualization (future PyMOL integration)
 │   │   └─ +util/             # Package-level utilities
@@ -307,11 +322,19 @@ EasyMolKit/
 
 | Module | Example functions | Description |
 |---|---|---|
-| `emk.setup` | `install()`, `verify()`, `initPython()` | Automatic Python environment deployment & initialization |
+| `emk.setup` | `install()`, `verify()`, `snapshot()`, `verifyLock()` | Python environment deployment, initialization & RF02 version lock |
 | `emk.mol` | `fromSmiles()`, `toSmiles()`, `isValid()`, `hasSubstruct()` | Molecular object creation & conversion |
-| `emk.descriptor` | `molWeight()`, `calculate()`, `batchCalculate()` | Molecular descriptor calculation |
+| `emk.descriptor` | `molWeight()`, `calculate()`, `qed()`, `saScore()`, `bcut()` | Molecular descriptor calculation |
 | `emk.fingerprint` | `morgan()`, `maccs()`, `toArray()` | Fingerprint generation |
-| `emk.similarity` | `tanimoto()`, `dice()` | Molecular similarity calculation |
+| `emk.similarity` | `tanimoto()`, `dice()`, `rankBy()`, `matrix()` | Molecular similarity calculation |
+| `emk.scaffold` | `genericMurcko()`, `brics()`, `rgroup()` | Scaffold analysis & fragment decomposition |
+| `emk.dataset` | `esol()`, `freesolv()`, `bbbp()`, `tox21()` | Benchmark dataset loaders with local cache |
+| `emk.filter` | `lipinski()`, `veber()`, `pains()`, `reos()` | Medicinal chemistry filters |
+| `emk.cluster` | `butina()` | Butina sphere-exclusion clustering |
+| `emk.diversity` | `pick()` | MaxMin diverse subset selection |
+| `emk.conformer` | `embed()`, `optimize()` | 3D conformer generation & force-field optimization |
+| `emk.shape` | `compare()` | 3D shape similarity comparison |
+| `emk.repro` | `verify()` | RF03 reproduction success verification |
 | `emk.io` | `readSdf()`, `writeSdf()`, `readSmilesList()` | SDF / SMILES file I/O |
 | `emk.viz` | `draw2d()` | 2D structure rendering (※) |
 
@@ -365,8 +388,8 @@ This software is provided for research and educational purposes.
 |---|---|
 | [docs/quickstart.md](docs/quickstart.md) | Setup steps & FAQ |
 | [docs/function_reference.md](docs/function_reference.md) | Full function signature reference |
-| [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (51 functions, all modules) |
-| [docs/test_catalog.md](docs/test_catalog.md) | Test class catalog (25 classes, unit + smoke) |
+| [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (76 functions, all modules) |
+| [docs/test_catalog.md](docs/test_catalog.md) | Test class catalog (31 classes, unit + smoke) |
 | [docs/python_integration.md](docs/python_integration.md) | Python integration architecture |
 | [docs/platform_support.md](docs/platform_support.md) | Desktop / Online platform support |
 | [docs/compliance.md](docs/compliance.md) | License & compliance |

@@ -1,0 +1,60 @@
+{
+  "_usage": "RF02 Version Lock template for RP02 BBBP Classification Baseline (ECFP4 + LR). Run rp02_bbbp.m to generate lock_snapshot.json with actual values in result/runs/<ts>/.",
+  "_note": "This file defines the lock schema. Actual values are filled in by emk.setup.lockfile(snap, filePath) after each successful run.",
+  "repro_id": "rp02_bbbp",
+  "paper": {
+    "title": "MoleculeNet: A Benchmark for Molecular Machine Learning",
+    "authors": "Wu, Z. et al.",
+    "year": 2018,
+    "doi": "10.1039/C7SC02664A",
+    "journal": "Chem. Sci.",
+    "volume": 9,
+    "pages": "513-530"
+  },
+  "model": "Logistic Regression (L2 ridge) with Morgan ECFP4 (radius=2, nBits=2048)",
+  "dataset": {
+    "name": "BBBP (MoleculeNet / DeepChem)",
+    "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
+    "n_molecules_total": 2039,
+    "n_bbb_pos": null,
+    "n_bbb_neg": null,
+    "cache_path": "data/benchmark/bbbp.csv",
+    "sha256": "FILL_IN_AFTER_FIRST_RUN"
+  },
+  "split": {
+    "method": "random 5-fold stratified CV",
+    "note": "Wu et al. use Bemis-Murcko scaffold split. This reproduction uses random split; see README.md Discussion for impact.",
+    "seed": 42
+  },
+  "fingerprint": {
+    "type": "Morgan ECFP4",
+    "radius": 2,
+    "n_bits": 2048,
+    "rdkit_api": "rdFingerprintGenerator.GetMorganGenerator"
+  },
+  "run_date": "YYYY-MM-DD",
+  "environment": {
+    "matlab": "R20XXx",
+    "python": "3.10.x",
+    "rdkit": "20XX.XX.X",
+    "commit": "xxxxxxx",
+    "toolboxes": {
+      "Statistics_and_Machine_Learning_Toolbox": "XX.X"
+    }
+  },
+  "rf03_criteria": {
+    "auc_cv": {"lower": 0.85}
+  },
+  "results": {
+    "model_auc_train": null,
+    "model_acc_train": null,
+    "model_balacc_train": null,
+    "auc_cv": null,
+    "auc_cv_std": null,
+    "acc_cv": null,
+    "acc_cv_std": null,
+    "balacc_cv": null,
+    "balacc_cv_std": null
+  },
+  "rf03_pass": null
+}

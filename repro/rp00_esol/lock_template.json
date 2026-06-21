@@ -1,0 +1,46 @@
+{
+  "_usage": "RF02 Version Lock template for RP00 ESOL. Run rp00_esol_pilot.m to generate lock_snapshot.json with actual values in result/runs/<ts>/.",
+  "_note": "This file defines the lock schema. Fill in after each successful reproduction run via emk.setup.lockfile(snap, filePath).",
+  "repro_id": "rp00_esol",
+  "paper": {
+    "title": "ESOL: Estimating Aqueous Solubility Directly from Molecular Structure",
+    "authors": "Delaney, J.S.",
+    "year": 2004,
+    "doi": "10.1021/ci034243x",
+    "journal": "J. Chem. Inf. Comput. Sci.",
+    "volume": 44,
+    "issue": 3,
+    "pages": "1000-1005"
+  },
+  "dataset": {
+    "name": "ESOL (MoleculeNet / DeepChem)",
+    "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/delaney-processed.csv",
+    "n_molecules_paper": 1144,
+    "n_molecules_used": 1128,
+    "cache_path": "data/benchmark/esol.csv",
+    "sha256": "FILL_IN_AFTER_FIRST_RUN"
+  },
+  "run_date": "YYYY-MM-DD",
+  "environment": {
+    "matlab": "R20XXx",
+    "python": "3.10.x",
+    "rdkit": "20XX.XX.X",
+    "commit": "xxxxxxx",
+    "toolboxes": {
+      "Statistics_and_Machine_Learning_Toolbox": "XX.X"
+    }
+  },
+  "rf03_criteria": {
+    "rmse_cv": {"upper": 1.20},
+    "r2_cv":   {"lower": 0.75}
+  },
+  "results": {
+    "rmse_train": null,
+    "r2_train": null,
+    "rmse_cv": null,
+    "rmse_cv_std": null,
+    "r2_cv": null,
+    "r2_cv_std": null
+  },
+  "rf03_pass": null
+}
