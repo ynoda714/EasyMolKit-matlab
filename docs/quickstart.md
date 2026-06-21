@@ -1,4 +1,4 @@
-# Quick Start Guide — EasyMolKit
+﻿# Quick Start Guide — EasyMolKit
 
 > Version: v0.2.0 / Updated: 2026-04-19
 
@@ -71,7 +71,7 @@ copy config\settings.example.json config\settings.json
 
 ```matlab
 addpath(genpath("src"));
-main_rdkit    % Use Run Section (Ctrl+Enter) to execute sections one at a time
+main_emk    % Use Run Section (Ctrl+Enter) to execute sections one at a time
 ```
 
 > ⚠️ Use **Run Section (Ctrl+Enter)**, not "Run" (F5).
@@ -131,7 +131,7 @@ test_mvp_smoke();
 
 | Tier | Entry point | Audience | Characteristics |
 |---|---|---|---|
-| **Tier 1: Try it now** | `main_rdkit.m` | First-time users | Run sections in order with Ctrl+Enter; preset SMILES for an instant experience |
+| **Tier 1: Try it now** | `main_emk.m` | First-time users | Run sections in order with Ctrl+Enter; preset SMILES for an instant experience |
 | **Tier 2: Customize** | `main_<feature>.m` | Regular users | Parameter control, section execution |
 | **Tier 3: Direct API** | `emk.*` functions | Developers & advanced users | Batch processing, custom scripts |
 
@@ -143,7 +143,7 @@ test_mvp_smoke();
 A: Check your network connection. In a proxy environment, set `python.proxy` in `config/settings.json`.
 
 **Q: Path is not recognized**
-A: Run `addpath(genpath("src"))`. This is automatically executed in Section 0a of `main_rdkit.m`.
+A: Run `addpath(genpath("src"))`. This is automatically executed in Section 0a of `main_emk.m`.
 
 **Q: Configuration file not found**
 A: Copy `config/settings.example.json` to `config/settings.json`.

@@ -1,4 +1,4 @@
-%% EasyMolKit -- Optional Library Setup
+﻿%% EasyMolKit -- Optional Library Setup
 % Use this file to install and manage Track 1 / Track 2 optional libraries.
 % Run each section with Ctrl+Enter (MATLAB Run Section).
 % Always run Section 0 first to initialize paths.
@@ -89,7 +89,7 @@ emk.setup.installExtra("datasets")
 %     meeko  -- ligand prep tool; requires vina to be useful
 %
 %   To install on MATLAB Online:
-%     In main_rdkit.m Section 0a, set the flag below to true,
+%     In main_emk.m Section 0a, set the flag below to true,
 %     then run Section 0b:
 %       cfg.useCase.docking = true
 %

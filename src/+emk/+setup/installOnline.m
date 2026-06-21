@@ -9,7 +9,7 @@
 %   if the correct version is already installed the pip step is skipped.
 %   See ADR-001 rev.3 for rationale.
 %
-%   When Config is supplied (recommended via main_rdkit.m), installOnline
+%   When Config is supplied (recommended via main_emk.m), installOnline
 %   also installs optional libraries listed in cfg.optionalLibraries.
 %
 %   Processing steps:

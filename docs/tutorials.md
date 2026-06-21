@@ -1,4 +1,4 @@
-# Tutorial Index — EasyMolKit
+﻿# Tutorial Index — EasyMolKit
 
 Full listing of all tutorial modules across all four layers.
 For a layer overview, see [README.md](../../README.md).
@@ -73,7 +73,7 @@ All modules run on MATLAB Online Basic (free tier).
 > **†** Requires `emk.setup.installExtra("biopython")` before first run (Track 1 add-on; independent of MATLAB licensing).
 >
 > **‡ MATLAB Online only** (not supported on Windows Desktop: vina has no Windows PyPI wheel; pdbfixer's openmm dependency is blocked by Smart App Control).
-> Setup: in `main_rdkit.m`, set `cfg.optionalLibraries.meeko/vina/pdbfixer = true`, then run `installOnline(Config=cfg)`.
+> Setup: in `main_emk.m`, set `cfg.optionalLibraries.meeko/vina/pdbfixer = true`, then run `installOnline(Config=cfg)`.
 >
 > **§** Requires the PyTorch + HuggingFace stack. Install in order:
 > `emk.setup.installExtra("torch")` → `emk.setup.installExtra("torch_geometric")` → `emk.setup.installExtra("transformers")` → `emk.setup.installExtra("datasets")`.

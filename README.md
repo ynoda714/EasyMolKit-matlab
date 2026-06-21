@@ -8,6 +8,8 @@
 
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=ynoda714/EasyMolKit-matlab)
 
+> *A personal hobby project built with [MATLAB Home License](https://www.mathworks.com/products/matlab-home.html), shared for personal enjoyment and learning. Not affiliated with MathWorks.*
+
 ## Why EasyMolKit?
 
 In the Chemoinformatics field, Python + RDKit is the de-facto standard toolchain.
@@ -51,7 +53,7 @@ users can access RDKit functionality as standard MATLAB functions — no Python 
 %    git clone https://github.com/ynoda/EasyMolKit.git
 %    cd EasyMolKit
 
-% 2. Open main_rdkit.m in MATLAB, then run each section with Ctrl+Enter:
+% 2. Open main_emk.m in MATLAB, then run each section with Ctrl+Enter:
 %
 %   Section 0a  — Path setup & config         (edit cfg.useCase.* here if needed)
 %   Section 0b  — Python + RDKit setup        (first time only; ~2-5 min)
@@ -71,7 +73,7 @@ If you are on a **corporate PC**, local Python deployment may be blocked by IT p
 
 | Issue | Symptom | Solution |
 |---|---|---|
-| Proxy server | `pip install` times out / SSL error | Set `cfg.python.proxy = "http://proxy.example.com:8080"` in Section 0a of `main_rdkit.m` |
+| Proxy server | `pip install` times out / SSL error | Set `cfg.python.proxy = "http://proxy.example.com:8080"` in Section 0a of `main_emk.m` |
 | Windows Defender / Smart App Control | Embedded Python extraction is quarantined | Whitelist the `python_env/` directory, or use MATLAB Online |
 | IT policy (executable downloads blocked) | Setup fails at the download step | Use **MATLAB Online** — no local Python deployment needed |
 | Antivirus quarantine | Python binaries disappear after extraction | Whitelist `python_env/`, or use MATLAB Online |
@@ -177,7 +179,7 @@ For full API details, see [docs/function_reference.md](docs/function_reference.m
 
 ```
 EasyMolKit/
-├─ main_rdkit.m               # RDKit setup & basic operations (run section by section)
+├─ main_emk.m               # RDKit setup & basic operations (run section by section)
 ├─ config/
 │   └─ settings.example.json  # Configuration template
 ├─ examples/
@@ -211,15 +213,6 @@ For details, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/comp
 Bug reports, feature requests, and pull requests are welcome.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## Disclaimer
-
-This software is provided for research and educational purposes.
-
-- This software is provided "AS IS" without warranty of any kind, express or implied
-- The developers are not liable for any damages arising from the use of this software
-- Use of external data sources (PubChem, ChEMBL, etc.) is subject to their respective terms of service
-- Predictions and calculation results are for research purposes only; direct application to medical or safety decisions requires expert review
-
 ## Documents
 
 | File | Description |
@@ -238,4 +231,7 @@ This software is provided for research and educational purposes.
 |---|---|
 | [docs/ja/README.ja.md](docs/ja/README.ja.md) | このリポジトリの概要（日本語版） |
 | [docs/ja/tutorials.ja.md](docs/ja/tutorials.ja.md) | チュートリアル一覧（日本語版） |
-| [docs/function_catalog.ja.md](docs/function_catalog.ja.md) | コンパクト関数カタログ（日本語版） |
+| [docs/ja/quickstart.ja.md](docs/ja/quickstart.ja.md) | セットアップ手順・Track 2・FAQ（日本語版） |
+| [docs/ja/function_catalog.ja.md](docs/ja/function_catalog.ja.md) | コンパクト関数カタログ・76 関数（日本語版） |
+| [docs/ja/function_reference.ja.md](docs/ja/function_reference.ja.md) | 関数シグネチャ詳細リファレンス（日本語版） |
+| [docs/ja/test_catalog.ja.md](docs/ja/test_catalog.ja.md) | テストクラスカタログ（日本語版） |

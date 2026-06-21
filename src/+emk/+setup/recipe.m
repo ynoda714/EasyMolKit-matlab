@@ -1,4 +1,4 @@
-function recipe(name)
+﻿function recipe(name)
 % recipe  Display the installation recipe for a supported library.
 %
 %   emk.setup.recipe(name)
@@ -361,8 +361,8 @@ function printPdbfixer_()
         logInfo("Description  : PDB structure preparation -- missing residues,");
         logInfo("               hydrogens, protonation state correction.");
         logInfo("               Auto-installs openmm >= 8.2 (~70 MB) as dependency.");
-        logInfo("Install via  : Option A (recommended) -- via main_rdkit.m:");
-        logInfo("               1. Open main_rdkit.m");
+        logInfo("Install via  : Option A (recommended) -- via main_emk.m:");
+        logInfo("               1. Open main_emk.m");
         logInfo("               2. In Section 0a, set:");
         logInfo("                    cfg.optionalLibraries.pdbfixer = true");
         logInfo("               3. Run Section 0b");
@@ -379,7 +379,7 @@ function printPdbfixer_()
         logInfo("               This is a Windows security policy and cannot be");
         logInfo("               bypassed in code.");
         logInfo("Workaround   : Use MATLAB Online (Linux) instead:");
-        logInfo("               1. Open main_rdkit.m");
+        logInfo("               1. Open main_emk.m");
         logInfo("               2. In Section 0a, set:");
         logInfo("                    cfg.optionalLibraries.pdbfixer = true");
         logInfo("               3. Run Section 0b");

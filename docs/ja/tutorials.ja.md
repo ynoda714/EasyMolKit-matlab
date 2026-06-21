@@ -1,4 +1,4 @@
-# チュートリアル一覧 — EasyMolKit
+﻿# チュートリアル一覧 — EasyMolKit
 
 全レイヤーのチュートリアルモジュール一覧です。
 層の概要は [README.ja.md](README.ja.md) を参照してください。
@@ -73,7 +73,7 @@ MATLAB Online Basic（無料枠）で完全動作します。
 > **†** 初回実行前に `emk.setup.installExtra("biopython")` が必要です（Track 1 追加ライブラリ。MATLAB ライセンスとは別要件）。
 >
 > **‡ MATLAB Online 限定**（Windows Desktop 非対応: vina は Windows PyPI ホイールなし・pdbfixer の openmm は Smart App Control でブロック）。
-> セットアップ: `main_rdkit.m` で `cfg.optionalLibraries.meeko/vina/pdbfixer = true` に設定 → `installOnline(Config=cfg)` で一括導入。
+> セットアップ: `main_emk.m` で `cfg.optionalLibraries.meeko/vina/pdbfixer = true` に設定 → `installOnline(Config=cfg)` で一括導入。
 >
 > **§** PyTorch + HuggingFace スタックが必要です。以下の順でインストールしてください:
 > `emk.setup.installExtra("torch")` → `emk.setup.installExtra("torch_geometric")` → `emk.setup.installExtra("transformers")` → `emk.setup.installExtra("datasets")`。

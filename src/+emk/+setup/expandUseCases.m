@@ -3,7 +3,7 @@
 %
 %   cfg = emk.setup.expandUseCases(cfg)
 %
-%   Translates high-level use-case toggles set in main_rdkit.m into the
+%   Translates high-level use-case toggles set in main_emk.m into the
 %   individual cfg.optionalLibraries.* flags consumed by install() and
 %   installOnline().  Called automatically by both install functions before
 %   the optional library install loop.
