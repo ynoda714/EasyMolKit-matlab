@@ -77,9 +77,11 @@ or run the full script via the MATLAB MCP tool.
 | Section 1 | ESOL dataset loading (`emk.dataset.esol()`) |
 | Section 2 | SMILES parsing + descriptor computation (`batchCalculate` + `pyrun` batch for QED/AroProp) |
 | Section 3 | Full-dataset model training (Model A / Model B) |
-| Section 4 | 5-fold CV (seed=42, `cvpartition`) |
-| Section 5 | RF03 verification (`emk.repro.verify()`) |
-| Section 6 | Save results (`makeRunDir()` → predictions.csv / metrics.json / `emk.setup.lockfile()`) |
+| Section 4 | VIF analysis (multicollinearity diagnostics, immediately after model fitting) |
+| Section 5 | 5-fold CV (seed=42, `cvpartition`; rng re-seeded immediately before) |
+| Section 6 | Paired t-test (A vs B; RMSE tests A−B > 0, R² tests A−B < 0) |
+| Section 7 | RF03 verification (`emk.repro.verify()`) |
+| Section 8 | Save results (`makeRunDir()` → predictions.csv / metrics.json / `emk.setup.lockfile()`) |
 
 ---
 
@@ -105,10 +107,12 @@ or run the full script via the MATLAB MCP tool.
 
 ### L05 Extension Effect
 
-| Metric | Model A | Model B | Improvement |
-|---|---|---|---|
-| CV RMSE | 1.0166 | 0.9798 | **−0.037 (−3.6%)** |
-| CV R² | 0.7622 | 0.7790 | **+0.017 (+1.7pp)** |
+| Metric | Model A | Model B | Improvement | t(4) | p (one-sided) |
+|---|---|---|---|---|---|
+| CV RMSE | 1.0166 | 0.9798 | **−0.037 (−3.6%)** | 6.591 | **0.001** ✅ significant |
+| CV R² | 0.7622 | 0.7790 | **+0.017 (+1.7pp)** | −7.116 | **0.001** ✅ significant |
+
+> paired t-test (per-fold, n=5, one-sided: RMSE tests A−B > 0, R² tests A−B < 0): L05 extension shows statistically significant improvement on both metrics (M-REPRO-AUDIT B2)
 
 **Environment (from lock_snapshot.json):**
 
@@ -122,6 +126,12 @@ or run the full script via the MATLAB MCP tool.
 ---
 
 ## Verification (RF03 Acceptance Criteria)
+
+> **Criterion origin (M-REPRO-AUDIT B1)**: RMSE ≤ 1.20 and R² ≥ 0.75 were set by
+> **post-hoc calibration** from the RP00 pilot result (RMSE=1.017, R²=0.762).
+> RP01 is not an evaluation against an independently pre-set criterion; it is the first
+> verification run against the RP00-calibrated threshold. This is intentional design
+> (pilot → production). From RP02 onward, these thresholds are fixed.
 
 | Metric | Criterion | Rationale |
 |---|---|---|
@@ -149,11 +159,33 @@ or run the full script via the MATLAB MCP tool.
 
 | Descriptor | Coefficient | p-value | Interpretation |
 |---|---|---|---|
-| TPSA | −0.016 | 1.3e-08 ✅ significant | Higher polar surface area → better solvation → improved logS (note reversed sign: TPSA↑ = higher solubility) |
+| TPSA | −0.016 | 1.3e-08 ✅ significant | Partial-regression sign is negative (sign reversal). Marginal r=+0.123 is positive, but high collinearity with LogP (r=−0.445, VIF=12.12) reverses the sign in the multivariate context. LogP absorbs the polarity signal; TPSA captures the residual. |
 | HBA | +0.204 | 6.9e-07 ✅ significant | More H-bond acceptors → stronger water interaction |
 | QED | +1.355 | 8.9e-11 ✅ significant | Higher drug-likeness reflects solubility-conscious design |
 | FractionCSP3 | −0.439 | 0.009 ✅ significant | Higher sp3 fraction → increased steric bulk and crystallinity → lower solubility |
 | HBD | −0.057 | 0.239 ❌ non-significant | Multicollinearity with TPSA and HBA |
+
+### VIF Analysis (multicollinearity, M-REPRO-AUDIT B2)
+
+**Model A (4 features)**: All VIF 1.25–1.49. No multicollinearity.
+
+**Model B (9 features)**:
+
+| Descriptor | VIF | Assessment |
+|---|---|---|
+| TPSA | 12.12 | ⚠️ HIGH (> 10) |
+| LogP | 8.45 | Caution (5–10) |
+| HBA | 9.30 | Caution (5–10) |
+| MolWt | 7.48 | Caution (5–10) |
+| AroProp | 4.61 | Acceptable |
+| FractionCSP3 | 4.74 | Acceptable |
+| HBD | 3.33 | Acceptable |
+| RotBonds | 2.07 | Acceptable |
+| QED | 1.14 | No issue |
+
+TPSA's high VIF is the primary cause of the sign reversal noted above.
+The L05 extension's statistical significance (paired t-test p=0.001) holds despite
+multicollinearity, but directional interpretation of individual coefficients requires caution.
 
 ### Lessons Learned (handoff to subsequent RP / M-REPRO-SCALE)
 
@@ -175,4 +207,5 @@ or run the full script via the MATLAB MCP tool.
 | `result/runs/<ts>/metrics.json` | Evaluation metrics (all scalars) |
 | `result/runs/<ts>/predictions.csv` | Measured values, predictions, and descriptors for all molecules |
 | `result/runs/<ts>/predicted_vs_actual.png` | Scatter plot comparison: Model A vs B |
+| `result/runs/<ts>/model_b_coefficients.csv` | Model B regression coefficients (TPSA sign verification archive) |
 | `repro/rp00_esol/` | RP00 pilot (prototype for RF01-RF04 design) |

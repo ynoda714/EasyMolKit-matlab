@@ -46,7 +46,29 @@ def _filter_valid(df):
 
 def _extract_cls_embeddings(smiles_list, tokenizer, model,
                              batch_size=32, max_len=128):
-    """Forward-pass all SMILES through frozen ChemBERTa; return CLS embeddings."""
+    """Forward-pass all SMILES through frozen ChemBERTa.
+
+    Two explicit phases:
+      Phase 1 — tokenize all SMILES without truncation to collect lengths
+                 (pure tokenizer, no model, outside torch.no_grad()).
+      Phase 2 — batch forward pass with truncation to extract CLS embeddings
+                 (model-only work, inside torch.no_grad()).
+
+    Returns:
+        emb: ndarray (n, hidden) -- CLS token embeddings
+        raw_lengths: ndarray (n,) int -- token counts without truncation
+    """
+    # Phase 1: raw token lengths (no model involvement).
+    # Items are tokenized individually rather than in batches because
+    # batch tokenization with padding=False requires return_tensors=None
+    # (list-of-lists output) and adds complexity with no measurable gain
+    # at ~2000 molecules. The one-at-a-time approach keeps intent clear.
+    raw_lengths = []
+    for s in smiles_list:
+        ids = tokenizer(s, return_tensors='pt', padding=False, truncation=False)
+        raw_lengths.append(int(ids['input_ids'].shape[1]))
+
+    # Phase 2: batch forward pass (frozen model, truncation applied)
     model.eval()
     all_emb = []
     with torch.no_grad():
@@ -55,17 +77,51 @@ def _extract_cls_embeddings(smiles_list, tokenizer, model,
             enc = tokenizer(batch, return_tensors='pt', padding=True,
                             truncation=True, max_length=max_len)
             out = model(**enc)
-            cls = out.last_hidden_state[:, 0, :].numpy()   # (b, hidden)
+            # .detach() required before .numpy() in PyTorch >= 2.0
+            cls = out.last_hidden_state[:, 0, :].detach().numpy()
             all_emb.append(cls)
-    return np.concatenate(all_emb, axis=0)   # (n, hidden)
+    return np.concatenate(all_emb, axis=0), np.array(raw_lengths)
+
+
+def _summarise_token_lengths(raw_lengths, max_len=128):
+    """Compute distribution statistics for raw (untruncated) token lengths.
+
+    Keys 'n_truncated' / 'frac_truncated' are independent of the max_len value,
+    so the JSON schema stays stable even when max_len is varied (e.g. 512).
+    """
+    arr = raw_lengths
+    return {
+        'min':           int(arr.min()),
+        'max':           int(arr.max()),
+        'mean':          round(float(arr.mean()), 2),
+        'p50':           int(np.percentile(arr, 50)),
+        'p90':           int(np.percentile(arr, 90)),
+        'p95':           int(np.percentile(arr, 95)),
+        'p99':           int(np.percentile(arr, 99)),
+        'n_truncated':   int((arr > max_len).sum()),
+        'frac_truncated': round(float((arr > max_len).mean()), 4),
+    }
 
 
 def run_rp04(csv_path, model_name=MODEL_NAME,
-             batch_size=32, max_len=128,
+             batch_size=None, max_len=128,
              C=1.0, n_fold=5, seed=42):
-    """Extract ChemBERTa CLS embeddings + 5-fold CV LR. Return JSON string."""
+    """Extract ChemBERTa CLS embeddings + 5-fold CV LR. Return JSON string.
+
+    Args:
+        batch_size: SMILES per forward pass. Defaults to max(1, 32 * 128 // max_len)
+                    so the token budget stays roughly constant when max_len changes
+                    (e.g. max_len=512 -> batch_size=8 to avoid OOM).
+                    Pass an explicit integer to override the auto-scaling.
+    """
 
     np.random.seed(seed)
+    torch.manual_seed(seed)  # Fix PyTorch RNG for forward-pass consistency
+
+    # Auto-scale batch_size to keep token budget ~constant across max_len values.
+    # Baseline: batch_size=32, max_len=128 -> 4096 tokens per batch.
+    if batch_size is None:
+        batch_size = max(1, 32 * 128 // max_len)
 
     # Load data & filter valid SMILES
     df = pd.read_csv(csv_path)
@@ -81,9 +137,11 @@ def run_rp04(csv_path, model_name=MODEL_NAME,
     hidden_size = mdl.config.hidden_size
     n_params    = int(sum(p.numel() for p in mdl.parameters()))
 
-    # Extract CLS embeddings (single forward pass per batch, no gradients)
-    X = _extract_cls_embeddings(smiles, tokenizer, mdl,
-                                 batch_size=batch_size, max_len=max_len)
+    # Phase 1: token lengths; Phase 2: CLS embeddings (see _extract_cls_embeddings)
+    X, raw_lengths = _extract_cls_embeddings(smiles, tokenizer, mdl,
+                                              batch_size=batch_size,
+                                              max_len=max_len)
+    token_stats = _summarise_token_lengths(raw_lengths, max_len=max_len)
 
     # 5-fold stratified CV: StandardScaler -> LogisticRegression (L2, lbfgs)
     pipe = Pipeline([
@@ -99,16 +157,17 @@ def run_rp04(csv_path, model_name=MODEL_NAME,
     auc_std = float(cv_aucs.std())
 
     result = {
-        'n_valid':     n_valid,
-        'n_bbb_pos':   n_pos,
-        'n_bbb_neg':   n_valid - n_pos,
-        'auc_cv':      auc_cv,
-        'auc_cv_std':  auc_std,
-        'fold_aucs':   cv_aucs.tolist(),
-        'model_name':  model_name,
-        'hidden_size': hidden_size,
-        'n_params_M':  round(n_params / 1e6, 2),
-        'embed_dim':   X.shape[1],
+        'n_valid':           n_valid,
+        'n_bbb_pos':         n_pos,
+        'n_bbb_neg':         n_valid - n_pos,
+        'auc_cv':            auc_cv,
+        'auc_cv_std':        auc_std,
+        'fold_aucs':         cv_aucs.tolist(),
+        'model_name':        model_name,
+        'hidden_size':       hidden_size,
+        'n_params_M':        round(n_params / 1e6, 2),
+        'embed_dim':         X.shape[1],
+        'token_length_stats': token_stats,
         'hyperparams': {
             'batch_size': batch_size,
             'max_len':    max_len,

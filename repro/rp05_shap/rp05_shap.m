@@ -49,18 +49,18 @@ clear molWarmup;
 snap = emk.setup.snapshot();
 logInfo("RP05 setup complete.");
 
-%% Section 1: Load BBBP Dataset & Resolve Paths
-logSection("RP05", "Section 1: Load BBBP Dataset", "SHAP BBBP Explainability");
+%% Section 1: Resolve Paths & Ensure Dataset
+logSection("RP05", "Section 1: Resolve Paths & Ensure Dataset", "SHAP BBBP Explainability");
 
-tbl    = emk.dataset.bbbp();
-nTotal = height(tbl);
-logInfo("Loaded %d molecules (BBB+: %d, BBB-: %d)", ...
-    nTotal, sum(tbl.BBB), sum(~tbl.BBB));
-
-% Paths for Python core module
 root       = resolveProjectRoot();
 csvPath    = fullfile(root, "data", "benchmark", "bbbp.csv");
 helperPath = fullfile(thisDir, "rp05_shap_core.py");
+
+% Trigger download/cache if not present; counts are reported from Python
+% after SMILES validation (single source of truth, avoids hash mismatch).
+if ~isfile(csvPath)
+    emk.dataset.bbbp();
+end
 
 if ~isfile(csvPath)
     error("emk:rp05:csvNotFound", "BBBP CSV not found: %s", csvPath);
@@ -87,12 +87,15 @@ res = jsondecode(char(string(pyResult)));
 aucCV   = res.auc_cv;
 aucStd  = res.auc_cv_std;
 nValid  = res.n_valid;
+nTrain  = res.n_train;
+nTest   = res.n_test;
 shapRho = res.shap_lr_spearman;
-shapCov = res.shap_coverage;
 
-logInfo("sklearn LR 5-fold CV: AUC=%.4f +/- %.4f  (n=%d)", ...
+logInfo("Dataset: %d valid (%d train / %d test), BBB+: %d, BBB-: %d", ...
+    nValid, nTrain, nTest, res.n_bbb_pos, nValid - res.n_bbb_pos);
+logInfo("sklearn LR 5-fold CV: AUC=%.4f +/- %.4f  (full dataset n=%d)", ...
     aucCV, aucStd, nValid);
-logInfo("SHAP LinearExplainer: Spearman(global_imp, |coef|*std) = %.4f", shapRho);
+logInfo("SHAP LinearExplainer: Spearman(global_imp, |coef|*std_train) = %.4f", shapRho);
 
 %% Section 3: Extract SHAP Results for MATLAB Visualization
 logSection("RP05", "Section 3: Extract SHAP Results", "SHAP BBBP Explainability");
@@ -150,10 +153,10 @@ box(ax1, "off");
 % -- Figure 2: Local waterfall for 3 example molecules --
 fig2 = figure("Name", "RP05 BBBP: SHAP Local Explanations");
 set(fig2, "Position", [820 100 1000 560]);
-titleStrs = { ...
-    sprintf("True Positive: %s  P(BBB+)=%.3f", exNames{1}, exProbs(1)), ...
-    sprintf("True Negative: %s  P(BBB+)=%.3f", exNames{2}, exProbs(2)), ...
-    sprintf("Misclassified: %s  P(BBB+)=%.3f", exNames{3}, exProbs(3))};
+% Derive titles from Python-returned ex_types so fallback (TN2) is reflected.
+titleStrs = arrayfun(@(k) sprintf("%s: %s  P(BBB+)=%.3f", ...
+    typePrefix_(string(exTypes{k})), exNames{k}, exProbs(k)), ...
+    1:3, "UniformOutput", false);
 
 for k = 1:3
     sv  = exTopShap(k, :);    % 1 x topN SHAP values
@@ -233,8 +236,9 @@ metrics = struct( ...
     "auc_cv",              aucCV, ...
     "auc_cv_std",          aucStd, ...
     "shap_lr_spearman",    shapRho, ...
-    "shap_coverage",       shapCov, ...
     "n_valid",             nValid, ...
+    "n_train",             nTrain, ...
+    "n_test",              nTest, ...
     "n_bbb_pos",           res.n_bbb_pos, ...
     "ecfp4_radius",        2, ...
     "ecfp4_nbits",         2048, ...
@@ -271,6 +275,17 @@ end
 
 function s = labelStr_(lbl)
     if lbl == 1; s = "+"; else; s = "-"; end
+end
+
+function s = typePrefix_(t)
+    switch t
+        case "TP";  s = "True Positive";
+        case "TN";  s = "True Negative";
+        case "TN2"; s = "True Neg (2nd)";
+        case "MIS"; s = "Misclassified";
+        otherwise
+            error("emk:rp05:unknownExType", "Unexpected ex_type from Python: %s", t);
+    end
 end
 
 function colors = colormap_(coefs)

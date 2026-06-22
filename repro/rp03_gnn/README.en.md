@@ -69,22 +69,26 @@ repro/rp03_gnn/rp03_gnn_core.py    Python core (graph construction + GCN + 5-fol
 | Section | Content |
 |---|---|
 | Section 0 | Setup (`emk.setup.snapshot()` for RF02 version capture) |
-| Section 1 | Resolve BBBP CSV path |
+| Section 1 | Resolve BBBP CSV path + auto-discover A2 fold indices |
 | Section 2 | Python: SMILES→graph + GCN training + 5-fold CV AUC |
-| Section 3 | Extract learning curves and per-fold AUCs |
-| Section 4 | Visualization (learning curves, fold AUC comparison with RP02 reference line) |
-| Section 5 | RF03 verification (`emk.repro.verify()`) |
+| Section 3 | Comparison report (RP02 orig / RP02-rev / RP03 orig / RP03-rev audit numbers) |
+| Section 4 | RF03 verification (`emk.repro.verify()`) |
+| Section 5 | Visualization (learning curves, fold AUC comparison with RP02 reference line) |
 | Section 6 | Save results (`makeRunDir()` → metrics.json / learning_curves.csv / lockfile) |
 
 ---
 
-## Result (first run 2026-06-21)
+## Result (first run 2026-06-21) ⚠️ test-leak present
+
+> **Note**: These results are from the original `rp03_gnn.m` before the A3 audit fix.
+> Test-leak and fitclinear bias inflate the apparent GCN advantage.
+> See **M-REPRO-AUDIT A3 Fix** below for the fair evaluation.
 
 | Metric | Value | Status |
 |---|---|---|
 | **ROC-AUC CV (5-fold)** | **0.9151 ± 0.0190** | **✅ PASS (≥ 0.85)** |
-| RP02 baseline (ECFP4+LR) | 0.8826 | — |
-| GCN vs baseline (Δ) | **+0.0325** | — |
+| RP02 baseline (ECFP4+LR, biased) | 0.8826 | — |
+| GCN vs baseline (Δ) | **+0.0325** ⚠️ | biased |
 
 Per-fold AUCs: 0.9182 / 0.8816 / 0.9121 / 0.9249 / 0.9388
 Shortest fold epochs: 39 / 150 (early stopping patience=20 effective)
@@ -99,6 +103,42 @@ Shortest fold epochs: 39 / 150 (early stopping patience=20 effective)
 | PyTorch | 2.11.0+cpu |
 | torch_geometric | 2.7.0 |
 | Commit | 9733c81 |
+
+---
+
+## M-REPRO-AUDIT A3 Fix (2026-06-21)
+
+**Problem**: The original `rp03_gnn.m / rp03_gnn_core.py` had test-leak and inner-split issues:
+- Early stopping used `te_loader` (test fold) each epoch → `fold_aucs` held best test AUC over all epochs.
+- `StratifiedKFold.next()` for inner split always took the same first fold (fixed seed), so all outer folds used the same 20% partition pattern as the val set.
+
+**Fix (A3)**:
+1. Outer train fold split 80/20 into sub-train / val using `train_test_split(test_size=0.2, stratify=y, random_state=seed+fold_idx)`.
+   Each outer fold uses a distinct seed so val sets differ across folds.
+2. Early stopping monitors `val_loader` (inner val) AUC only.
+3. `copy.deepcopy(model.state_dict())` saves best model; restored after early stopping.
+4. Test fold evaluated exactly once after training completes.
+5. Also integrates A2: `fold_indices_path` aligns outer folds with RP02-rev.
+
+> **Training size note (A2 asymmetry)**: RP03 sub-train (~80% of RP02 outer train) differs
+> in size from RP02 outer train. Paired comparison is valid on shared outer test folds, but
+> models are trained on different-sized datasets. See `metrics.json` → `train_size_note`
+> and `fold_curves[].train_size` / `val_size` for exact sizes per fold.
+
+| Script | Model | AUC CV | Baseline | Δ | Status |
+|---|---|---|---|---|---|
+| original | GCN (test-leaked) | 0.9151 ± 0.0190 | fitclinear 0.8826 | +0.0325 | biased |
+| current | GCN (leak-fixed) | **0.9038 ± 0.0203** | sklearn LR 0.9118 | **−0.0080** | **fair** |
+
+Per-fold test AUC (A3 fixed): 0.9047 / 0.8670 / 0.9177 / 0.9034 / 0.9263
+
+**Key finding**: The apparent GCN advantage of +0.0325 decomposed as:
+- fitclinear solver bias: +0.0292 (resolved in A1)
+- test-leak: +0.0113 (0.9151 → 0.9038)
+- Fair difference after both fixes: **−0.0080** (gap < 1σ=0.0203, p=0.35, not significant)
+
+> **Implication**: "FP < GNN" is **not supported** by BBBP random 5-fold CV at n=2039.
+> GCN and LR+ECFP4 are statistically equivalent on this dataset.
 
 ---
 
@@ -135,12 +175,13 @@ may generalize poorly on small datasets. Prior MoleculeNet benchmarks show ECFP 
 
 ### Lessons learned
 
-- [x] GCN AUC=0.9151 exceeded the ECFP4+LR baseline (0.8826) by +0.0325. GNN improvement is confirmed even at n=2039 scale.
+- [x] ~~GCN AUC=0.9151 exceeded the ECFP4+LR baseline (0.8826) by +0.0325~~ (pre-A3, biased)
+  **A3 fix**: GCN-rev AUC=0.9038 vs LR-rev AUC=0.9118. Δ=−0.0080 (<1σ=0.0203), paired t(4)=−1.07, p=0.35. **"FP < GNN" is not supported on BBBP 5-fold CV (FP ≈ GNN).**
 - [x] Early stopping worked: shortest fold converged at epoch 39 (patience=20). Only 39/150 epochs used → fast training (~2 min for 5 folds on CPU).
-- [x] BCEWithLogitsLoss pos_weight effectively handles class imbalance (BBB+ 76.5% / BBB- 23.5%), achieving AUC 0.91.
+- [x] BCEWithLogitsLoss `pos_weight = n_neg/n_pos < 1` when BBB+ is majority: down-weights majority class (BBB+) loss so the minority class (BBB-) gets relatively higher gradient contribution. Achieves AUC ~0.90 despite 76.5%/23.5% imbalance.
 - [x] MATLAB `table()`: do NOT pass `"VariableNames"` as a string literal — use `VariableNames=value` (named argument syntax) to avoid row-count mismatch errors.
 - [x] PyTorch: use `loss.item()` instead of `float(loss)` to avoid UserWarning about requires_grad tensor scalar conversion.
-- [x] Bridge to RP04 (ChemBERTa): GCN AUC=0.9151 becomes the graph-learning baseline for language model comparison.
+- [x] Bridge to RP04 (ChemBERTa): GCN-rev AUC=0.9038 (A3 fair value) becomes the graph-learning baseline for language model comparison.
 
 ---
 
@@ -148,12 +189,12 @@ may generalize poorly on small datasets. Prior MoleculeNet benchmarks show ECFP 
 
 | File | Content |
 |---|---|
-| `rp03_gnn.m` | MATLAB reproduction script |
-| `rp03_gnn_core.py` | Python: graph construction + GCN + 5-fold CV |
+| `rp03_gnn.m` | MATLAB orchestration script (A3 fixed: leak-free CV + fold alignment). See git log for pre-A3 version. |
+| `rp03_gnn_core.py` | Python core (train_test_split inner split + GCN + 5-fold CV) |
 | `lock_template.json` | RF02 version lock schema |
 | `result/runs/<ts>/lock_snapshot.json` | Runtime version info |
-| `result/runs/<ts>/metrics.json` | Metrics (AUC CV / fold AUCs / RP02 comparison) |
-| `result/runs/<ts>/learning_curves.csv` | Per-epoch avg Train Loss / Val AUC |
+| `result/runs/<ts>/metrics.json` | Metrics (AUC CV / fold AUCs / audit comparison / train_size_note) |
+| `result/runs/<ts>/learning_curves.csv` | Per-epoch avg Train Loss / Val AUC (truncated to shortest fold; see `learning_curve_note` in metrics.json) |
 | `result/runs/<ts>/learning_curves.png` | Learning curves (dual-axis Loss + AUC) |
 | `result/runs/<ts>/fold_auc_comparison.png` | Per-fold AUC bar chart with RP02 reference line |
 | `repro/rp02_bbbp/` | RP02 ECFP4+LR baseline (comparison target) |

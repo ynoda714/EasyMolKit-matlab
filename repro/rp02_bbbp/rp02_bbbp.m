@@ -1,205 +1,190 @@
-% rp02_bbbp.m  RP02: MoleculeNet BBBP Classification Baseline (ECFP4 + Logistic Regression)
+% rp02_bbbp.m  RP02: BBBP Classification (sklearn LR, nested CV)
 %
-% Reproduces the MoleculeNet (Wu et al. 2018) classification baseline for
-% Blood-Brain Barrier Permeability (BBBP) using Morgan fingerprints (ECFP4)
-% with logistic regression.
+% Canonical baseline using sklearn LogisticRegression (lbfgs, nested CV).
+% Note: original fitclinear yielded AUC ~0.019 below sklearn lbfgs on
+% identical fold splits (M-REPRO-AUDIT A1, 2026-06-21).
 %
-%   Paper:  Wu, Z. et al. (2018). MoleculeNet: A Benchmark for Molecular
-%           Machine Learning. Chem. Sci. 9:513-530.
-%           DOI: 10.1039/C7SC02664A
+%   Model:  sklearn LogisticRegression (L2 ridge, lbfgs, C by inner 3-fold CV)
+%   CV:     Outer 5-fold stratified x inner 3-fold for C selection (nested CV)
+%   RF03:   ROC-AUC CV >= 0.85
 %
-%   Model:  Logistic Regression (L2 ridge) with Morgan ECFP4
-%             Radius=2, NBits=2048 (Wu et al. Table 4 "Logreg with Circular FP")
+%   Output: result/runs/rp02_bbbp_<ts>/
+%     metrics.json            -- auc_cv, best C per fold, RF03 pass/fail
+%     outer_fold_indices.json -- fold indices for RP03/RP04 fold alignment (A2)
+%     roc_curve.png           -- pseudo-ROC (all test-fold predictions concatenated)
+%     lock_snapshot.json      -- RF02 version lock
 %
-%   Task:   Binary classification -- BBB permeability (BBB+ = 1, BBB- = 0)
-%
-%   Split:  5-fold stratified random CV (NOT scaffold split as in Wu et al.;
-%           see README.md Discussion for impact on expected AUC).
-%
-%   RF01: repro/rp02_bbbp/README.md
-%   RF02: emk.setup.snapshot() + emk.setup.lockfile()
-%   RF03: ROC-AUC CV (5-fold, random split, stratified) >= 0.85
-%
-%   Prerequisites:
-%     emk.setup.install() has been run once.
-%     Statistics and Machine Learning Toolbox (fitclinear, perfcurve, cvpartition).
-%
-%   Run: Ctrl+Enter in MATLAB with project root as CWD.
+% Run: Ctrl+Enter in MATLAB with project root as CWD.
 
-%% Section 0: Setup & Environment
+%% Section 0: Setup
 thisDir = fileparts(mfilename("fullpath"));
 if ~isempty(thisDir)
     cd(fullfile(thisDir, "..", ".."));
 end
 addpath(genpath("src"));
 
-logSection("RP02", "Section 0: Setup & Environment", "BBBP Classification Baseline");
+logSection("RP02", "Section 0: Setup", "BBBP sklearn Baseline");
 emk.setup.initPython();
-
+% L3: warmup call forces the Python engine to start before timed sections.
+% Without this, the first real call absorbs engine startup latency (~3-5 s).
 molWarmup = emk.mol.fromSmiles("C");
 clear molWarmup;
-
 snap = emk.setup.snapshot();
-logInfo("RP02 setup complete.");
 
-%% Section 1: Load BBBP Dataset
-logSection("RP02", "Section 1: Load BBBP Dataset", "BBBP Classification Baseline");
+%% Section 1: Ensure BBBP CSV is cached
+logSection("RP02", "Section 1: Ensure BBBP CSV cached", "BBBP sklearn Baseline");
 
-tbl    = emk.dataset.bbbp();
-nTotal = height(tbl);
-nPos   = sum(tbl.BBB);
-nNeg   = sum(~tbl.BBB);
-logInfo("Loaded %d molecules (BBB+: %d [%.1f%%], BBB-: %d [%.1f%%])", ...
-    nTotal, nPos, 100*nPos/nTotal, nNeg, 100*nNeg/nTotal);
-
-%% Section 2: Parse SMILES & Compute Morgan Fingerprints (ECFP4)
-logSection("RP02", "Section 2: Parse SMILES & Compute Morgan Fingerprints", ...
-    "BBBP Classification Baseline");
-
-nBits  = 2048;
-radius = 2;  % ECFP4 = Morgan radius 2 (Wu et al. standard)
-
-mols      = cell(1, nTotal);
-validMask = false(1, nTotal);
-for i = 1:nTotal
-    try
-        mols{i}      = emk.mol.fromSmiles(tbl.SMILES(i));
-        validMask(i) = true;
-    catch
-        logWarn("SMILES parse failed [%d]: %s", i, tbl.SMILES(i));
-    end
-end
-nValid    = sum(validMask);
-validMols = mols(validMask);
-yAll      = tbl.BBB(validMask);   % logical: true=BBB+, false=BBB-
-y         = double(yAll);          % 1=BBB+, 0=BBB- (required by fitclinear/perfcurve)
-logInfo("Parsed %d / %d SMILES successfully", nValid, nTotal);
-
-% Batch-compute Morgan ECFP4 fingerprints in a single IPC round-trip.
-% Returns logical matrix n x nBits via concatenated bit-string approach.
-logInfo("Computing Morgan ECFP4 (radius=%d, nBits=%d) for %d molecules ...", ...
-    radius, nBits, nValid);
-X = batchMorganFP_(validMols, radius, nBits);
-density = 100 * sum(X(:)) / numel(X);
-logInfo("Fingerprint matrix: %d x %d  (mean bit density: %.2f%%)", ...
-    size(X,1), size(X,2), density);
-
-%% Section 3: Build Full-Data Logistic Regression Model
-logSection("RP02", "Section 3: Build Full-Data Logistic Regression Model", ...
-    "BBBP Classification Baseline");
-
-% fitclinear: efficient logistic regression for high-dimensional sparse data.
-% L2 (ridge) regularization with default Lambda=1/n.
-% This corresponds to Wu et al. 'Logreg with Circular FP' baseline.
-mdlFull = fitclinear(X, y, "Learner", "logistic", "Regularization", "ridge");
-
-posIdx = find(mdlFull.ClassNames == 1, 1);   % index of BBB+ class in ClassNames
-[labelsFull, scoresFull] = predict(mdlFull, X);
-[~, ~, ~, aucFull] = perfcurve(y, scoresFull(:, posIdx), 1);
-accFull  = mean(labelsFull == y);
-baFull   = balancedAcc_(y, labelsFull);
-
-logInfo("Full model (train): AUC=%.4f  Acc=%.4f  BalAcc=%.4f", ...
-    aucFull, accFull, baFull);
-
-%% Section 4: 5-Fold Stratified Cross-Validation
-logSection("RP02", "Section 4: 5-Fold Stratified Cross-Validation", ...
-    "BBBP Classification Baseline");
-
-rng(42, "twister");
-cv    = cvpartition(y, "KFold", 5);   % stratified: each fold preserves class ratio
-nFold = cv.NumTestSets;
-
-aucs  = zeros(nFold, 1);
-accs  = zeros(nFold, 1);
-bAccs = zeros(nFold, 1);
-
-for fold = 1:nFold
-    trainIdx = training(cv, fold);
-    testIdx  = test(cv, fold);
-
-    mdlFold  = fitclinear(X(trainIdx,:), y(trainIdx), ...
-        "Learner", "logistic", "Regularization", "ridge");
-
-    pIdx = find(mdlFold.ClassNames == 1, 1);
-    [labFold, scFold] = predict(mdlFold, X(testIdx,:));
-
-    [~, ~, ~, aucs(fold)] = perfcurve(y(testIdx), scFold(:, pIdx), 1);
-    accs(fold)  = mean(labFold == y(testIdx));
-    bAccs(fold) = balancedAcc_(y(testIdx), labFold);
+% emk.dataset.bbbp() downloads and caches data/benchmark/bbbp.csv.
+tbl = emk.dataset.bbbp();
+logInfo("RP02r: %d total molecules in table (CSV cached)", height(tbl));
+csvPath = fullfile(pwd(), "data", "benchmark", "bbbp.csv");
+if ~isfile(csvPath)
+    error("emk:rp02rev:csvNotFound", "bbbp.csv not found at: %s", csvPath);
 end
 
-aucCV  = mean(aucs);
-accCV  = mean(accs);
-bAccCV = mean(bAccs);
+%% Section 2: Run Python nested CV (sklearn LR + inner C selection)
+logSection("RP02", "Section 2: Python nested CV (sklearn LR)", "BBBP sklearn Baseline");
 
-logInfo("5-fold CV: AUC=%.4f +/- %.4f  Acc=%.4f +/- %.4f  BalAcc=%.4f +/- %.4f", ...
-    aucCV, std(aucs), accCV, std(accs), bAccCV, std(bAccs));
+coreScript = fullfile(thisDir, "rp02_sklearn_core.py");
+logInfo("Running nested CV (outer 5-fold x inner 3-fold C selection) ...");
+logInfo("C grid: [0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0]");
 
-%% Section 5: RF03 Verification
-logSection("RP02", "Section 5: RF03 Verification", "BBBP Classification Baseline");
+% H2: Python exceptions are caught inside run_rp02_sklearn and returned as
+% JSON with success=false. This ensures the error is always surfaced here
+% rather than surfacing as a jsondecode failure on the next line.
+resultJson = pyrun([ ...
+    "exec(open(script_path).read()); " ...
+    "result_json = run_rp02_sklearn(csv_path)"], ...
+    "result_json", ...
+    script_path=coreScript, ...
+    csv_path=csvPath);
 
-rf03crit = struct("auc_cv", struct("lower", 0.85));   % explicit init avoids workspace contamination
+res = jsondecode(char(string(resultJson)));
 
-metRP02 = struct("auc_cv", aucCV);
-resRP02 = emk.repro.verify(metRP02, rf03crit);
+% H2: check for Python-side failure before proceeding
+if isfield(res, "success") && ~res.success
+    error("emk:rp02:pythonError", ...
+        "rp02_sklearn_core.py failed:\n%s\n\nTraceback:\n%s", ...
+        res.error, res.traceback);
+end
+
+logInfo("n_valid=%d  BBB+=%.0f  BBB-=%.0f", res.n_valid, res.n_bbb_pos, res.n_bbb_neg);
+logInfo("");
+
+for k = 1:numel(res.fold_results)
+    fr = res.fold_results(k);
+    logInfo("  fold %d: AUC=%.4f  best_C=%.3g  (inner_AUC=%.4f, train=%d, test=%d)", ...
+        fr.fold, fr.test_auc, fr.best_C, fr.inner_auc, fr.train_size, fr.test_size);
+end
+
+aucCV = res.auc_mean;
+logInfo("");
+logInfo("Nested CV AUC = %.4f +/- %.4f", aucCV, res.auc_std);
+logInfo("Best C per fold: %s", mat2str([res.fold_results.best_C], 3));
+
+%% Section 3: RF03 Verification
+logSection("RP02", "Section 3: RF03 Verification", "BBBP sklearn Baseline");
+
+% L1: named constant so that if RP03 is re-run the value can be updated here
+GCN_AUC_RP03 = 0.9151;
+% L5: 0.8826 is the historical fitclinear baseline retained for comparison.
+% It appears in metrics.json under comparison.rp02_fitclinear_auc but is NOT
+% used as an RF03 criterion -- aucCV (nested CV) is the sole pass/fail signal.
+FITCLINEAR_AUC_HISTORICAL = 0.8826;
+
+rf03crit = struct("auc_cv", struct("lower", 0.85));
+% M2: aucCV (nested CV mean) is the ONLY metric used for RF03 pass/fail.
+% pseudoAuc (computed in Section 4) is a diagnostic view only and must NOT
+% be substituted here -- it is computed on the concatenated test-fold
+% predictions, which leaks fold-selection information.
+metRP02r = struct("auc_cv", aucCV);
+resRP02r = emk.repro.verify(metRP02r, rf03crit);
 
 logInfo("==> ROC-AUC CV = %.4f (criterion: >= %.2f): %s", ...
-    aucCV, rf03crit.auc_cv.lower, statusStr_(resRP02.pass));
-disp(resRP02.report);
+    aucCV, rf03crit.auc_cv.lower, statusStr_(resRP02r.pass));
+disp(resRP02r.report);
 
-if resRP02.pass
-    logInfo("==> RP02 REPRODUCTION: PASS");
-else
-    logWarn("==> RP02 REPRODUCTION: NEEDS REVIEW -- see README.md Discussion");
-end
+logInfo("");
+logInfo("--- Comparison with original RP02 ---");
+logInfo("  RP02 fitclinear AUC  = %.4f  (historical; M-REPRO-AUDIT A1: biased low due to solver)", ...
+    FITCLINEAR_AUC_HISTORICAL);
+logInfo("  RP02 sklearn AUC     = %.4f  (fair baseline for RP03/RP04 comparison)", aucCV);
+logInfo("  Revised GCN advantage    ~ +%.4f  (vs %.4f reported in RP03)", ...
+    GCN_AUC_RP03 - aucCV, GCN_AUC_RP03 - FITCLINEAR_AUC_HISTORICAL);
 
-%% Section 6: Save Results
-logSection("RP02", "Section 6: Save Results", "BBBP Classification Baseline");
+%% Section 4: ROC curve (pseudo -- all test-fold predictions concatenated)
+logSection("RP02", "Section 4: ROC Curve", "BBBP sklearn Baseline");
 
 runDir    = makeRunDir("Prefix", "rp02_bbbp");
 absRunDir = char(fullfile(pwd(), runDir));
 
-% Predictions CSV (full model)
-outTbl = tbl(validMask, ["SMILES","Name","BBB"]);
-outTbl.BBB_pred  = logical(labelsFull);
-outTbl.score_pos = scoresFull(:, posIdx);
-outTbl.correct   = outTbl.BBB == outTbl.BBB_pred;
-writetable(outTbl, fullfile(runDir, "predictions.csv"));
-logInfo("Predictions saved: predictions.csv");
-
-% ROC curve (full model, for reference)
-[rocX, rocY] = perfcurve(y, scoresFull(:, posIdx), 1);
-fig = figure("Name", "RP02 BBBP: ROC Curve");
+yTrue = res.y_true;
+yProb = res.y_prob;
+% M2: pseudoAuc is the AUC of the concatenated test-fold probability scores.
+% It approximates full-data performance but is NOT bias-corrected; use aucCV
+% for all quantitative reporting and RF03 decisions.
+[rocX, rocY, ~, pseudoAuc] = perfcurve(yTrue, yProb, 1);
+fig = figure("Name", "RP02 BBBP: sklearn LR ROC (pseudo hold-out)");
 plot(rocX, rocY, "b-", "LineWidth", 1.8);
 hold on;
 plot([0 1], [0 1], "k--", "LineWidth", 1.0);
 xlabel("False Positive Rate");
 ylabel("True Positive Rate");
-title(sprintf("BBBP LR+ECFP4  AUC (train)=%.3f  CV=%.3f (5-fold)", aucFull, aucCV));
-legend(sprintf("LR+ECFP4 train (AUC=%.3f)", aucFull), "Random", "Location", "SouthEast");
+title(sprintf("BBBP LR+ECFP4 (sklearn)  CV=%.3f  pseudo-ROC=%.3f (5-fold)", aucCV, pseudoAuc));
+legend(sprintf("sklearn LR ECFP4 (pseudo AUC=%.3f)", pseudoAuc), "Random", "Location", "SouthEast");
 saveas(fig, fullfile(absRunDir, "roc_curve.png"));
+close(fig);
 logInfo("Figure saved: roc_curve.png");
 
+%% Section 5: Save results
+logSection("RP02", "Section 5: Save Results", "BBBP sklearn Baseline");
+
+% M4: guard against running this section standalone without Section 4
+if ~exist("runDir", "var") || isempty(runDir)
+    error("emk:rp02:missingRunDir", ...
+        "runDir is not defined. Run Section 4 first to create the output directory.");
+end
+
+% Outer fold indices (for A2: sharing with RP03/RP04)
+foldIdxPath = fullfile(runDir, "outer_fold_indices.json");
+fid = fopen(foldIdxPath, "w");
+if fid == -1
+    error("emk:rp02:fopenFailed", "Cannot open for writing: %s", foldIdxPath);
+end
+fprintf(fid, "%s\n", jsonencode(res.outer_fold_indices, "PrettyPrint", true));
+fclose(fid);
+logInfo("Outer fold indices saved (A2 input): %s", foldIdxPath);
+
 % Metrics JSON
+% L2: inner_C_grid (per-fold HP selection evidence) is already embedded in
+% fold_results; extracted here at top level for quick inspection.
 metrics = struct( ...
-    "model_auc_train",    aucFull, ...
-    "model_acc_train",    accFull, ...
-    "model_balacc_train", baFull, ...
-    "auc_cv",             aucCV, ...
-    "auc_cv_std",         std(aucs), ...
-    "acc_cv",             accCV, ...
-    "acc_cv_std",         std(accs), ...
-    "balacc_cv",          bAccCV, ...
-    "balacc_cv_std",      std(bAccs), ...
-    "n_molecules",        nValid, ...
-    "n_bbb_pos",          sum(y == 1), ...
-    "n_bbb_neg",          sum(y == 0), ...
-    "ecfp4_radius",       radius, ...
-    "ecfp4_nbits",        nBits, ...
-    "rf03_criteria",      rf03crit, ...
-    "rf03_pass",          resRP02.pass);
-fid = fopen(fullfile(runDir, "metrics.json"), "w");
+    "auc_cv",           aucCV, ...
+    "auc_cv_std",       res.auc_std, ...
+    "auc_per_fold",     res.auc_per_fold, ...
+    "auc_pseudo_roc",   pseudoAuc, ...
+    "best_C_per_fold",  res.best_C_per_fold, ...
+    "n_valid",          res.n_valid, ...
+    "n_bbb_pos",        res.n_bbb_pos, ...
+    "n_bbb_neg",        res.n_bbb_neg, ...
+    "ecfp4_radius",     2, ...
+    "ecfp4_nbits",      2048, ...
+    "solver",           "sklearn_lbfgs", ...
+    "cv_outer",         5, ...
+    "cv_inner",         3, ...
+    "rf03_criteria",    rf03crit, ...
+    "rf03_pass",        resRP02r.pass, ...
+    "comparison", struct( ...
+        "rp02_fitclinear_auc",    FITCLINEAR_AUC_HISTORICAL, ...
+        "rp02_rev_sklearn_auc",   aucCV, ...
+        "solver_gap_a1",          0.0191, ...
+        "fold_gap_a1",            0.0079, ...
+        "gcn_auc_rp03",           GCN_AUC_RP03));
+metricsPath = fullfile(runDir, "metrics.json");
+fid = fopen(metricsPath, "w");
+if fid == -1
+    error("emk:rp02:fopenFailed", "Cannot open for writing: %s", metricsPath);
+end
 fprintf(fid, "%s\n", jsonencode(metrics, "PrettyPrint", true));
 fclose(fid);
 logInfo("Metrics saved: metrics.json");
@@ -207,46 +192,17 @@ logInfo("Metrics saved: metrics.json");
 % RF02 lock snapshot
 snap.run_date  = char(datetime("now", "Format", "yyyy-MM-dd"));
 snap.run_dir   = runDir;
-snap.rf03_pass = resRP02.pass;
+snap.rf03_pass = resRP02r.pass;
 emk.setup.lockfile(snap, fullfile(runDir, "lock_snapshot.json"));
 
-logInfo("RP02 complete.  run_dir=%s", runDir);
+if resRP02r.pass
+    logInfo("==> RP02 REPRODUCTION: PASS  (run_dir=%s)", runDir);
+else
+    logWarn("==> RP02 REPRODUCTION: NEEDS REVIEW  (run_dir=%s)", runDir);
+end
+logInfo("NOTE: outer_fold_indices.json available for RP03/RP04 fold alignment.");
 
 % ===========================================================================
-% Local helper functions
-% ===========================================================================
-
-function X = batchMorganFP_(mols, radius, nBits)
-% Batch-compute Morgan ECFP4 fingerprints in a single IPC round-trip.
-% All bit strings are concatenated in Python and reshaped in MATLAB.
-    n = numel(mols);
-    pyMolList = py.list();
-    for i = 1:n
-        pyMolList.append(mols{i});
-    end
-
-    % Join all n bit strings into one string of length n*nBits (1 IPC call)
-    pyAllBits = pyrun([ ...
-        "from rdkit.Chem import rdFingerprintGenerator as _rfg;" ...
-        "gen = _rfg.GetMorganGenerator(radius=int(fp_r), fpSize=int(fp_nb));" ...
-        "fps = ''.join(gen.GetFingerprint(m).ToBitString() for m in mols)"], ...
-        "fps", mols=pyMolList, fp_r=int32(radius), fp_nb=int32(nBits));
-
-    allBits = char(string(pyAllBits)) == '1';    % logical row vector: 1 x (n*nBits)
-    X = double(reshape(allBits, nBits, n)');     % n x nBits double (fitclinear requires numeric)
-end
-
-function bacc = balancedAcc_(yTrue, yPred)
-% Balanced accuracy = (sensitivity + specificity) / 2.
-    tp   = sum(yTrue == 1 & yPred == 1);
-    tn   = sum(yTrue == 0 & yPred == 0);
-    fp   = sum(yTrue == 0 & yPred == 1);
-    fn   = sum(yTrue == 1 & yPred == 0);
-    sens = tp / max(tp + fn, 1);
-    spec = tn / max(tn + fp, 1);
-    bacc = (sens + spec) / 2;
-end
-
 function s = statusStr_(tf)
     if tf; s = "PASS"; else; s = "FAIL"; end
 end

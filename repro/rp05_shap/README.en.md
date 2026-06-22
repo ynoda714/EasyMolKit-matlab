@@ -64,9 +64,9 @@ repro/rp05_shap/rp05_shap_core.py    Python core (sklearn LR fit + SHAP)
 | Section | Contents |
 |---|---|
 | Section 0 | Setup, Python init, `emk.setup.snapshot()` |
-| Section 1 | BBBP CSV check, path resolution |
-| Section 2 | Python: ECFP4 compute → sklearn LR fit → 5-fold CV AUC |
-| Section 3 | Extract Python results (global importance, example molecule SHAP) |
+| Section 1 | Path resolution, BBBP CSV cache check (downloads only if absent) |
+| Section 2 | Python: ECFP4 → 5-fold CV AUC (unfitted estimator) → 80/20 split → LR fit → SHAP |
+| Section 3 | Extract Python results (global importance, example molecule SHAP, counts) |
 | Section 4 | MATLAB visualization (global importance bar, local waterfall) |
 | Section 5 | RF03 verification (`emk.repro.verify()`) |
 | Section 6 | Save results (`makeRunDir()` → lockfile) |
@@ -114,10 +114,14 @@ repro/rp05_shap/rp05_shap_core.py    Python core (sklearn LR fit + SHAP)
 
 ### Lessons Learned
 
-- `shap.LinearExplainer` triggers numba JIT compilation on first run (~30 s); fast thereafter
-- `shap_values()` returns a list for multiclass models — requires `isinstance` check for binary case
-- MATLAB `jsondecode` automatically converts a JSON 2D array to a double matrix (e.g., 3×20)
-- Faithful methodology reproduction on chemogenomics tasks requires ChEMBL access — future candidate
+- [x] Passing the full dataset as the LinearExplainer background causes data leakage. Use an 80/20 train/test split and pass only `X_tr` as background.
+- [x] Passing a fitted model to `cross_val_score` is misleading (it clones internally so AUC is correct, but intent is unclear). Always pass an unfitted estimator.
+- [x] MIS fallback: when the test set has no misclassified samples, replace with TN2 (2nd-best TN) and set `ex_types = ["TP", "TN", "TN2"]`. Prevents TP appearing under the "MIS" label.
+- [x] `shap_coverage` hardcoded to 1.0 is meaningless — removed the field entirely.
+- [ ] `shap.LinearExplainer` triggers numba JIT compilation on first run (~30 s); fast thereafter
+- [ ] `shap_values()` returns a list for multiclass models — requires `isinstance` check for binary case
+- [ ] MATLAB `jsondecode` automatically converts a JSON 2D array to a double matrix (e.g., 3×20)
+- [ ] Faithful methodology reproduction on chemogenomics tasks requires ChEMBL access — future candidate
 
 ---
 
