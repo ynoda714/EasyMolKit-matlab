@@ -11,7 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.0] - 2026-06-21
+## [1.4.0] - 2026-06-22
+
+### Fixed
+
+**Post-audit corrections for RP00–RP05** (applied before v1.4.0 release; pre-release tag moved to HEAD)
+
+- **RP00**: calibration run added, OOF R² metric corrected
+- **RP01**: CV seed fixed for reproducibility, section ordering corrected, error handling improved
+- **RP02**: `rp02_sklearn_core.py` added (extracted from inline script), robustness and naming improved
+- **RP03**: inner split fixed, reproducibility improvements, visualization corrections
+- **RP04**: double tokenization bug fixed, robustness improvements
+- **RP05**: train/test split corrected, SHAP leakage eliminated, MIS fallback added
 
 ### Added
 
