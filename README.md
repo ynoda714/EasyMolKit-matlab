@@ -136,17 +136,32 @@ see [docs/tutorials.md](docs/tutorials.md).
 
 ## Reproducible Research
 
-`repro/` contains MATLAB reproductions of published Chemoinformatics papers, each with a
-locked environment snapshot and defined success criteria.
+`repro/` contains MATLAB reproductions of 6 published Chemoinformatics papers,
+each with a locked environment snapshot (RF02) and defined success criteria (RF03).
 
-| ID | Paper | Method | Result |
+For the full listing with methods, datasets, and results, see [docs/repro.md](docs/repro.md).
+
+## What MATLAB Can Cover
+
+Experiments under `repro/` establish evidence-based boundaries for MATLAB in Chemoinformatics workflows.
+Results are stated as conditions, not verdicts — "MATLAB is X, Python is Y."
+
+| Zone | Task type | Key condition | Outcome |
 |---|---|---|---|
-| RP00 | Delaney (2004) ESOL | Linear regression on physicochemical descriptors | CV RMSE=1.017, R²=0.762 |
-| RP01 | Delaney (2004) ESOL extended | Linear regression + TPSA / QED / SA Score | CV RMSE=0.584, R²=0.906 |
-| RP02 | Wu et al. (2018) MoleculeNet BBBP | Morgan FP (ECFP4) + Random Forest | ROC-AUC CV=0.883 |
-| RP03 | Yang et al. (2019) GNN on BBBP | Graph Convolutional Network | ROC-AUC CV=0.915 |
-| RP04 | Chithrananda et al. (2020) ChemBERTa | Frozen CLS embedding + Logistic Regression | ROC-AUC CV=0.927 |
-| RP05 | SHAP explainability on BBBP | shap.LinearExplainer + LR model | ROC-AUC CV=0.909, Spearman ρ=0.902 |
+| **A — MATLAB native** | Statistics, filters, visualization | Default settings | Equivalent to or better than Python alternatives |
+| **B — Conditionally equivalent** | Classical ML (LR, Ridge, RF) and linear SHAP | Solver and regularization configured explicitly | Gap < 1σ (practical tie); SHAP Spearman ρ = 0.915–0.927 |
+| **C — Division of labor** | Full ML / DL / LLM pipeline | RDKit (Python) for feature extraction; MATLAB for model training | Fully functional: GCN Δ = −0.017 < 1σ, ChemBERTa AUC = 0.914 |
+| **D — Python advantage** | Non-linear SHAP (TreeSHAP / KernelSHAP) | Requires `shap` library | `TreeExplainer` / `KernelExplainer` unavailable in MATLAB |
+
+**Zone B — conditions required for practical parity:**
+1. Use the `lbfgs` solver explicitly — the default SGD solver fails on high-dimensional sparse features
+2. Set regularization scale explicitly — `Lambda = 1/n` (MATLAB) ≡ `C ≈ n` (sklearn) give equivalent performance despite opposite conventions
+3. Preprocessing (SMILES → fingerprints) requires RDKit; only the ML training step runs in MATLAB
+
+**Zone C — tested pipelines (RP03, RP04, all RP):**
+- **Descriptor pipeline** (SMILES → features → ML/statistics): Fully functional across all RP — no capability gap
+- **GCN / deep learning** (RP03): MATLAB Deep Learning Toolbox 3-layer GCN achieves AUC = 0.887 ± 0.015 vs Python 0.904 ± 0.020 (Δ = −0.017 < 1σ — practical tie); requires Python for RDKit graph featurization
+- **LLM embedding** (RP04): Python tokenizes → MATLAB runs ONNX inference + logistic regression, AUC = 0.914 ± 0.009 (RF03 PASS); ONNX fidelity confirmed (F1-a and F1-b results match exactly)
 
 ## API Overview
 
@@ -219,6 +234,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 |---|---|
 | [docs/quickstart.md](docs/quickstart.md) | Setup steps, Track 2 setup & FAQ |
 | [docs/tutorials.md](docs/tutorials.md) | Full tutorial listing (F01–R10, RP00–RP05) |
+| [docs/repro.md](docs/repro.md) | Reproducible research index (RP00–RP05 with methods and results) |
 | [docs/function_reference.md](docs/function_reference.md) | Full function signature reference |
 | [docs/function_catalog.md](docs/function_catalog.md) | Compact function catalog (76 functions) |
 | [docs/python_integration.md](docs/python_integration.md) | Python integration architecture |
