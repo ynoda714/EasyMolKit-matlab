@@ -8,7 +8,7 @@
 %   1. VIF for Model A (4-feat) and Model B (9-feat) — multicollinearity.
 %   2. Paired t-test: Model A vs B per-fold RMSE and R^2.
 %   3. TPSA sign verification: partial coefficient vs marginal correlation.
-%      (TPSA marginal r=+0.123 but partial coef=-0.016 due to LogP overlap.)
+%      (Actual values vary by run -- see execution log for r and coef.)
 %
 %   Run: Ctrl+Enter in MATLAB with project root as CWD.
 
@@ -25,7 +25,14 @@ emk.setup.initPython();
 molWarmup = emk.mol.fromSmiles("C");
 clear molWarmup;
 snap = emk.setup.snapshot();
-rng(42, "twister");  % seed for Section 1-4; CV fold assignment is re-seeded in Section 5
+lockTemplatePath = fullfile(thisDir, "lock_template.json");
+if isfile(lockTemplatePath)
+    lockTemplate = jsondecode(fileread(lockTemplatePath));
+else
+    lockTemplate = struct();
+    logWarn("lock_template.json not found; RF03 criteria will fall back to hardcoded defaults.");
+end
+rng(42, "twister");  % initialize RNG state for Sections 1-4 (no MATLAB randomness currently consumed here); CV fold assignment is independently re-seeded at the top of Section 5
 
 %% Section 1: Load ESOL Dataset
 logSection("RP01", "Section 1: Load ESOL Dataset", "ESOL QSAR + L05");
@@ -34,6 +41,10 @@ tbl    = emk.dataset.esol();
 nTotal = height(tbl);
 logInfo("Loaded %d molecules (ESOL / Delaney 2004)", nTotal);
 logInfo("logS range: [%.2f, %.2f] log mol/L", min(tbl.logS), max(tbl.logS));
+
+csvFile     = fullfile(projectRoot, "data", "benchmark", "esol.csv");
+datasetHash = computeFileHash_(csvFile);
+logInfo("Dataset SHA-256: %s", datasetHash);
 
 %% Section 2: Parse SMILES & Compute Descriptors
 logSection("RP01", "Section 2: Parse SMILES & Compute Descriptors", "ESOL QSAR + L05");
@@ -58,10 +69,10 @@ allDesc = ["LogP", "MolWt", "NumRotatableBonds", "HeavyAtomCount", ...
 descTbl = emk.descriptor.batchCalculate(validMols, allDesc);
 [descTbl.AromaticProportion, descTbl.QED] = calcAroPropAndQED_(validMols, descTbl.HeavyAtomCount);
 
-% Exclude molecules where AroProp or QED calculation fell back to NaN
-nanDescMask = isnan(descTbl.AromaticProportion) | isnan(descTbl.QED);
+% Exclude molecules where any descriptor is NaN (covers all batchCalculate outputs, AroProp, and QED).
+nanDescMask = any(ismissing(descTbl), 2);
 if any(nanDescMask)
-    logWarn("Excluding %d molecule(s) with NaN AroProp/QED from model fitting.", sum(nanDescMask));
+    logWarn("Excluding %d molecule(s) with NaN in any descriptor from model fitting.", sum(nanDescMask));
     validIndices = find(validMask);
     validMask(validIndices(nanDescMask)) = false;
     descTbl   = descTbl(~nanDescMask, :);
@@ -87,8 +98,13 @@ featsB = [featsA, {'TPSA','HBD','HBA','FracCSP3','QED'}];
 mdlA = fitlm(Xa, y, "VarNames", [featsA, {'logS'}]);
 mdlB = fitlm(Xb, y, "VarNames", [featsB, {'logS'}]);
 
-logInfo("Model A (4-feature) full: RMSE=%.4f  R^2=%.4f", sqrt(mdlA.MSE), mdlA.Rsquared.Ordinary);
-logInfo("Model B (9-feature) full: RMSE=%.4f  R^2=%.4f", sqrt(mdlB.MSE), mdlB.Rsquared.Ordinary);
+% Training RMSE = sqrt(RSS/n) -- biased estimator matching README "RMSE (full-dataset fit)".
+% sqrt(mdl.MSE) uses RSS/(n-p-1) (unbiased) and is smaller; do not use it here.
+rmseTrainA = sqrt(mean(mdlA.Residuals.Raw.^2));
+rmseTrainB = sqrt(mean(mdlB.Residuals.Raw.^2));
+
+logInfo("Model A (4-feature) full: RMSE=%.4f  R^2=%.4f", rmseTrainA, mdlA.Rsquared.Ordinary);
+logInfo("Model B (9-feature) full: RMSE=%.4f  R^2=%.4f", rmseTrainB, mdlB.Rsquared.Ordinary);
 
 % Extract coefficients for TPSA sign check (B2)
 coefB     = mdlB.Coefficients;
@@ -143,7 +159,7 @@ logInfo("Moderate VIF (5-10): %s", strjoin(modVIF, ", "));
 %% Section 5: 5-Fold Cross-Validation
 logSection("RP01", "Section 5: 5-Fold Cross-Validation", "ESOL QSAR + L05");
 
-rng(42, "twister");  % re-seed here: batchCalculate/pyrun in Section 2 may have consumed RNG
+rng(42, "twister");  % re-seed immediately before cvpartition; guards against RNG consumed by batchCalculate/pyrun above and any future emk.* internals
 cv = cvpartition(nValid, "KFold", 5);
 
 [rmseCVa, r2CVa, rmsesA, r2sA] = runCV_(Xa, y, cv);
@@ -155,6 +171,8 @@ logInfo("Model B 5-fold CV: RMSE=%.4f +/- %.4f  R^2=%.4f +/- %.4f", ...
     rmseCVb, std(rmsesB), r2CVb, std(r2sB));
 logInfo("Per-fold RMSE -- A: %s", sprintf("%.4f ", rmsesA'));
 logInfo("Per-fold RMSE -- B: %s", sprintf("%.4f ", rmsesB'));
+logInfo("Per-fold R^2  -- A: %s  (min=%.4f)", sprintf("%.4f ", r2sA'), min(r2sA));
+logInfo("Per-fold R^2  -- B: %s  (min=%.4f)", sprintf("%.4f ", r2sB'), min(r2sB));
 
 %% Section 6: Paired t-test Model A vs B (B2)
 logSection("RP01", "Section 6: Paired t-test A vs B", "ESOL QSAR + L05");
@@ -188,8 +206,12 @@ logInfo("        does not establish equivalence; effect may exist but be undetec
 %% Section 7: RF03 Verification
 logSection("RP01", "Section 7: RF03 Verification", "ESOL QSAR + L05");
 
-rf03crit.rmse_cv = struct("upper", 1.20);
-rf03crit.r2_cv   = struct("lower", 0.75);
+if isfield(lockTemplate, "rf03_criteria")
+    rf03crit = lockTemplate.rf03_criteria;
+else
+    rf03crit.rmse_cv = struct("upper", 1.20);
+    rf03crit.r2_cv   = struct("lower", 0.75);
+end
 metA.rmse_cv = rmseCVa;  metA.r2_cv = r2CVa;
 metB.rmse_cv = rmseCVb;  metB.r2_cv = r2CVb;
 resA = emk.repro.verify(metA, rf03crit);
@@ -202,8 +224,13 @@ disp(resB.report);
 %% Section 8: Save Results
 logSection("RP01", "Section 8: Save Results", "ESOL QSAR + L05");
 
-runDir    = makeRunDir("Prefix", "rp01_esol");
-absRunDir = char(fullfile(projectRoot, runDir));
+runDir = makeRunDir("Prefix", "rp01_esol");
+% N3: makeRunDir returns a relative path. Guard against absolute paths.
+if startsWith(runDir, '/') || (numel(runDir) >= 2 && runDir(2) == ':')
+    absRunDir = char(runDir);
+else
+    absRunDir = char(fullfile(projectRoot, runDir));
+end
 
 yPredA = predict(mdlA, Xa);
 yPredB = predict(mdlB, Xb);
@@ -215,8 +242,10 @@ outTbl.residual_B = y - yPredB;
 outTbl = [outTbl, descTbl];
 writetable(outTbl, fullfile(absRunDir, "predictions.csv"));
 
-loAll = floor(min([y; yPredA; yPredB]));
-hiAll = ceil(max([y; yPredA; yPredB]));
+% Axis range based on measured y: keeps the diagonal (y=x) fully visible.
+% Predicted outliers appear as clipped points rather than compressing the view.
+loAll = floor(min(y) - 0.3);
+hiAll = ceil(max(y) + 0.3);
 
 fig = figure("Name", "RP01 ESOL: Model A vs B");
 try
@@ -224,14 +253,16 @@ try
     scatter(y, yPredA, 20, "filled", "MarkerFaceAlpha", 0.5);
     hold on;
     plot([loAll,hiAll],[loAll,hiAll],"k--","LineWidth",1.2);
+    xlim([loAll,hiAll]); ylim([loAll,hiAll]);
     xlabel("Measured logS");  ylabel("Predicted logS");
-    title(sprintf("Model A (4-feat)  RMSE=%.3f  R^2=%.3f", sqrt(mdlA.MSE), mdlA.Rsquared.Ordinary));
+    title(sprintf("Model A (4-feat)  RMSE=%.3f  R^2=%.3f", rmseTrainA, mdlA.Rsquared.Ordinary));
     subplot(1,2,2);
     scatter(y, yPredB, 20, "filled", "MarkerFaceAlpha", 0.5, "MarkerFaceColor","#0072BD");
     hold on;
     plot([loAll,hiAll],[loAll,hiAll],"k--","LineWidth",1.2);
+    xlim([loAll,hiAll]); ylim([loAll,hiAll]);
     xlabel("Measured logS");  ylabel("Predicted logS");
-    title(sprintf("Model B (9-feat)  RMSE=%.3f  R^2=%.3f", sqrt(mdlB.MSE), mdlB.Rsquared.Ordinary));
+    title(sprintf("Model B (9-feat)  RMSE=%.3f  R^2=%.3f", rmseTrainB, mdlB.Rsquared.Ordinary));
     saveas(fig, fullfile(absRunDir, "predicted_vs_actual.png"));
 finally
     close(fig);
@@ -244,7 +275,7 @@ coefBmat = table(termCol, coefB.Estimate, coefB.SE, coefB.tStat, coefB.pValue, .
 writetable(coefBmat, fullfile(absRunDir, "model_b_coefficients.csv"));
 
 metrics = struct( ...
-    "model_a_rmse_train",    sqrt(mdlA.MSE), ...
+    "model_a_rmse_train",    rmseTrainA, ...
     "model_a_r2_train",      mdlA.Rsquared.Ordinary, ...
     "model_a_rmse_cv",       rmseCVa, ...
     "model_a_rmse_cv_std",   std(rmsesA), ...
@@ -252,7 +283,7 @@ metrics = struct( ...
     "model_a_r2_cv_std",     std(r2sA), ...
     "model_a_fold_rmse",     rmsesA(:)', ...
     "model_a_fold_r2",       r2sA(:)', ...
-    "model_b_rmse_train",    sqrt(mdlB.MSE), ...
+    "model_b_rmse_train",    rmseTrainB, ...
     "model_b_r2_train",      mdlB.Rsquared.Ordinary, ...
     "model_b_rmse_cv",       rmseCVb, ...
     "model_b_rmse_cv_std",   std(rmsesB), ...
@@ -262,6 +293,7 @@ metrics = struct( ...
     "model_b_fold_r2",       r2sB(:)', ...
     "l05_delta_rmse",        deltaRmse, ...
     "l05_delta_r2",          deltaR2, ...
+    "dataset_sha256",        datasetHash, ...
     "paired_ttest_rmse", struct( ...
         "t",       st_rmse.tstat, ...
         "df",      st_rmse.df, ...
@@ -289,16 +321,19 @@ metrics = struct( ...
     "rf03_criteria",         rf03crit, ...
     "rf03_model_a_pass",     resA.pass, ...
     "rf03_model_b_pass",     resB.pass, ...
-    "rf03_pass",             resB.pass, ...
-    "rf03_modelA_ref",       resA.pass);
+    "rf03_pass",             resA.pass && resB.pass);
 
 fid = fopen(fullfile(absRunDir, "metrics.json"), "w");
-fprintf(fid, "%s\n", jsonencode(metrics, "PrettyPrint", true));
-fclose(fid);
+try
+    fprintf(fid, "%s\n", jsonencode(metrics, "PrettyPrint", true));
+finally
+    fclose(fid);
+end
 
 snap.run_date  = char(datetime("now", "Format", "yyyy-MM-dd"));
 snap.run_dir   = runDir;
-snap.rf03_pass = resB.pass;
+snap.rf03_pass = resA.pass && resB.pass;
+snap.dataset_sha256 = datasetHash;
 emk.setup.lockfile(snap, fullfile(absRunDir, "lock_snapshot.json"));
 
 logInfo("Results saved: %s", runDir);
@@ -381,7 +416,7 @@ function [rmseCV, r2CV, rmses, r2s] = runCV_(X, y, cv)
         yPred    = predict(mdl, X(testIdx,:));
         res      = y(testIdx) - yPred;
         rmses(fold) = sqrt(mean(res.^2));
-        ssTot       = sum((y(testIdx) - mean(y(testIdx))).^2);
+        ssTot       = sum((y(testIdx) - mean(y)).^2);  % global mean baseline (OOS R^2); y is the full label vector passed as arg 2
         r2s(fold)   = 1 - sum(res.^2) / ssTot;
     end
     rmseCV = mean(rmses);
@@ -390,4 +425,36 @@ end
 
 function s = statusStr_(tf)
     if tf; s = "PASS"; else; s = "FAIL"; end
+end
+
+function h = computeFileHash_(fpath)
+% Compute SHA-256 hex digest of the dataset file for RF02 traceability.
+    fpathChar = char(fpath);
+    if ispc()
+        fpathSafe = strrep(fpathChar, "'", "''");
+        cmd = sprintf( ...
+            'powershell -Command "(Get-FileHash -LiteralPath ''%s'' -Algorithm SHA256).Hash"', ...
+            fpathSafe);
+        [status, out] = system(cmd);
+        if status == 0
+            h = string(upper(strtrim(out)));
+            return;
+        end
+    else
+        fpathSafe = strrep(fpathChar, "'", "''");
+        [status, out] = system(sprintf("sha256sum '%s'", fpathSafe));
+        if status ~= 0
+            [status, out] = system(sprintf("shasum -a 256 '%s'", fpathSafe));
+        end
+        if status == 0
+            parts = strsplit(strtrim(out));
+            if ~isempty(parts)
+                h = string(upper(parts{1}));
+                return;
+            end
+        end
+    end
+    warning("emk:rp01:computeFileHash:failed", ...
+        "SHA-256 hash unavailable for '%s' (platform: %s).", fpathChar, computer());
+    h = "unavailable";
 end

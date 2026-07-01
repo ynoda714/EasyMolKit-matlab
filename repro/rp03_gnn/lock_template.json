@@ -54,8 +54,10 @@
     "auc_cv": null,
     "auc_cv_std": null,
     "fold_aucs": null,
-    "rp02_baseline_auc": 0.8826,
-    "gnn_vs_baseline": null
+    "rp02_orig_auc": 0.8826,
+    "rp02_rev_auc": 0.9118,
+    "gnn_vs_rp02_orig": null,
+    "gnn_vs_rp02_rev": null
   },
   "rf03_pass": null
 }

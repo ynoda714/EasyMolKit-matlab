@@ -9,6 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+**M-REPRO-SCALE2: RP09 — QED Descriptor Validation (Bickerton 2012)**
+
+- `repro/rp09_qed/` — reproduces Bickerton et al. (2012) *Nature Chemistry* QED score distribution
+  for ChEMBL FDA-approved oral small molecule drugs (modern ChEMBL: 1893 valid molecules).
+  RF03 Cat A: n_valid=1893 ✅, qed_mean=0.530 ✅, frac>0.67=0.332 ✅. Cat C: QED(aspirin)=0.550 ✅.
+- `emk.dataset.chemblOralDrugs()` — ChEMBL REST API loader for oral approved drugs (max_phase=4).
+  Returns table with `SMILES`, `ChemblID`, `PrefName`; local CSV cache at `data/benchmark/`.
+
+---
+
+## [1.4.1] - 2026-07-01
+
+### Added
+
+**M-REPRO-REFINE: MATLAB capability extensions for RP02–RP05**
+
+Post-v1.4.0 comparison experiments extending the MATLAB-side implementation of each reproduction entry.
+
+- **RP02** `r1b_solver.m` — fitclinear solver/convergence comparison (R1-B): scans sgd / sparsa / lbfgs × IterationLimit to isolate the source of the AUC gap identified in R1. Confirms lbfgs as the effective solver choice.
+- **RP02** `r1c_matlab_nested_cv.m` — MATLAB nested CV with fitclinear lbfgs (R1-C): outer folds matched to sklearn; inner stratified 3-fold for Lambda selection. Result: AUC=0.9084 vs sklearn 0.9143 (gap=0.0058, practical tie → Zone B).
+- **RP03** `rp03_gnn_matlab.m` / `rp03_gnn_matlab_core.m` — MATLAB Deep Learning Toolbox GCN (R2): 3-layer GCNConv-equivalent trained on BBBP. AUC=0.8872±0.0151 vs Python 0.9038±0.0203 (Δ=−0.017 < 1σ → Zone C confirmed).
+- **RP04** `rp04_chemberta_f1.m` — F1-b: Python ChemBERTa embeddings → MATLAB fitclinear LR. AUC=0.9138±0.0088 (RF03 PASS, Zone C).
+- **RP04** `rp04_chemberta_f1a.m` — F1-a: MATLAB ONNX inference + fitclinear LR (Python handles tokenization only). AUC=0.9138, identical to F1-b; ONNX fidelity confirmed (Zone C).
+- **RP05** F2 analytical SHAP added to `rp05_shap.m` — MATLAB closed-form linear SHAP vs Python `shap.LinearExplainer(C=1.0)`. Spearman ρ=0.9274 ≥ 0.85 threshold → Zone B confirmed.
+- **RP05** F3 SHAP benchmarking added to `rp05_shap.m` — MATLAB `shapley` + TreeBagger RF; exploratory mode (`n_eval=[1,2,4]`, single repeat). Runtime guardrail triggered (projected >20 min); Zone D/B determination pending.
+
+### Changed
+
+**Documentation corrections and clarifications for RP00–RP05**
+
+Post-v1.4.0 README improvements applied to all six reproduction entries.
+
+- **RP00**: ESOL metrics and lock metadata clarified; descriptor definitions and tolerance rationale documented
+- **RP01**: Validated RMSE details confirmed (Model A CV RMSE=1.017, Model B CV RMSE=0.980); TPSA sign diagnostic documented
+- **RP02**: `README.en.md` renamed to `README.md`; provenance and molecule count (2,039) clarified
+- **RP03**: Bilingual README aligned with validated run metadata and pinned artifact references
+- **RP04**: Artifact provenance and ONNX pipeline description updated
+- **RP05**: SHAP artifact references and validated run metadata updated
+
+**Reproducibility templates**
+
+- `repro/TEMPLATE.en.md` renamed to `repro/Template.md`
+- `repro/Template.jp.md` added — Japanese companion template for new reproduction entries
+
+**Japanese companion READMEs**
+
+- `README.jp.md` added for RP00–RP05 (bilingual coverage complete)
+
 ---
 
 ## [1.4.0] - 2026-06-22
@@ -34,21 +84,21 @@ defined success criteria (RF03), and a standardised directory layout under `repr
 | ID | Paper | Method | Result | RF03 |
 |---|---|---|---|---|
 | RP00 | Delaney (2004) ESOL — aqueous solubility | Linear regression on physicochemical descriptors | CV RMSE=1.017, R²=0.762 | PASS |
-| RP01 | Delaney (2004) ESOL — extended with L05 descriptors | Linear regression + TPSA / QED / SA Score | CV RMSE=0.584, R²=0.906 | PASS |
+| RP01 | Delaney (2004) ESOL — extended with L05 descriptors | Linear regression + TPSA / QED / SA Score | CV RMSE=0.980, R²=0.780 | PASS |
 | RP02 | Wu et al. (2018) MoleculeNet BBBP baseline | Morgan FP (ECFP4) + Random Forest | ROC-AUC CV=0.883 | PASS |
 | RP03 | Yang et al. (2019) GNN on BBBP | Graph Convolutional Network (Chemprop-style) | ROC-AUC CV=0.915 | PASS |
 | RP04 | Chithrananda et al. (2020) ChemBERTa | Frozen CLS embedding + Logistic Regression | ROC-AUC CV=0.927 | PASS |
 | RP05 | SHAP explainability on BBBP | shap.LinearExplainer + BBBP LR model | ROC-AUC CV=0.909, Spearman ρ=0.902 | PASS |
 
 Each `repro/rp*/` directory contains: `rp*.m` (MATLAB entry), `rp*_core.py` (where required),
-`README.en.md` (context, method, results), and `lock_template.json` (RF02 version snapshot).
+`README.md` (canonical English context, method, results), optional `README.jp.md`, and `lock_template.json` (RF02 version snapshot).
 
 **Reproducibility infrastructure (RF01–RF04)**
 - `emk.setup.snapshot()` — capture current environment for RF02 version lock (matlab / python / rdkit / toolboxes / timestamp)
 - `emk.setup.lockfile(snap, path)` / `emk.setup.lockfile(path)` — save / load RF02 lock JSON
 - `emk.setup.verifyLock(lockRef)` — compare current environment to a saved lock → `.pass` `.details` `.warnings`
 - `emk.repro.verify(result, criteria)` — assert reproduction success against RF03 numeric criteria
-- `repro/TEMPLATE.en.md` — standardised template for new reproduction entries
+- `repro/Template.md` / `repro/Template.jp.md` — standardised bilingual templates for new reproduction entries
 
 **New `emk.*` modules (M-INFRA library expansion)**
 - `emk.scaffold.genericMurcko(mol)` — Generic Murcko scaffold (all atoms C, all bonds single)

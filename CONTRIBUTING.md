@@ -54,7 +54,7 @@ Reproducing a published cheminformatics result is one of the most valuable contr
 
 Each reproduction must include:
 
-1. **RF01 README** — follow the standard template at `repro/TEMPLATE.en.md`.
+1. **RF01 README** — follow the standard templates at `repro/Template.md` and `repro/Template.jp.md`.
    - Overview, Environment, Data, Script, Result, Verification, Discussion sections
    - Descriptor definitions table (tool + version + definition for every descriptor used)
 
@@ -65,7 +65,15 @@ Each reproduction must include:
    ```
    The lock records MATLAB, Python, RDKit, and Toolbox versions.
 
-3. **RF03 Verification** — report pass/fail against numerical criteria:
+3. **RF03 Verification** — check metrics against 3 categories of criteria:
+
+   | Category | Name | Required for PASS? |
+   |---|---|---|
+   | **Cat A** | Absolute threshold | Yes — `emk.repro.verify()` upper/lower bounds |
+   | **Cat B** | Relative comparison | No — paired t-test between models (informational) |
+   | **Cat C** | Implementation sanity | Yes (if applicable) — e.g., SHAP rank correlation |
+
+   At minimum, run Cat A with `emk.repro.verify()`:
    ```matlab
    crit.rmse_cv = struct("upper", 1.20);
    crit.r2_cv   = struct("lower", 0.75);
@@ -74,6 +82,7 @@ Each reproduction must include:
    result = emk.repro.verify(met, crit);
    ```
    Save the result in `metrics.json` with `rf03_pass` and `rf03_criteria` fields.
+   Add Cat B / Cat C subsections to the README `Verification` section if applicable.
 
 4. **Script** — place the reproduction script in `repro/rp<XX>_<name>/`.
    The script must be a plain `.m` file with `%% Section` markers (no interactive input).
@@ -83,7 +92,8 @@ Each reproduction must include:
 ```
 repro/
   rp<XX>_<name>/
-    README.md           (RF01 -- based on repro/TEMPLATE.en.md)
+    README.md           (RF01 -- based on repro/Template.md)
+    README.jp.md        (RF01 -- based on repro/Template.jp.md)
     rp<XX>_<name>.m     (reproduction script)
     lock_template.json  (RF02 schema)
     result/             (.gitignore managed -- not committed)

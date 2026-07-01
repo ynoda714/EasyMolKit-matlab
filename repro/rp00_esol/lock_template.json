@@ -16,11 +16,12 @@
     "name": "ESOL (MoleculeNet / DeepChem)",
     "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/delaney-processed.csv",
     "n_molecules_paper": 1144,
-    "n_molecules_used": 1128,
+    "n_molecules_source_total": 1128,
+    "n_molecules_regression": "SEE_RESULT_METRICS_JSON",
     "cache_path": "data/benchmark/esol.csv",
     "sha256": "FILL_IN_AFTER_FIRST_RUN"
   },
-  "run_date": "YYYY-MM-DD",
+  "run_date": "YYYY-MM-DDTHH:MM:SS",
   "environment": {
     "matlab": "R20XXx",
     "python": "3.10.x",
@@ -31,16 +32,17 @@
     }
   },
   "rf03_criteria": {
-    "rmse_cv": {"upper": 1.20},
-    "r2_cv":   {"lower": 0.75}
+    "rmse_cv":           {"upper": 1.20},
+    "r2_cv":             {"lower": 0.75},
+    "delaney_rmse_ref":  0.996
   },
   "results": {
     "rmse_train": null,
     "r2_train": null,
     "rmse_cv": null,
+    "rmse_cv_fold_avg": null,
     "rmse_cv_std": null,
-    "r2_cv": null,
-    "r2_cv_std": null
+    "r2_cv_pooled": null
   },
   "rf03_pass": null
 }

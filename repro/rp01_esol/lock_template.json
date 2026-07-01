@@ -1,6 +1,6 @@
 {
   "_usage": "RF02 Version Lock template for RP01 ESOL + L05 Extended Descriptors. Run rp01_esol.m to generate lock_snapshot.json with actual values in result/runs/<ts>/.",
-  "_note": "This file defines the lock schema. Fill in after each successful reproduction run via emk.setup.lockfile(snap, filePath).",
+  "_note": "This file defines the RF02 metadata template and the single source of truth for rf03_criteria. rp01_esol.m reads rf03_criteria from this file. Runtime scalar results are written to metrics.json; runtime environment fields are written to lock_snapshot.json via emk.setup.lockfile().",
   "repro_id": "rp01_esol",
   "paper": {
     "title": "ESOL: Estimating Aqueous Solubility Directly from Molecular Structure",
@@ -25,6 +25,7 @@
     "sha256": "FILL_IN_AFTER_FIRST_RUN"
   },
   "run_date": "YYYY-MM-DD",
+  "dataset_sha256": "FILL_IN_AFTER_FIRST_RUN",
   "environment": {
     "matlab": "R20XXx",
     "python": "3.10.x",

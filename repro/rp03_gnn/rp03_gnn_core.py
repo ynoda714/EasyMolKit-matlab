@@ -22,6 +22,8 @@ Architecture is unchanged from original:
 
 import copy
 import json
+import argparse
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -145,10 +147,17 @@ def run_rp03(csv_path, fold_indices_path=None,
     Inner val split: train_test_split(test_size=0.2, stratify=y, random_state=seed+fold_idx).
     Each outer fold uses a distinct seed so val sets differ across folds.
 
-    Reproducibility note: DataLoader uses num_workers=0 (default). The fold-specific
-    Generator guarantees deterministic shuffle within a fold at num_workers=0.
-    If num_workers > 0 is added in future, a worker_init_fn seeded per worker is
-    also required for bit-exact reproducibility.
+    Reproducibility note: num_workers=0 is set explicitly on all DataLoaders to prevent
+    silent non-reproducibility if PyG or PyTorch changes the default in future versions.
+    The fold-specific Generator guarantees deterministic shuffle for tr_loader.
+    val/te loaders use shuffle=False so no generator is needed (order is index-deterministic).
+    GCNClassifier weight initialization uses the global RNG (torch.manual_seed(seed+fold_idx)
+    set at fold start), giving fold-specific initialization that is fully reproducible.
+    If num_workers > 0 is added in future, a worker_init_fn seeded per worker is also required.
+
+    Class weight (pos_weight): computed from sub-train only (intentional design) to avoid
+    leaking val label distribution into the loss scale. Fold-to-fold variation in pos_weight
+    is expected and acceptable; the BBB+ majority (~76.5%) is stable across all folds.
     """
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -167,6 +176,10 @@ def run_rp03(csv_path, fold_indices_path=None,
     n_valid  = len(data_list)
     n_pos    = int(y_arr.sum())
     atom_dim = data_list[0].x.shape[1]
+    assert atom_dim == 25, (
+        f"_atom_features() returned {atom_dim} dims; expected 25. "
+        f"Update GCNClassifier default in_channels if atom featurization changed."
+    )
 
     # Outer fold splits (A2: use shared indices if available)
     if fold_indices_path and Path(str(fold_indices_path)).exists():
@@ -178,6 +191,15 @@ def run_rp03(csv_path, fold_indices_path=None,
             for k in range(1, n_fold + 1)
         ]
         fold_source = "a2_shared_rp02rev"
+        # Guard: A2 indices must be within bounds of current data_list (RP02 may have filtered differently)
+        for k_chk, (tr_c, te_c) in enumerate(outer_splits):
+            max_idx = int(max(tr_c.max(), te_c.max()))
+            if max_idx >= n_valid:
+                raise IndexError(
+                    f"A2 fold {k_chk + 1} max index {max_idx} >= n_valid={n_valid}. "
+                    f"Fold indices in {fold_indices_path} were generated from a differently "
+                    f"filtered dataset. Re-run RP02 to regenerate aligned indices."
+                )
     else:
         skf = StratifiedKFold(n_splits=n_fold, shuffle=True, random_state=seed)
         outer_splits = list(skf.split(np.zeros(n_valid), y_arr))
@@ -198,14 +220,16 @@ def run_rp03(csv_path, fold_indices_path=None,
         val_idx   = tr_val_idx[sub_val_local]
 
         # generator pins DataLoader shuffle order independently of global RNG state.
+        # val/te use shuffle=False so no generator is needed (order is index-deterministic).
+        # num_workers=0 is set explicitly to prevent silent non-reproducibility if defaults change.
         fold_gen  = torch.Generator().manual_seed(seed + fold_idx)
         tr_loader  = PyGLoader([data_list[i] for i in train_idx],
                                 batch_size=batch_size, shuffle=True,
-                                generator=fold_gen)
+                                generator=fold_gen, num_workers=0)
         val_loader = PyGLoader([data_list[i] for i in val_idx],
-                                batch_size=batch_size, shuffle=False)
+                                batch_size=batch_size, shuffle=False, num_workers=0)
         te_loader  = PyGLoader([data_list[i] for i in te_idx],
-                                batch_size=batch_size, shuffle=False)
+                                batch_size=batch_size, shuffle=False, num_workers=0)
 
         # Class weight from sub-train only
         n_tr_pos = int(y_arr[train_idx].sum())
@@ -222,7 +246,7 @@ def run_rp03(csv_path, fold_indices_path=None,
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.5)
 
         best_val_auc = 0.0
-        best_state   = None
+        best_state   = copy.deepcopy(model.state_dict())  # safety fallback if val AUC never improves
         no_improve   = 0
         tr_losses    = []
         val_aucs     = []
@@ -293,3 +317,88 @@ def run_rp03(csv_path, fold_indices_path=None,
             'inner_val_split': 'train_test_split(test_size=0.2, random_state=seed+fold_idx)',
         },
     })
+
+
+# ---------------------------------------------------------------------------
+# MATLAB featurization bridge
+# ---------------------------------------------------------------------------
+
+def featurize_bbbp(csv_path):
+    """Return featurized BBBP data as a dict for MATLAB consumption via json.dumps.
+
+    Wraps _atom_features (the same featurizer used in run_rp03) so that MATLAB
+    can load atom feature matrices and adjacency matrices without duplicating
+    featurization logic.
+
+    Returns:
+        dict with keys:
+            n_valid    -- number of valid molecules (invalid SMILES excluded)
+            n_bbb_pos  -- count of BBB+ (label=1)
+            n_bbb_neg  -- count of BBB- (label=0)
+            molecules  -- list of dicts, each with:
+                smiles  (str)
+                label   (int, 0 or 1)
+                n_atoms (int)
+                x       (list[list[float]], N_atoms x 25)
+                adj     (list[list[int]],  N_atoms x N_atoms, symmetric 0/1)
+    """
+    df = pd.read_csv(str(csv_path))
+    molecules = []
+    n_bbb_pos = 0
+    n_bbb_neg = 0
+
+    for _, row in df.iterrows():
+        rdmol = Chem.MolFromSmiles(str(row['smiles']))
+        if rdmol is None:
+            continue
+
+        label   = int(row['p_np'])
+        n_atoms = rdmol.GetNumAtoms()
+
+        x   = [_atom_features(a) for a in rdmol.GetAtoms()]
+        adj = [[0] * n_atoms for _ in range(n_atoms)]
+        for bond in rdmol.GetBonds():
+            i, j = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+            adj[i][j] = 1
+            adj[j][i] = 1
+
+        molecules.append({
+            'smiles':  str(row['smiles']),
+            'label':   label,
+            'n_atoms': n_atoms,
+            'x':       x,
+            'adj':     adj,
+        })
+        if label == 1:
+            n_bbb_pos += 1
+        else:
+            n_bbb_neg += 1
+
+    return {
+        'n_valid':   len(molecules),
+        'n_bbb_pos': n_bbb_pos,
+        'n_bbb_neg': n_bbb_neg,
+        'molecules': molecules,
+    }
+
+
+def _build_cli():
+    parser = argparse.ArgumentParser(
+        description="Run RP03 Python GCN directly with the repo-local python_env.")
+    parser.add_argument("--csv-path", required=True,
+                        help="Path to BBBP.csv (for example data/benchmark/bbbp.csv)")
+    parser.add_argument("--fold-indices-path", default="",
+                        help="Path to outer_fold_indices.json from RP02. Optional.")
+    parser.add_argument("--output-json", default="",
+                        help="Optional path to save the run result JSON.")
+    return parser
+
+
+if __name__ == "__main__" and len(sys.argv) > 1:
+    args = _build_cli().parse_args()
+    result_json = run_rp03(
+        csv_path=args.csv_path,
+        fold_indices_path=args.fold_indices_path or None)
+    if args.output_json:
+        Path(args.output_json).write_text(result_json + "\n", encoding="utf-8")
+    print(result_json)

@@ -15,7 +15,9 @@
   "dataset": {
     "name": "BBBP (MoleculeNet / DeepChem)",
     "url": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
-    "n_molecules_total": 2039,
+    "n_molecules_total": 2050,
+    "n_molecules_valid": 2039,
+    "n_smiles_parse_failures": 11,
     "n_bbb_pos": null,
     "n_bbb_neg": null,
     "cache_path": "data/benchmark/bbbp.csv",
@@ -43,18 +45,29 @@
     }
   },
   "rf03_criteria": {
+    "_note": "Only auc_cv is a pass/fail criterion. acc_cv and balacc_cv are not evaluated for RP02 (sklearn LR reports AUC-based metrics only; accuracy-based fields were removed with the M-REPRO-AUDIT A1 fitclinear-to-sklearn migration).",
     "auc_cv": {"lower": 0.85}
   },
   "results": {
-    "model_auc_train": null,
-    "model_acc_train": null,
-    "model_balacc_train": null,
     "auc_cv": null,
     "auc_cv_std": null,
-    "acc_cv": null,
-    "acc_cv_std": null,
-    "balacc_cv": null,
-    "balacc_cv_std": null
+    "auc_cv_std_definition": "sample_std_ddof1",
+    "auc_per_fold": null,
+    "auc_pseudo_roc": null,
+    "best_C_per_fold": null,
+    "n_valid": null,
+    "n_bbb_pos": null,
+    "n_bbb_neg": null,
+    "scaffold_cv": {
+      "auc_cv": null,
+      "auc_cv_std": null,
+      "auc_cv_std_definition": "sample_std_ddof1",
+      "auc_per_fold": null,
+      "n_unique_scaffolds": null,
+      "split_gap": null,
+      "wu_gap": null,
+      "wu_et_al_auc": 0.690
+    }
   },
   "rf03_pass": null
 }

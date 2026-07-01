@@ -22,7 +22,7 @@ if ~isempty(thisDir)
 end
 addpath(genpath("src"));
 
-logSection("RP03", "Section 0: Setup", "GCN BBBP (M-REPRO-AUDIT A3)");
+logSection("RP03", "Section 0: Setup", "GCN BBBP");
 emk.setup.initPython();
 molWarmup = emk.mol.fromSmiles("C");
 clear molWarmup;
@@ -30,13 +30,20 @@ snap = emk.setup.snapshot();
 
 %% Section 1: Resolve paths + A2 fold indices
 logSection("RP03", "Section 1: Resolve Paths + A2 fold indices", ...
-    "GCN BBBP (M-REPRO-AUDIT A3)");
+    "GCN BBBP");
 
 tbl = emk.dataset.bbbp();
 logInfo("BBBP: %d total molecules in table", height(tbl));
 
 csvPath    = fullfile(pwd(), "data", "benchmark", "bbbp.csv");
 coreScript = fullfile(thisDir, "rp03_gnn_core.py");
+% isfile guards against a missing file only; it does not verify the path is within the
+% project tree. The exec() call in pyrun is structurally equivalent to arbitrary code
+% execution. This is accepted because coreScript is hardcoded to a known project-local
+% path. Do not substitute coreScript with an external or user-supplied path.
+if ~isfile(coreScript)
+    error("emk:repro:rp03:missingScript", "Core script not found: %s", coreScript);
+end
 
 % Auto-discover latest rp02_bbbp run for fold index alignment
 rp02Runs = dir(fullfile("result", "runs", "*rp02_bbbp*"));
@@ -57,8 +64,8 @@ end
 
 %% Section 2: GCN Training with leak-free CV (Python)
 logSection("RP03", "Section 2: GCN Nested CV (leak-free)", ...
-    "GCN BBBP (M-REPRO-AUDIT A3)");
-logInfo("Fix: inner 80/20 val split for early stopping; test fold evaluated once only.");
+    "GCN BBBP");
+logInfo("Evaluation: inner 80/20 val split for early stopping; test fold evaluated once.");
 logInfo("Expected runtime: 8-15 min on CPU.");
 
 pyResult = pyrun([ ...
@@ -70,6 +77,11 @@ pyResult = pyrun([ ...
     fold_idx_path=foldIdxPath);
 
 res     = jsondecode(char(string(pyResult)));
+% Normalize fold_curves to cell array: jsondecode output format varies with array length
+% (struct array for N>1, potentially scalar struct for N=1 in debug runs)
+if isstruct(res.fold_curves)
+    res.fold_curves = num2cell(res.fold_curves);
+end
 aucCV   = res.auc_cv;
 aucStd  = res.auc_cv_std;
 foldAUC = res.fold_aucs;
@@ -77,7 +89,7 @@ foldAUC = res.fold_aucs;
 logInfo("fold_source = %s", res.fold_source);
 logInfo("");
 for k = 1:numel(res.fold_curves)
-    fc = res.fold_curves(k);
+    fc = res.fold_curves{k};
     logInfo("  fold %d: test_AUC=%.4f  best_val_AUC=%.4f  epochs=%d  (tr=%d val=%d te=%d)", ...
         fc.fold, fc.test_auc, fc.best_val_auc, fc.n_epochs, ...
         fc.train_size, fc.val_size, fc.test_size);
@@ -86,18 +98,18 @@ logInfo("");
 logInfo("GCN-rev 5-fold CV: AUC = %.4f +/- %.4f", aucCV, aucStd);
 
 %% Section 3: Comparison report
-logSection("RP03", "Section 3: Comparison Report", "GCN BBBP (M-REPRO-AUDIT A3)");
+logSection("RP03", "Section 3: Comparison Report", "GCN BBBP");
 
 auc_rp02_orig = 0.8826;   % original fitclinear (biased)
-auc_rp02_rev  = 0.9118;   % sklearn nested CV (fair, M-REPRO-AUDIT A1)
-auc_rp03_orig = 0.9151;   % original GCN (leaked)
+auc_rp02_rev  = 0.9118;   % sklearn LR, fair baseline
+auc_rp03_orig = 0.9151;   % original GCN (initial evaluation)
 auc_rp03_rev  = aucCV;    % this run
 
 logInfo("=== RP03 AUDIT COMPARISON ===");
 logInfo("  RP02 original  (fitclinear, biased)   : %.4f", auc_rp02_orig);
 logInfo("  RP02           (sklearn nested CV)     : %.4f  [fair baseline]", auc_rp02_rev);
-logInfo("  RP03 original  (GCN, test leak)        : %.4f  [reported]", auc_rp03_orig);
-logInfo("  RP03       (GCN, leak-fixed)       : %.4f  [this run]", auc_rp03_rev);
+logInfo("  RP03 original  (GCN, initial)            : %.4f", auc_rp03_orig);
+logInfo("  RP03           (GCN, corrected eval)     : %.4f  [this run]", auc_rp03_rev);
 logInfo("");
 logInfo("  Original GCN advantage (biased): %+.4f", auc_rp03_orig - auc_rp02_orig);
 logInfo("  Revised  GCN advantage (fair)  : %+.4f", auc_rp03_rev  - auc_rp02_rev);
@@ -108,7 +120,7 @@ else
 end
 
 %% Section 4: RF03 Verification
-logSection("RP03", "Section 4: RF03 Verification", "GCN BBBP (M-REPRO-AUDIT A3)");
+logSection("RP03", "Section 4: RF03 Verification", "GCN BBBP");
 
 rf03crit = struct("auc_cv", struct("lower", 0.85));
 metRP03r = struct("auc_cv", aucCV);
@@ -117,7 +129,7 @@ logInfo("==> ROC-AUC CV = %.4f (>= 0.85): %s", aucCV, statusStr_(resRP03r.pass))
 disp(resRP03r.report);
 
 %% Section 5: Visualization
-logSection("RP03", "Section 5: Visualization", "GCN BBBP (M-REPRO-AUDIT A3)");
+logSection("RP03", "Section 5: Visualization", "GCN BBBP");
 
 if exist("fig1", "var") && isvalid(fig1); close(fig1); end
 if exist("fig2", "var") && isvalid(fig2); close(fig2); end
@@ -170,10 +182,20 @@ grid on; box off;
 logInfo("Figures ready (fig1, fig2). Run Section 6 to save all results.");
 
 %% Section 6: Save Results
-logSection("RP03", "Section 6: Save Results", "GCN BBBP (M-REPRO-AUDIT A3)");
+logSection("RP03", "Section 6: Save Results", "GCN BBBP");
 
-runDir    = makeRunDir("Prefix", "rp03_gnn");
-absRunDir = char(fullfile(pwd(), runDir));
+if ~exist("res", "var") || ~isstruct(res)
+    error("emk:repro:rp03:noResult", "Run Section 2 first: pyrun has not completed.");
+end
+nEpRun = res.n_epochs_run;   % ensure nEpRun is defined even if Section 5 was skipped
+
+runDir = makeRunDir("Prefix", "rp03_gnn");
+% N3: makeRunDir returns a CWD-relative path. Guard against absolute paths.
+if startsWith(runDir, '/') || (numel(runDir) >= 2 && runDir(2) == ':')
+    absRunDir = char(runDir);
+else
+    absRunDir = char(fullfile(pwd(), runDir));
+end
 
 if exist("fig1", "var") && isvalid(fig1)
     saveas(fig1, fullfile(absRunDir, "learning_curves.png"));
@@ -205,8 +227,8 @@ metrics = struct( ...
     "audit_comparison", struct( ...
         "rp02_orig_fitclinear",  auc_rp02_orig, ...
         "rp02_rev_sklearn",      auc_rp02_rev, ...
-        "rp03_orig_leaked",      auc_rp03_orig, ...
-        "rp03_rev_leak_fixed",   aucCV, ...
+        "rp03_orig",             auc_rp03_orig, ...
+        "rp03_current",          aucCV, ...
         "orig_gcn_advantage",    auc_rp03_orig - auc_rp02_orig, ...
         "fair_gcn_advantage",    auc_rp03_rev  - auc_rp02_rev), ...
     "hyperparams",         res.hyperparams, ...

@@ -23,8 +23,17 @@
     "sha256": "FILL_IN_AFTER_FIRST_RUN"
   },
   "split": {
-    "method": "random 5-fold stratified CV",
-    "seed": 42
+    "cv": {
+      "method": "5-fold stratified CV on full valid set (n=2039)",
+      "n_folds": 5,
+      "seed": 42
+    },
+    "shap_split": {
+      "method": "random 80/20 stratified train/test split for SHAP background",
+      "test_size": 0.2,
+      "seed": 42,
+      "_note": "Intentionally asymmetric with CV: SHAP background uses X_tr only to avoid leaking test-set distribution into LinearExplainer baseline E[f(X)]."
+    }
   },
   "fingerprint": {
     "type": "Morgan ECFP4",
@@ -50,7 +59,8 @@
     "auc_cv":            null,
     "auc_cv_std":        null,
     "shap_lr_spearman":  null,
-    "shap_coverage":     null
+    "n_bbb_pos_train":   null,
+    "n_bbb_pos_test":    null
   },
   "rf03_pass": null
 }
